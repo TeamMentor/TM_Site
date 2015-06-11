@@ -1,11 +1,11 @@
-Jade_Service       = null
+Jade_Service = null
 
 content_cache = {};
 
 class Misc_Controller
 
   dependencies: ->
-    Jade_Service       = require('../services/Jade-Service')
+    Jade_Service = require('../services/Jade-Service')
 
   constructor: (req, res)->
     @.dependencies()

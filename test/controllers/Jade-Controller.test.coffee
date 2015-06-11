@@ -2,7 +2,7 @@ Jade_Controller = require('../../src/controllers/Jade-Controller')
 Jade_Service    = require('../../src/services/Jade-Service')
 cheerio = require 'cheerio'
 
-describe.only '| controllers | Jade-Controller.test.js |', ()->
+describe '| controllers | Jade-Controller.test.js |', ()->
 
   describe 'render mixin', ->
     mixin_File   = null

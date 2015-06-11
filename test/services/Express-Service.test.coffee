@@ -4,7 +4,7 @@ express         = require('express')
 session         = require('express-session')
 supertest       = require('supertest')
 
-describe.only '| services | Express-Service.test', ()->
+describe '| services | Express-Service.test', ()->
 
   it 'constructor',->
 
@@ -105,7 +105,6 @@ describe.only '| services | Express-Service.test', ()->
       expressService.checkAuth(req,null, next,null)
 
     it 'checkAuth (no session username)', (done)->
-
       send = (html)->
         html.assert_Contains('You need to login to see that page.')
         done()

@@ -7,9 +7,9 @@ class Session_Service
                       { id :'search-xss'                     , title: 'xss'                      , results:10},
                       { id :'search-secure-connection-string', title: 'secure connection string' , results:10}]
   DEFAULT_ARTICLES:
-                      [{id: '1d72228392bf', title: 'Decrypt a String via a Block Cipher Using AES'},
+                      [{id: '1d72228392bf', title: 'Decrypt a String via a Block Cipher Using AES'         },
                        {id: '22ed784143ee', title: 'Using Parameterized Queries for Secure Database Access'},
-                       {id: '17f790dedf10', title: 'Constrain, Reject, and Sanitize Input'}]
+                       {id: '17f790dedf10', title: 'Constrain, Reject, and Sanitize Input'                 }]
   dependencies: ()->
     Nedb            = require('nedb')
     Express_Session = require 'express-session'

@@ -6,7 +6,7 @@ Search_Controller = require('../../src/controllers/Search-Controller')
 Express_Service   = require('../../src/services/Express-Service')
 
 
-describe "| controllers | Search-Controller.test |", ->
+describe.only "| controllers | Search-Controller.test |", ->
 
   @.timeout(3500)
 
@@ -20,7 +20,7 @@ describe "| controllers | Search-Controller.test |", ->
         assert_Is_Null @.searchData
         @.req               .assert_Is req
         @.res               .assert_Is res
-        @.jade_Page         .assert_Is '/source/jade/user/search.jade'
+        @.jade_Page         .assert_Is 'user/search.jade'
         @.jade_Service      .assert_Instance_Of require('../../src/services/Jade-Service')
         @.graph_Service     .assert_Instance_Of require('../../src/services/Graph-Service')
         @.defaultUser       .assert_Is 'TMContent'
@@ -84,7 +84,7 @@ describe "| controllers | Search-Controller.test |", ->
     req    = { params: queryId : 'Logging', session: {}}
     res    =
         render: (jadePage,viewModel)->
-            jadePage.assert_Is('source/jade/user/main.jade')
+            jadePage.assert_Is('user/main.jade')
             done()
     express_Service =
       session_Service :

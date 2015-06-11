@@ -1,10 +1,5 @@
 Jade_Service    = null
 Graph_Service   = null
-#without
-
-Array::remove_If_Contains = (value)->
-  @.filter (word) -> word.not_Contains(value)
-
 
 class PoC_Controller
 
@@ -28,7 +23,6 @@ class PoC_Controller
       app.get '/poc/filters:page'          , @.show_Filters
       app.get '/poc/filters:page/:filters' , @.show_Filters
       app.get '/poc/:page'                 , @.show_Page
-
     @
 
   check_Auth: (req,res,next)=>

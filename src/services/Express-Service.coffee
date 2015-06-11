@@ -62,7 +62,7 @@ class Express_Service
     @app.use(express['static'](path.join(__dirname,'../../')));
 
   set_Views_Path :()=>
-    @.app.set('views', path.join(__dirname,'../../../TM_4_Jade'))
+    @.app.set('views', path.join(__dirname,'../../../TM_Jade'))
 
   map_Route: (file)=>
     require(file)(@)

@@ -25,10 +25,10 @@ class Help_Controller
 
     @.docs_Server      = 'https://docs.teammentor.net'
     @.gitHubImagePath  = 'https://raw.githubusercontent.com/TMContent/Lib_Docs/master/_Images/'
-    @.jade_Help_Index  = '/source/jade/misc/help-index.jade'
-    @.jade_Help_Page   = '/source/jade/misc/help-page.jade'
+    @.jade_Help_Index  = 'misc/help-index.jade'
+    @.jade_Help_Page   = 'misc/help-page.jade'
     @.index_Page_Id    = '1eda3d77-43e0-474b-be99-9ba118408dd3'
-    @.jade_Error_Page  = '/source/jade/guest/404.jade'
+    @.jade_Error_Page  = 'guest/404.jade'
     @.imagePath        = '../../.tmCache/Lib_Docs-json/_Images/'
 
   content_Cache_Set: (title, content)=>

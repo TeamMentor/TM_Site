@@ -76,8 +76,8 @@ describe '| controllers | Help-Controller.test |', ()->
 
       @.docs_Server     .assert_Is 'https://docs.teammentor.net'
       @.gitHubImagePath .assert_Is 'https://raw.githubusercontent.com/TMContent/Lib_Docs/master/_Images/'
-      @.jade_Help_Index .assert_Is '/source/jade/misc/help-index.jade'
-      @.jade_Help_Page  .assert_Is '/source/jade/misc/help-page.jade'
+      @.jade_Help_Index .assert_Is 'misc/help-index.jade'
+      @.jade_Help_Page  .assert_Is 'misc/help-page.jade'
 
       done()
 

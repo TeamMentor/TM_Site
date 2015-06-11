@@ -1,7 +1,6 @@
-
-signUp_fail             = 'source/jade/guest/sign-up-Fail.jade'
-signUpPage_Unavailable  = 'source/jade/guest/sign-up-cant-connect.jade'
-signUp_Ok               = 'source/jade/guest/sign-up-OK.html'
+signUp_fail             = 'guest/sign-up-Fail.jade'
+signUpPage_Unavailable  = 'guest/sign-up-cant-connect.jade'
+signUp_Ok               = 'guest/sign-up-OK.html'
 errorMessage            = "TEAM Mentor is unavailable, please contact us at "
 request                 = null
 Config                  = null
