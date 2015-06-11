@@ -44,7 +44,6 @@ class JadeService
     calculate_Jade_Path: (jade_File)=>
       if jade_File.file_Exists()                                    then return jade_File
       if jade_Folder = global.config?.tm_design?.folder_Jade_Files  then return jade_Folder.path_Combine(jade_File)
-      log jade_Folder
       return null
 
 
