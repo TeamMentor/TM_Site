@@ -9,7 +9,7 @@ tmWebServices = 'Aspx_Pages/TM_WebServices.asmx'
 
 global.config =
   jade_Compilation:
-    enabled: true
+    enabled: false
   tm_design :
     folder_Docs_Json        : root_Folder.path_Combine 'data/Lib_Docs-Json'
     folder_Jade_Files       : root_Folder.path_Combine 'code/TM_Jade'
