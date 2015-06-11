@@ -46,7 +46,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
         render : (target,model)->
           model.assert_Is_Not_Undefined
           model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
-          target.assert_Is('source/jade/guest/login-cant-connect.jade')
+          target.assert_Is('guest/login-cant-connect.jade')
           done()
 
       on_SendPasswordReminder = (ws_req, ws_res)->
@@ -81,7 +81,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
       render : (target,model)->
         model.assert_Is_Not_Undefined
         model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
-        target.assert_Is('source/jade/guest/login-cant-connect.jade')
+        target.assert_Is('guest/login-cant-connect.jade')
         done()
 
     options =
@@ -155,7 +155,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
       @.res =
         render: (jade_Page, view_Model)=>
-          jade_Page.assert_Is 'source/jade/guest/pwd-reset-fail.jade'
+          jade_Page.assert_Is 'guest/pwd-reset-fail.jade'
           view_Model.assert_Is { errorMessage: 'Invalid token, perhaps it has expired' }
           done()
 
@@ -172,7 +172,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
       @.res =
         render: (jade_Page, view_Model)=>
-          jade_Page.assert_Is 'source/jade/guest/pwd-reset-fail.jade'
+          jade_Page.assert_Is 'guest/pwd-reset-fail.jade'
           view_Model.assert_Is { errorMessage: 'Invalid token, perhaps it has expired' }
           done()
 
@@ -183,8 +183,8 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
   describe 'Check password_Reset_Token method validation',->
 
-    password_reset_fail       = 'source/jade/guest/pwd-reset-fail.jade'
-    password_reset_ok         = 'source/jade/guest/login-pwd-reset.html'
+    password_reset_fail       = 'guest/pwd-reset-fail.jade'
+    password_reset_ok         = 'guest/login-pwd-reset.html'
 
     invoke_PasswordReset = (username, token, password, confirmPassword,expected_Target, expected_Message,callback)->
       using pwd_Reset_Controller,->

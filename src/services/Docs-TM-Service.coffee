@@ -17,7 +17,7 @@ class Docs_TM_Service
     @._tmSite                = 'https://docs.teammentor.net'
     @._tmWebServices         = '/Aspx_Pages/TM_WebServices.asmx/'
     @.cache                  = new Cache_Service("docs_cache")
-    @.libraryDirectory       = __dirname.path_Combine '../../.tmCache/Lib_Docs-json'
+    @.libraryDirectory       = global.config?.tm_design?.folder_Docs_Json
 
 
   getFolderStructure_Libraries: (callback)=>

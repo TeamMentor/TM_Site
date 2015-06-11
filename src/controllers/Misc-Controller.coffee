@@ -15,7 +15,7 @@ class Misc_Controller
   show_Misc_Page: ()=>
     jade_Page  = '/source/jade/misc/' + @.req.params.page + '.jade'
     view_Model = loggedIn: @.user_Logged_In()
-    html = new Jade_Service().renderJadeFile(jade_Page, view_Model)
+    html = new Jade_Service().render_Jade_File(jade_Page, view_Model)
     @.res.status(200)
          .send(html)
 

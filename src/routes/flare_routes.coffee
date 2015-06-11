@@ -6,22 +6,15 @@ register_Routes =   (express_Service)->
   app          = express_Service.app
 
   preCompiler =
-      renderJadeFile: (path)->
-        #console.log('[renderJadeFile]' + path)
-        return new Jade_Service(app.config).renderJadeFile(path)
+    render_Jade_File: (path)->
+      return new Jade_Service().render_Jade_File(path)
 
-      cleanCacheFolder: ()->
-
-
-  preCompiler.cleanCacheFolder()
-
-  app.get '/flare/_dev/:area/:page'  , (req, res)->  res.send preCompiler.renderJadeFile '/source/flare-dev/' + req.params.area + '/' + req.params.page + '.jade'
-  app.get '/flare/_dev/all'          , (req, res)->  res.send preCompiler.renderJadeFile '/source/flare-dev/index.jade'
   app.get '/flare/_dev'              , (req, res)->  res.redirect '/flare/_dev/all'
-
-  app.get '/flare/:page'             , (req, res)->  res.send preCompiler.renderJadeFile '/source/flare/' + req.params.page + '.jade'
   app.get '/flare'                   , (req, res)->  res.redirect '/flare/main-app-view'
 
-  #app.get '/flare/main-app-view', (req, res)->  res.redirect '/flare/index'
+  app.get '/flare/_dev/:area/:page'  , (req, res)->  res.send preCompiler.render_Jade_File '../TM_Flare/' + req.params.area + '/' + req.params.page + '.jade'
+  app.get '/flare/_dev/all'          , (req, res)->  res.send preCompiler.render_Jade_File '../TM_Flare/index.jade'
+  app.get '/flare/:page'             , (req, res)->  res.send preCompiler.render_Jade_File '../TM_Flare/' + req.params.page + '.jade'
+
 
 module.exports = register_Routes

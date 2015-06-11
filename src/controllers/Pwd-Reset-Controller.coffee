@@ -16,14 +16,15 @@ class Pwd_Reset_Controller
     @.res                          = res
     @.request_Timeout              = @.options.request_Timeout || 1500
     @.webServices                  = @.options.webServices || global.config?.tm_design?.webServices
-    @.jade_password_reset_fail     = 'source/jade/guest/pwd-reset-fail.jade'
+    @.jade_password_reset_fail     = 'guest/pwd-reset-fail.jade'
+    @.jade_loginPage_Unavailable   = 'guest/login-cant-connect.jade'
     @.url_password_reset_ok        = '/guest/login-pwd-reset.html'
     @.url_password_sent            = '/guest/pwd-sent.html'
     @.url_WS_SendPasswordReminder  = @.webServices + '/SendPasswordReminder'
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
-    @.loginPage_Unavailable        = 'source/jade/guest/login-cant-connect.jade'
+
 
   password_Reset: ()=>
 
@@ -42,10 +43,10 @@ class Pwd_Reset_Controller
       else
           logger?.info ('Could not connect with TM 3.5 server')
           userViewModel = {errorMessage:@.errorMessage,username:'',password:''}
-          return @.res.render @.loginPage_Unavailable, {viewModel:userViewModel }
+          return @.res.render @.jade_loginPage_Unavailable, {viewModel:userViewModel }
 
   password_Reset_Page: ()=>
-    html = new Jade_Service().renderJadeFile '/source/jade/guest/pwd-reset.jade'
+    html = new Jade_Service().render_Jade_File '/source/jade/guest/pwd-reset.jade'
     @.res.send html
 
   password_Reset_Token : ()=>
