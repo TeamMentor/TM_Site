@@ -2,7 +2,7 @@ Analytics_Service = require('./../../src/services/Analytics-Service')
 expect                  = require("chai").expect
 assert                  = require("chai").assert
 
-describe.only '| services | Analytics-Service.test |', ->
+describe '| services | Analytics-Service.test |', ->
 
   ga_Service = null
 
@@ -11,23 +11,23 @@ describe.only '| services | Analytics-Service.test |', ->
 
   it 'constructor()',->
     using new Analytics_Service(), ->
-      @.config.analitycsTrackUrl      = 'http://foo/bar'
-      @.config.analitycsSiteId        = 1
-      @.config.analitycsTrackingSite  = 'http://foo/bar'
+      @.analitycsTrackUrl      = 'http://foo/bar'
+      @.analitycsSiteId        = 1
+      @.analitycsTrackingSite  = 'http://foo/bar'
       @.setup()
 
 
   it ' setup missing Analytics siteId()',->
     using new Analytics_Service(), ->
-      @.config.analitycsEnabled = true
-      @.config.analitycsTrackUrl      = 'http://foo/bar'
+      @.analitycsEnabled = true
+      @.analitycsTrackUrl      = 'http://foo/bar'
       result = @.setup()
       result.toString().assert_Is('Error: siteId must be provided.')
 
   it ' missing Analytics Track site()',->
     using new Analytics_Service(), ->
-      @.config.analitycsEnabled = true
-      @.config.analitycsSiteId  = 1
+      @.analitycsEnabled = true
+      @.analitycsSiteId  = 1
       result = @.setup()
       result.toString().assert_Is('Error: A tracker URL must be provided, e.g. http://example.com/piwik.php')
 
@@ -69,5 +69,5 @@ describe.only '| services | Analytics-Service.test |', ->
       session       : recent_Articles: []
     res ={}
     using new Analytics_Service(req, res),->
-      @.config.analitycsEnabled = true
+      @.analitycsEnabled = true
       @.track('Page Title','Event Category', 'Event Name')
