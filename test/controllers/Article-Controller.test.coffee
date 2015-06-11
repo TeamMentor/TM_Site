@@ -53,7 +53,7 @@ describe '| controllers | Article-Controller.test', ->
         $('#article #title').html().assert_Is article_Title
         html = $('#article #html' ).html().assert_Contains article_Text
                                           .assert_Contains('<pre> <span class="keyword">')
-        $.html().assert_Contains('<link href="/static/css/syntax-highlighting-github-style.css" rel="stylesheet">')
+        $.html().assert_Contains('<link href="/css/syntax-highlighting-github-style.css" rel="stylesheet">')
         done()
 
     graphService =

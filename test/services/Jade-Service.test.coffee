@@ -118,32 +118,3 @@ describe "| services | Jade-Service |", ()->
         @.render_Jade_File(jade_File                  ).assert_Is jade_Html
         #@.render_Jade_File(jade_File,{loggedIn:false} ).assert_Is '<h2>abc</h2><h1>false</h1>'
         #@.render_Jade_File(jade_File,{loggedIn:true}  ).assert_Is '<h2>abc</h2><h1>true</h1>'
-
-
-
-  #it 'renderMixin', (done)->
-  #  using new Jade_Service(),->
-  #    @.renderMixin('search-mixins', 'results', {resultsTitle : 'AAAA'})
-  #      .assert_Contains ['<!DOCTYPE html><html lang="en"', 'link href="/static/css/custom-style.css']
-  #        #                 '<h5 id="resultsTitle">AAAA</h5>']
-  #    done()
-
-    ###
-    it('cleanCacheFolder', function()
-    {
-        var cacheFolder        = preCompiler.targetFolder();
-        var filesInCacheFolder = fs.readdirSync(cacheFolder);
-
-        expect(filesInCacheFolder).to.be.an('Array');
-        expect(filesInCacheFolder).to.not.be.empty;
-        preCompiler.cleanCacheFolder();
-
-        filesInCacheFolder = fs.readdirSync(cacheFolder);
-        expect(filesInCacheFolder).to.be.an('Array');
-        expect(filesInCacheFolder).to.be.empty;
-    });
-    ###
-
-
-
-    #targetFolder      = preCompiler.targetFolder()

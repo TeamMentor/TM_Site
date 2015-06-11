@@ -132,3 +132,26 @@ describe '| services | Express-Service.test', ()->
       expressService.checkAuth(req,res, null,config)
       req.session.redirectUrl.assert_Is_Not_Null()
       req.session.redirectUrl.assert_Is('/a/article/00000001')
+
+  describe '| Check static files',->
+
+    expressService  = null
+
+    before ->
+      expressService = new Express_Service().set_Static_Route()
+
+    it '/css/{file}.css', (done)->
+
+      supertest(expressService.app)
+        .get '/css/custom-style.css'
+        .end (err,res)->
+          res.status.assert_Is 200
+          done()
+
+    it '/assets/{file}.jpg', (done)->
+
+      supertest(expressService.app)
+      .get '/assets/clients/logos.jpg'
+      .end (err,res)->
+        res.status.assert_Is 200
+        done()

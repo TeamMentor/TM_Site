@@ -27,6 +27,9 @@ class Express_Service
     @.session_Service         = null
     @.logging_Service         = null
 
+    @.path_To_Jade            = __dirname.path_Combine '../../../TM_Jade'
+    @.path_To_Static          = __dirname.path_Combine '../../../TM_Static'
+
   setup: ()=>
     if @.logging_Enabled
       @.set_Logging()
@@ -56,13 +59,14 @@ class Express_Service
     @.app.use(bodyParser.urlencoded({limit:'1kb', extended: true }));     # to support URL-encoded bodies
 
   remove_Unwanted_Headers : () ->
-    @.app.disable("x-powered-by")
+    @.app.disable "x-powered-by"
 
   set_Static_Route:()=>
-    @app.use(express['static'](path.join(__dirname,'../../')));
+    @app.use express['static'](@.path_To_Static);
+    @
 
   set_Views_Path :()=>
-    @.app.set('views', path.join(__dirname,'../../../TM_Jade'))
+    @.app.set 'views', @.path_To_Jade
 
   map_Route: (file)=>
     require(file)(@)
