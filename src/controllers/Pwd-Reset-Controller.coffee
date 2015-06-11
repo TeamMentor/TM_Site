@@ -6,7 +6,6 @@ class Pwd_Reset_Controller
 
   dependencies: ->
     request      = require('request')
-    Config       = require('../misc/Config')
     Jade_Service = require('../services/Jade-Service')
 
   constructor: (req, res, options)->
@@ -15,9 +14,8 @@ class Pwd_Reset_Controller
     @.options                      = options || {}
     @.req                          = req
     @.res                          = res
-    @.config                       = @.options.config || new Config()
     @.request_Timeout              = @.options.request_Timeout || 1500
-    @.webServices                  = @.config.tm_35_Server + @.config.tmWebServices
+    @.webServices                  = @.options.webServices || global.config?.tm_design?.webServices
     @.jade_password_reset_fail     = 'source/jade/guest/pwd-reset-fail.jade'
     @.url_password_reset_ok        = '/guest/login-pwd-reset.html'
     @.url_password_sent            = '/guest/pwd-sent.html'
@@ -26,7 +24,6 @@ class Pwd_Reset_Controller
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
     @.loginPage_Unavailable        = 'source/jade/guest/login-cant-connect.jade'
-
 
   password_Reset: ()=>
 
@@ -38,6 +35,7 @@ class Pwd_Reset_Controller
                     json   : true
                     url    : @.url_WS_SendPasswordReminder
               }
+
     request options, (error, response, body)=>
       if ((not error) and response?.statusCode == 200)
           @.res.redirect(@.url_password_sent);
@@ -100,7 +98,6 @@ class Pwd_Reset_Controller
                    json  : true
                    url   : @.url_WS_PasswordReset
               }
-
     request options, (error, response, body)=>
       if (not error) and response.statusCode is 200
         if response?.body?.d

@@ -6,7 +6,7 @@ Search_Controller = require('../../src/controllers/Search-Controller')
 Express_Service   = require('../../src/services/Express-Service')
 
 
-describe.only "| controllers | Search-Controller.test |", ->
+describe "| controllers | Search-Controller.test |", ->
 
   @.timeout(3500)
 
@@ -83,9 +83,9 @@ describe.only "| controllers | Search-Controller.test |", ->
   it 'showMainAppView', (done)->
     req    = { params: queryId : 'Logging', session: {}}
     res    =
-        render: (jadePage,viewModel)->
-            jadePage.assert_Is('user/main.jade')
-            done()
+        send: (html)->
+          html.assert_Contains 'main-app-view'
+          done()
     express_Service =
       session_Service :
         user_Data: (session, callback) ->

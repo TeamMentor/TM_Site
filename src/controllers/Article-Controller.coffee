@@ -12,7 +12,7 @@ class Article_Controller
     Analytics_Service  = require('../services/Analytics-Service')
 
   constructor: (req, res, next,graph_Options)->
-    @dependencies()
+    @.dependencies()
     @.req              = req
     @.res              = res
     @.next             = next
@@ -32,7 +32,6 @@ class Article_Controller
     article_Ref = @req.params.ref
 
     @.graphService.article article_Ref, (data)=>
-
       article_Id = data.article_Id
       if article_Id
         @graphService.node_Data article_Id, (article_Data)=>

@@ -1,22 +1,12 @@
 require 'fluentnode'
 
-Article_Controller = null
-Express_Service    = null
-Session_Service    = null
-cheerio            = null
-supertest          = null
+Article_Controller = require '../../src/controllers/Article-Controller'
+Express_Service    = require '../../src/services/Express-Service'
+Session_Service    = require '../../src/services/Session-Service'
+cheerio            = require 'cheerio'
+supertest          = require 'supertest'
 
 describe '| controllers | Article-Controller.test', ->
-
-  dependencies = ->
-    Article_Controller = require '../../src/controllers/Article-Controller'
-    Express_Service    = require '../../src/services/Express-Service'
-    Session_Service    = require('../../src/services/Session-Service')
-    cheerio            = require 'cheerio'
-    supertest          = require 'supertest'
-
-  before ->
-    dependencies()
 
   it 'constructor', (done)->
     using new Article_Controller(), ->
@@ -25,8 +15,9 @@ describe '| controllers | Article-Controller.test', ->
       done()
 
   it 'article (bad id)', (done)->
+    article_Id = 123
     req =
-      params: ref: 123
+      params: ref: article_Id
       session: recent_Articles: []
     res =
       send : (data)->
@@ -35,7 +26,13 @@ describe '| controllers | Article-Controller.test', ->
         $('#article p'    ).html().assert_Is 'That article doesn&apos;t exist.'
         done()
 
-    using new Article_Controller(req,res), ->
+    graphService =
+      article:  (id, callback)->
+        id.assert_Is article_Id
+        callback { }
+
+    using new Article_Controller(req,res),->
+      @.graphService = graphService
       @.article()
 
   it 'article (good id, verify syntax highlighting)', (done)->
@@ -172,9 +169,6 @@ describe '| controllers | Article-Controller.test', ->
 
 
   describe 'routes |',->
-
-    before ->
-      dependencies()
 
     it 'register_Routes',->
       route_Inner_Code = 'new Article_Controller(req, res, next, graph_Options)[method_Name]();'

@@ -10,7 +10,7 @@ class PoC_Controller
   constructor: (options)->
     @.dependencies()
     @.options         = options || {}
-    @.dir_Poc_Pages   = __dirname.path_Combine '../../source/jade/__poc'
+    @.dir_Poc_Pages   = '__poc'
     @.jade_Service    = new Jade_Service()
     @.express_Service = @.options.express_Service
     @.graph_Service   = new Graph_Service()
@@ -30,8 +30,11 @@ class PoC_Controller
       return next()
     res.redirect '/guest/404'
 
+  folder_PoC_Pages: ()=>
+    return @.jade_Service.calculate_Jade_Path(@.dir_Poc_Pages)
+
   jade_Files: =>
-    @.dir_Poc_Pages.files_Recursive().remove_If_Contains('mixin').remove_If_Contains('poc-pages')
+    @.folder_PoC_Pages().files_Recursive().remove_If_Contains('mixin').remove_If_Contains('poc-pages')
 
   map_Files_As_Pages: =>
     extra_Mappings = [{ name: 'Articles' , link: '/articles'}]
@@ -43,8 +46,8 @@ class PoC_Controller
 
   show_Index: (req,res)=>
     view_Model = {pages: @.map_Files_As_Pages() }
-    jade_Page  = "#{@.dir_Poc_Pages}/poc-pages.jade"
-    @render_Jade res, jade_Page, view_Model
+    jade_Page  = "#{@.folder_PoC_Pages()}/poc-pages.jade"
+    @.render_Jade res, jade_Page, view_Model
 
   show_Page: (req,res)=>
     page  = req.params.page
@@ -72,7 +75,7 @@ class PoC_Controller
   render_Jade: (res, jade_Page, view_Model)=>
     view_Model.loggedIn = true
     res.status(200)
-       .send @.jade_Service.renderJadeFile(jade_Page, view_Model)
+       .send @.jade_Service.render_Jade_File(jade_Page, view_Model)
 
   #specific mappings
 

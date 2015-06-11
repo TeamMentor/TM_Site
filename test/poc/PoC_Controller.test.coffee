@@ -8,23 +8,14 @@ describe '| poc | Controller-PoC.test |' ,->
 
   it 'constructor',->
     using new PoC_Controller() ,->
-      @.dir_Poc_Pages.assert_Folder_Exists()
-                     .assert_Contains "source#{path.sep}jade#{path.sep}__poc"
+      @.dir_Poc_Pages.assert_Is "__poc"
 
-  it 'register_Routes', ()->
-    routes     = {}
-    auth_Check = null
-    express_Service =
-      app:
-        get: (path,target)-> routes[path] = target
+  it 'folder_PoC_Pages', ->
+    using new PoC_Controller() ,->
+      @.folder_PoC_Pages().assert_Folder_Exists()
+                          .assert_Contains '__poc'
 
-    using new PoC_Controller({ express_Service: express_Service}).register_Routes() ,->
-      routes.assert_Is
-        '/poc*'                     : @.check_Auth
-        '/poc'                      : @.show_Index
-        '/poc/filters:page'         : @.show_Filters
-        '/poc/filters:page/:filters': @.show_Filters
-        '/poc/:page'                : @.show_Page
+
 
   it 'check_Auth (anonymous)', (done)->
     res =
@@ -44,7 +35,7 @@ describe '| poc | Controller-PoC.test |' ,->
   it 'jade_Files', (done)->
     using new PoC_Controller() ,->
       files = @.jade_Files().assert_Not_Empty()
-      @.dir_Poc_Pages.files_Recursive().assert_Contains files
+      @.folder_PoC_Pages().files_Recursive().assert_Contains files
       done()
 
   it 'map_Files_As_Pages', (done)->
@@ -87,7 +78,7 @@ describe '| poc | Controller-PoC.test |' ,->
           done()
       @.show_Page(req,res)
 
-  it 'show_Page (bad link)', (done)->
+  it 'show_Page (bad link) , render_Jade', (done)->
     using new PoC_Controller(), ->
 
       req = params : page : 'aaaaabbbb'
@@ -101,7 +92,20 @@ describe '| poc | Controller-PoC.test |' ,->
 
       @.show_Page(req,res)
 
-  #it  'render_Jade', (done)-> # this is already tested by the previous method
+  it 'register_Routes', ()->
+    routes     = {}
+    auth_Check = null
+    express_Service =
+      app:
+        get: (path,target)-> routes[path] = target
+
+    using new PoC_Controller({ express_Service: express_Service}).register_Routes() ,->
+      routes.assert_Is
+        '/poc*'                     : @.check_Auth
+        '/poc'                      : @.show_Index
+        '/poc/filters:page'         : @.show_Filters
+        '/poc/filters:page/:filters': @.show_Filters
+        '/poc/:page'                : @.show_Page
 
   describe 'using Express |', ->
     it 'check Auth redirect', (done)->

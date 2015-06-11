@@ -3,12 +3,12 @@ request    = null
 Config     = null
 analytics_Service = null
 
-loginPage                  = 'source/jade/guest/login-Fail.jade'
-loginPage_Unavailable      = 'source/jade/guest/login-cant-connect.jade'
-guestPage_403              = 'source/jade/guest/403.jade'
+loginPage                  = 'guest/login-Fail.jade'
+loginPage_Unavailable      = 'guest/login-cant-connect.jade'
+guestPage_403              = 'guest/403.jade'
+password_reset_fail        = 'guest/pwd-reset-fail.jade'
 mainPage_user              = '/user/main.html'
 mainPage_no_user           = '/guest/default.html'
-password_reset_fail        = 'source/jade/guest/pwd-reset-fail.jade'
 password_reset_ok          = '/guest/login-pwd-reset.html'
 blank_credentials_message  = 'Invalid Username or Password'
 loginSuccess               = 0
@@ -18,14 +18,12 @@ class Login_Controller
   constructor: (req, res)->
 
     request      = require('request')
-    Config       = require('../misc/Config')
     analytics_Service   = require('../services/Analytics-Service')
 
     #@.users              = users
     @.req                = req || {}
     @.res                = res || {}
-    @.config             = new Config();
-    @.webServices        = @.config.tm_35_Server + @.config.tmWebServices
+    @.webServices        = global.config?.tm_design?.webServices
     @.analyticsService   = new analytics_Service(@.req, @.res)
         
   redirectToLoginPage:  ()=>

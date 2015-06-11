@@ -57,11 +57,12 @@ describe "| services | Jade-Service |", ()->
 
   it 'cache_Enabled', ()->
     using new Jade_Service(),->
-      @.cache_Enabled()    .assert_Is_False()
-      global.config = jade_Compilation : enabled :true
-      @.cache_Enabled()    .assert_Is_True()
-      global.config = null
-      @.cache_Enabled()    .assert_Is_False()
+      if not @.cache_Enabled()
+        @.cache_Enabled()    .assert_Is_False()
+        global.config = jade_Compilation : enabled :true
+        @.cache_Enabled()    .assert_Is_True()
+        global.config = null
+        @.cache_Enabled()    .assert_Is_False()
 
 
   it 'calculate_Compile_Path', ()->

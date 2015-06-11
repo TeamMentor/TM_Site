@@ -9,9 +9,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
   #blank_credentials_message = 'Invalid Username or Password'
   app                     = null
   server                  = null
-  url                     = null
-  config                  = null
+  #url                     = null
+  #config                  = null
   pwd_Reset_Controller    = null
+  url_Mocked_Server       = null
   on_SendPasswordReminder = ->
   on_PasswordReset        = ->
 
@@ -23,11 +24,8 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
     app.post          '/tmWebServices/PasswordReset'       , (req,res)-> on_PasswordReset(req,res)
     server            = app.listen(random_Port)
 
-    config            =
-      tm_35_Server : url_Mocked_Server
-      tmWebServices: 'tmWebServices'
-
-    pwd_Reset_Controller = new Pwd_Reset_Controller({}, {}, { config: config })
+    webServices =  url_Mocked_Server + 'tmWebServices'
+    pwd_Reset_Controller = new Pwd_Reset_Controller({}, {}, { webServices: webServices })
 
     url_Mocked_Server.GET (html)->
       html.assert_Is 'Cannot GET /\n'
@@ -36,7 +34,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
   after ->
     server.close()
 
-  it 'passwordReset (no email , 201 ws response)', (done)->
+  it 'password_Reset (no email , 201 ws response)', (done)->
     ws_Called = false
     using pwd_Reset_Controller,->
       @.req = {}
@@ -58,7 +56,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
       @.password_Reset()
 
-  it 'passwordReset (valid email, 200 ws response)', (done)->
+  it 'password_Reset (valid email, 200 ws response)', (done)->
     ws_Called = false
     email     = 'aaa@aaaa.com'
     using pwd_Reset_Controller,->
@@ -76,24 +74,36 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
       @.password_Reset()
 
-  it 'passwordReset(bad server)', (done)->
+  it 'password_Reset (bad server)', (done)->
     req =
       body   : {}
     res =
-      redirect: (target)->
-        target.assert_Is '/error'
-        done()
       render : (target,model)->
         model.assert_Is_Not_Undefined
         model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
         target.assert_Is('source/jade/guest/login-cant-connect.jade')
         done()
+
     options =
-      config:
-        tm_35_Server   : 'http://aaaaa.teammentor.net/'
-        tmWebServices  : 'tmWebServices'
+      webServices : 'http://aaaaaa.teammentor.net/' + 'tmWebServices'
+
     using new Pwd_Reset_Controller(req,res, options),->
       @password_Reset()
+
+
+  it '@password_Reset_Token (bad server)', (done)->
+    req =
+      params : { username: 'aaaa' , token: 'bbbb'}
+      body   : { password: '!!TmAdmin24**','confirm-password':'!!TmAdmin24**'}
+    res =
+      redirect: (target)->
+        target.assert_Is '/error'
+        done()
+    options =
+      webServices : 'http://aaaaaa.teammentor.net/' + 'tmWebServices'
+
+    using new Pwd_Reset_Controller(req,res, options),->
+      @password_Reset_Token()
 
   it 'password_Reset_Token (no body)', (done)->
 
@@ -169,21 +179,6 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
       on_PasswordReset = (ws_Req, ws_Res)->
         ws_Res.send null
 
-      @password_Reset_Token()
-
-  it 'password_Reset(bad server)', (done)->
-    req =
-      params : { username: 'aaaa' , token: 'bbbb'}
-      body   : { password: '!!TmAdmin24**','confirm-password':'!!TmAdmin24**'}
-    res =
-      redirect: (target)->
-        target.assert_Is '/error'
-        done()
-    options =
-      config:
-        tm_35_Server   : 'http://aaaaa.teammentor.net/'
-        tmWebServices  : 'bbbbbb'
-    using new Pwd_Reset_Controller(req,res, options),->
       @password_Reset_Token()
 
   describe 'Check password_Reset_Token method validation',->

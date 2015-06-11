@@ -150,8 +150,7 @@ class SearchController
         jadePage  = 'user/main.jade'  # relative to the /views folder
 
         @.express_Service.session_Service.user_Data @.req.session, (user_Data)=>
-          viewModel = user_Data
-          @res.render(jadePage, viewModel)
+          @.res.send @jade_Service.render_Jade_File(jadePage, user_Data)
 
 SearchController.register_Routes = (app, expressService) ->
 

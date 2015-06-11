@@ -9,7 +9,7 @@ class JadeService
     dependencies: ()->
       fs          = require('fs')
       path        = require('path')
-      jade        = require('jade')
+      jade        = require('jade')   # 4 ms (with preloading)
       cheerio     = require('cheerio')
       {Highlight} = require('highlight')
 

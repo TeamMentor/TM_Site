@@ -3,11 +3,10 @@ bodyParser              = require('body-parser')
 Login_Controller        = require('../../src/controllers/Login-Controller')
 User_Sign_Up_Controller = require('../../src/controllers/User-Sign-Up-Controller')
 
-
 describe '| controllers | User-Sign-Up-Controller', ->
 
-  signUp_fail             = "source/jade/guest/sign-up-Fail.jade"
-  signUpPage_Unavailable  = 'source/jade/guest/sign-up-cant-connect.jade'
+  signUp_fail             = "guest/sign-up-Fail.jade"
+  signUpPage_Unavailable  = 'guest/sign-up-cant-connect.jade'
   signUp_Ok               = '/guest/sign-up-OK.html'
   mainPage_user           = '/user/main.html'
   text_Short_Pwd          = 'Password must be 8 to 256 character long'

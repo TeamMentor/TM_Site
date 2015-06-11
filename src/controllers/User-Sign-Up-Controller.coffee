@@ -6,17 +6,24 @@ request                 = null
 Config                  = null
 Analytics_Service       = null
 
+Login_Controller        = null
+request                 = null
+request                 = null
+
 class User_Sign_Up_Controller
 
-  constructor: (req, res)->
-    request              = require('request')
-    Config               = require('../misc/Config')
+  dependencies: ->
+    request = require('request')
     Login_Controller     = require('../controllers/Login-Controller')
     Analytics_Service    = require('../services/Analytics-Service')
+
+  constructor: (req, res, options)->
+    @.dependencies()
+    @.options            = options || {}
     @.req                = req || {}
     @.res                = res || {}
-    @.config             = new Config();
-    @.webServices        = @.config.tm_35_Server + @.config.tmWebServices
+
+    @.webServices        = @.options.webServices || global.config?.tm_design?.webServices
     @.login              = new Login_Controller(req,res)
     @.analyticsService   = new Analytics_Service(@.req, @.res)
 

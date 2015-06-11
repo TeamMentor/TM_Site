@@ -2,7 +2,7 @@ Analytics_Service = require('./../../src/services/Analytics-Service')
 expect                  = require("chai").expect
 assert                  = require("chai").assert
 
-describe '| services | Analytics-Service.test |', ->
+describe.only '| services | Analytics-Service.test |', ->
 
   ga_Service = null
 
