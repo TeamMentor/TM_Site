@@ -8,10 +8,16 @@ require('fluentnode');                                  // register fluentnode f
 process.env.TM_SITE_DATA = "SiteData_TM";
 
 var Side_Data = require('../TM_Shared/src/Site-Data');
-global.config = new Side_Data().load_Options()
-log('------------------------------------')
+var site_Data = new Side_Data()
+
+log('[SiteData] loading data from ' + site_Data.siteData_Folder())
+
+global.config = site_Data.load_Custom_Code()
+                         .load_Options()
+
+log('------------global.config---------------')
 log(global.config);
-log('------------------------------------')
+log('----------------------------------------')
 
 var Express_Service   = require('./src/services/Express-Service');
 var Analytics_Service = require('./src/services/Analytics-Service');

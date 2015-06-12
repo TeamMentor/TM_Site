@@ -1,6 +1,5 @@
 
 add_Routes = (express_Service)->
-    Express_Service         = require '../services/Express-Service'
     Jade_Service            = require '../services/Jade-Service'
     Ga_Service              = require '../services/Analytics-Service'
     Article_Controller      = require '../controllers/Article-Controller'
@@ -15,14 +14,17 @@ add_Routes = (express_Service)->
 
     app                     = express_Service.app
 
-
+    # Log/track request
     app.use (req,res,next)->
       logger?.info {url: req.url , ip: req.connection.remoteAddress,  agent: req.headers.agent }
       using new Ga_Service(req,res),->
         @.track()
       next()
-    #login routes
-    
+
+    #run custom code hook (if available)
+    global.custom?.express_Routes?(app, require('express'))
+
+
     app.get  '/user/login'     , (req, res)-> new Login_Controller(req, res).redirectToLoginPage()
     app.post '/user/login'     , (req, res)-> new Login_Controller(req, res).loginUser()
     app.get  '/user/logout'    , (req, res)-> new Login_Controller(req, res).logoutUser()
@@ -49,7 +51,6 @@ add_Routes = (express_Service)->
     Jade_Controller                    .register_Routes(app                  )
     new PoC_Controller(options)        .register_Routes()
 
-    #app.get '/passwordReset/:username/:token'               , (req, res)->  res.send new Jade_Service(app.config).renderJadeFile '/source/jade/guest/pwd-reset.jade'
 
     #errors 404 and 500
     app.get '/error', (req,res)-> res.status(500).render 'guest/500.jade',{loggedIn:req.session?.username isnt undefined}

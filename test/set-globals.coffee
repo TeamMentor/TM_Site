@@ -16,6 +16,9 @@ global.config =
     folder_Jade_Compilation : tm_Cache.path_Combine 'jade_Compilation'
     webServices             : tm_35_Server + tmWebServices
 
+global.custom =
+  express_Routes: (express)->
+    log 'in express_Routes'
 
 # preloading these dependencies since they take a while to load and are warping the timings of the Unit tests (like Article-Controller)
 require('jade')      # 350 ms

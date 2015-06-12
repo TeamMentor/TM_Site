@@ -65,7 +65,12 @@ class JadeService
                 .file_Exists()
 
     render_Jade_File: (jadeFile, params)=>
-      if params and params.article_Html
+
+      params = params || {}
+
+      #params.custom_navigation = './../../config/SiteData/_Customizations/TP_Logo.GIF'.file_Exists()
+
+      if params.article_Html
         params.article_Html = @.apply_Highlight(params.article_Html)
       if (@.cache_Enabled() is false)
         jadeFile_Path = @.calculate_Jade_Path(jadeFile)
