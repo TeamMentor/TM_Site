@@ -67,8 +67,7 @@ class JadeService
     render_Jade_File: (jadeFile, params)=>
 
       params = params || {}
-
-      #params.custom_navigation = './../../config/SiteData/_Customizations/TP_Logo.GIF'.file_Exists()
+      params.custom_navigation = global.custom?.custom_navigation
 
       if params.article_Html
         params.article_Html = @.apply_Highlight(params.article_Html)
