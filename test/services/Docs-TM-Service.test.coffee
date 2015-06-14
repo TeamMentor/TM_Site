@@ -1,6 +1,6 @@
 Docs_TM_Service   = require('../../src/services/Docs-TM-Service')
 
-describe.only "| services | Docs-TM-Service.test", ()->
+describe "| services | Docs-TM-Service.test", ()->
 
   docs_TM_Service = null
 
@@ -67,3 +67,15 @@ describe.only "| services | Docs-TM-Service.test", ()->
               @.Phase     .assert_Is 'NA'
               @.Type      .assert_Is ''
               @.Category  .assert_Is ''
+
+  it 'json_Files', ->
+    docs_TM_Service.json_Files (json_Files)->
+      json_Files.assert_Size_Is_Above 40              # there should be at least 40 help files
+
+  it 'article_Data', ->
+    using docs_TM_Service, ->
+      @.json_Files (json_Files)=>
+        ids = (json_File.file_Name_Without_Extension() for json_File in json_Files)
+        for id in ids
+          data = @.article_Data id
+          data.id.assert_Is id
