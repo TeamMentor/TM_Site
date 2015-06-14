@@ -8,13 +8,11 @@ tm_35_Server  = 'https://tmdev01-uno.teammentor.net/'
 tmWebServices = 'Aspx_Pages/TM_WebServices.asmx'
 
 global.config =
-  jade_Compilation:
-    enabled: false
   tm_design :
-    folder_Docs_Json        : root_Folder.path_Combine 'data/Lib_Docs-Json'
-    folder_Jade_Files       : root_Folder.path_Combine 'code/TM_Jade'
-    folder_Jade_Compilation : tm_Cache.path_Combine 'jade_Compilation'
-    webServices             : tm_35_Server + tmWebServices
+    jade_Compilation_Enabled : true
+    folder_Docs_Json         : root_Folder.path_Combine 'data/Lib_Docs-Json'
+    folder_Jade_Files        : root_Folder.path_Combine 'code/TM_Jade'
+    webServices              : tm_35_Server + tmWebServices
 
 global.custom =
   express_Routes: (express)->

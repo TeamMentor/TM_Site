@@ -43,9 +43,8 @@ describe "| services | Jade-Service |", ()->
       @.cache_Enabled           .assert_Is_Function()
       @.compile_JadeFile_To_Disk.assert_Is_Function()
       @.render_Jade_File        .assert_Is_Function()
-      #@.render_Mixin            .assert_Is_Function()
-
-          #@.target_Folder         .assert_Is(@.config.jade_Compilation)
+      #@.render_Mixin           .assert_Is_Function()
+      #@.target_Folder          .assert_Is(@.config.jade_Compilation)
 
   it 'apply_Highlight', ->
     no_Pre             = '<b>aaaa</b>'
@@ -66,36 +65,36 @@ describe "| services | Jade-Service |", ()->
 
 
   it 'calculate_Compile_Path', ()->
-    global.config = tm_design : folder_Jade_Compilation : compile_Path
-    using new Jade_Service().calculate_Compile_Path, ->
-      @("aaa"              ).assert_Is compile_Path.path_Combine('aaa.txt'             )
-      @("aaa/bbb"          ).assert_Is compile_Path.path_Combine('aaa_bbb.txt'         )
-      @("aaa/bbb/ccc"      ).assert_Is compile_Path.path_Combine('aaa_bbb_ccc.txt'     )
-      @("aaa/bbb.jade"     ).assert_Is compile_Path.path_Combine('aaa_bbb_jade.txt'    )
-      @("aaa/bbb.ccc.jade" ).assert_Is compile_Path.path_Combine('aaa_bbb_ccc_jade.txt')
+    using new Jade_Service(), ->
+      @.folder_Jade_Compilation = compile_Path
+      using @.calculate_Compile_Path, ->
+        @("aaa"              ).assert_Is compile_Path.real_Path().path_Combine('aaa.js'             )
+        @("aaa/bbb"          ).assert_Is compile_Path.real_Path().path_Combine('aaa-bbb.js'         )
+        @("aaa/bbb/ccc"      ).assert_Is compile_Path.real_Path().path_Combine('aaa-bbb-ccc.js'     )
+        @("aaa/bbb.jade"     ).assert_Is compile_Path.real_Path().path_Combine('aaa-bbb.jade.js'    )
+        @("aaa/bbb.ccc.jade" ).assert_Is compile_Path.real_Path().path_Combine('aaa-bbb.ccc.jade.js')
 
-      global.config = null
-      assert_Is_Null @ "aaa"
+      @.folder_Jade_Compilation = null
+      assert_Is_Null @.calculate_Compile_Path "aaa"
 
   it 'calculate_Jade_Path',->
-      global.config = tm_design : folder_Jade_Files : jade_Path
-      using new Jade_Service().calculate_Jade_Path, ->
-        @("a.jade"    ).assert_Is jade_Path.path_Combine 'a.jade'
-        @("/a.jade"   ).assert_Is jade_Path.path_Combine 'a.jade'
-        @("a/b.jade"  ).assert_Is jade_Path.path_Combine 'a/b.jade'
-        @("/a/b.jade" ).assert_Is jade_Path.path_Combine 'a/b.jade'
+      using new Jade_Service(), ->
+        @.folder_Jade_Files = jade_Path
+        using @.calculate_Jade_Path, ->
+          @("a.jade"    ).assert_Is jade_Path.path_Combine 'a.jade'
+          @("/a.jade"   ).assert_Is jade_Path.path_Combine 'a.jade'
+          @("a/b.jade"  ).assert_Is jade_Path.path_Combine 'a/b.jade'
+          @("/a/b.jade" ).assert_Is jade_Path.path_Combine 'a/b.jade'
 
-        global.config = null
-        assert_Is_Null @ "aaa"
+        @.folder_Jade_Files = null
+        assert_Is_Null @.calculate_Jade_Path "aaa"
 
   it 'compile_JadeFile_To_Disk', ()->
-    global.config = tm_design :
-                      folder_Jade_Files       : jade_Path
-                      folder_Jade_Compilation : compile_Path
-
     using new Jade_Service(), ->
+      @.folder_Jade_Files = jade_Path
+      @.folder_Jade_Compilation = compile_Path
 
-      compiled_File    = @.calculate_Compile_Path(jade_File).assert_File_Not_Exists();
+      compiled_File    = @.calculate_Compile_Path(jade_File)
       @.compile_JadeFile_To_Disk(jade_File).assert_Is_True()
       jadeTemplate  = require(compiled_File.real_Path());
       jadeTemplate.assert_Is_Function()
