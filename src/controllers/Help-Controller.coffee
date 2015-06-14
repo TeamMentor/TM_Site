@@ -27,9 +27,10 @@ class Help_Controller
     @.gitHubImagePath  = 'https://raw.githubusercontent.com/TMContent/Lib_Docs/master/_Images/'
     @.jade_Help_Index  = 'misc/help-index.jade'
     @.jade_Help_Page   = 'misc/help-page.jade'
+    @.jade_No_Image    = 'guest/404.jade'
     @.index_Page_Id    = '1eda3d77-43e0-474b-be99-9ba118408dd3'
     @.jade_Error_Page  = 'guest/404.jade'
-    @.imagePath        = '../../.tmCache/Lib_Docs-json/_Images/'
+    @.imagePath        = @.docs_TM_Service.libraryDirectory?.path_Combine '_Images/'
 
   content_Cache_Set: (title, content)=>
     key = @.page_Id()
@@ -72,9 +73,6 @@ class Help_Controller
     @.res.status(200)
          .send(html)
 
-  redirect_Images_to_Folder: ()=>
-    @.res.redirect @.imagePath + @.req.params.name
-
   show_Content: (title, content)=>
     if (content_cache[@.page_Id()]==undefined)
       @.content_Cache_Set title, content
@@ -92,6 +90,17 @@ class Help_Controller
 
       @.fetch_Article_and_Show @.docs_Library?.Articles[@.page_Id()]?.Title || null
 
+  show_Image: ()=>
+    image_Name = @.req.params.name
+    image_Path = @.imagePath.path_Combine image_Name
+    if image_Path.file_Exists()
+      @.res.sendFile image_Path.real_Path()
+    else
+      logger?.error "requested help image not found: #{image_Name}"
+      @.res.status(404)
+           .send new Jade_Service().render_Jade_File @.jade_No_Image
+
+
   show_Index_Page: ()=>
     #setting up index page
     @.req?.params?.page= @.index_Page_Id
@@ -106,6 +115,6 @@ Help_Controller.register_Routes =  (app)=>
   app.get '/help/index.html'      , (req, res)-> new Help_Controller(req, res).show_Index_Page()
   app.get '/help/article/:page*'  , (req, res)-> new Help_Controller(req, res).show_Help_Page()
   app.get '/help/:page*'          , (req, res)-> new Help_Controller(req, res).show_Help_Page()
-  app.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).redirect_Images_to_Folder()
+  app.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).show_Image()
 
 module.exports = Help_Controller

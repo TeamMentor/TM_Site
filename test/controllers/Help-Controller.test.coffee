@@ -1,9 +1,9 @@
 cheerio           = require 'cheerio'
-supertest         = require 'supertest'
+express           = require 'express'
 expect            = require('chai').expect
 request           = require 'request'
 marked            = require 'marked'
-
+supertest         = require 'supertest'
 Help_Controller   = require('../../src/controllers/Help-Controller')
 
 describe '| controllers | Help-Controller.test |', ()->
@@ -121,14 +121,6 @@ describe '| controllers | Help-Controller.test |', ()->
         check_Help_Page_Contents html, false, view_Model.title, view_Model.content, done
       @.render_Jade_and_Send @.jade_Help_Page, view_Model
 
-  it 'redirect_Images_to_Folder', (done)->
-    using help_Controller,->
-      @.req = { params: name: 'req_param_value'}
-      @.res.redirect = (value)=>
-        value.assert_Is @.imagePath + 'req_param_value'
-        done()
-      @.redirect_Images_to_Folder()
-
   it 'show_Content', (done)->
     page_Id = 'id'     .add_5_Letters()
     title   = 'title_' .add_5_Letters()
@@ -155,6 +147,31 @@ describe '| controllers | Help-Controller.test |', ()->
       @.content_Cache()[page_Id] = { title: title, content: content }
       @.res.send = (html)-> check_Help_Page_Contents html, false, title,content, done
       @show_Help_Page()
+
+  it 'show_Image (when image exists)', (done)->
+    using help_Controller,->
+      @.imagePath.assert_Folder_Exists()
+      image_Path = @.imagePath.files('.jpg').assert_Not_Empty().first()
+      image_Name = image_Path.file_Name()
+      @.req = { params: name: image_Name}
+
+      @.res.sendFile = (data)->
+        data.assert_Is image_Path
+        done()
+
+      @.show_Image()
+
+  it 'show_Image (when image not exists)', (done)->
+    req = { params: name: 'AAAAAA-BBBBB'}
+    res =
+      status: (code)->
+        code.assert_Is 404
+        @
+      send  : (data)->
+        data.assert_Contains 'a HTTP 404 error'
+        done()
+    using new Help_Controller(req,res), ->
+      @.show_Image()
 
   it 'show_Index_Page (anonymous users)', (done)->
     page_Id = 'id'     .add_5_Letters()
@@ -183,9 +200,6 @@ describe '| controllers | Help-Controller.test |', ()->
       done()
 
   describe 'using mocked docs tm server |', ->
-
-    express    = require 'express'
-    supertest  = require 'supertest'
 
     app               = null
     server            = null
@@ -286,7 +300,42 @@ describe '| controllers | Help-Controller.test |', ()->
 
         @.show_Help_Page()
 
-  describe 'routes',->
+  describe 'using express |', ->
+
+    app               = null
+    server            = null
+    url_Mocked_Server = null
+    help_Controller   = null
+
+    before ->
+      random_Port       = 10000.random().add(10000)
+      url_Mocked_Server = "http://localhost:#{random_Port}"
+      app               = new express()
+      Help_Controller.register_Routes(app)
+      server            = app.listen(random_Port)
+
+    after ->
+      server.close()
+
+    it 'show_Image (image exists)', (done)->
+      supertest(app)
+      .get('/Image/index01.png')
+      .end (err, res)->
+        res.status.assert_Is 200
+        res.type  .assert_Is 'image/png'
+        res.body.length.assert_Is_Bigger_Than 100000
+        done()
+
+    it 'show_Image (image not exists)', (done)->
+      supertest(app)
+        .get('/Image/aaaa-bbb')
+        .end (err, res)->
+          res.status.assert_Is 404
+          res.text.assert_Contains 'a HTTP 404 error'
+          done()
+
+
+  describe 'routes |',->
     it 'register_Routes',->
       routes = {}
       app    =
@@ -298,4 +347,4 @@ describe '| controllers | Help-Controller.test |', ()->
       routes['/help/index.html'     ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Index_Page();'
       routes['/help/article/:page*' ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
       routes['/help/:page*'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
-      routes['/Image/:name'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).redirect_Images_to_Folder();'
+      routes['/Image/:name'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Image();'
