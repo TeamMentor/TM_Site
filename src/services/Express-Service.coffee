@@ -16,17 +16,16 @@ class Express_Service
     path             = require "path"
     express          = require 'express'
 
-  constructor: (config)->
+  constructor: (options)->
     @.dependencies()
-
-    @.config                  = config || global.config
-    @.logging_Enabled         = @.config?.logging_Enabled || true
+    @.options                 = options || {}
     @.app                     = express()
     @.loginEnabled            = true;
-    @.app.port                = @.config.tm_design?.port || process.env.PORT || 1337;
+    @.app.port                = @.options.port || global.config?.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
 
+    @.logging_Enabled         = global.config?.logging_Enabled || true
     @.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
     @.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
 

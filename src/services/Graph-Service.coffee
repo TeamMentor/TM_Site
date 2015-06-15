@@ -4,7 +4,8 @@ class Graph_Service
     @.options    = options || {}
     @.dataFile   = './src/article-data.json'
     @.data       = null
-    @.server     = @.options.server || 'http://localhost:1332'
+    @.port       = global.config?.tm_graph?.port || 1332
+    @.server     = @.options.server || "http://localhost:#{@.port}"
     #@.cache      = new Cache_Service('graph-service')
 
   article_Html: (article_Id, callback)=>

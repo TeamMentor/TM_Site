@@ -81,16 +81,8 @@ describe '| routes | routes.test |', ()->
         logging_Enabled : false
         port            : 1024 + (20000).random()
 
-
-
-      #global.config.tm_design.webServices = 'http://aaaa.teammentor.net'
-
-      #log global.config
-
       express_Service  = new Express_Service(options).setup().start()
-
       app              = express_Service.app
-      #app.server       = app.listen();
 
       tm_Server = supertest(app)
 
