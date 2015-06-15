@@ -43,7 +43,8 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
           target.assert_Is '/error'
           ws_Called.assert_True()
           done()
-        render : (target,model)->
+
+      @.render_Page = (target,model)->
           model.assert_Is_Not_Undefined
           model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
           target.assert_Is('guest/login-cant-connect.jade')
@@ -77,8 +78,8 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
   it 'password_Reset (bad server)', (done)->
     req =
       body   : {}
-    res =
-      render : (target,model)->
+    res = null
+    render_Page = (target,model)->
         model.assert_Is_Not_Undefined
         model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
         target.assert_Is('guest/login-cant-connect.jade')
@@ -88,6 +89,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
       webServices : 'http://aaaaaa.teammentor.net/' + 'tmWebServices'
 
     using new Pwd_Reset_Controller(req,res, options),->
+      @.render_Page = render_Page
       @password_Reset()
 
 
@@ -110,11 +112,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
     using pwd_Reset_Controller,->
       @.req = {}
 
-      @.res =
-        render: (jade_View,view_Model)=>
-          jade_View.assert_Is @.jade_password_reset_fail
-          view_Model.assert_Is { errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character' }
-          done()
+      @.render_Page = (jade_View,view_Model)=>
+        jade_View.assert_Is @.jade_password_reset_fail
+        view_Model.assert_Is { errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character' }
+        done()
 
       @password_Reset_Token()
 
@@ -123,11 +124,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
     using pwd_Reset_Controller,->
       @.req = { body: {}}
 
-      @.res =
-        render: (jade_View,view_Model)=>
-          jade_View.assert_Is @.jade_password_reset_fail
-          view_Model.assert_Is { errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character' }
-          done()
+      @.render_Page = (jade_View,view_Model)=>
+        jade_View.assert_Is @.jade_password_reset_fail
+        view_Model.assert_Is { errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character' }
+        done()
 
       @password_Reset_Token()
 
@@ -153,11 +153,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
         params : { username: 'demo' , token: '00000000-0000-0000-0000-000000000000'}
         body   : { password: '!!TmAdmin24**','confirm-password':'!!TmAdmin24**'}
 
-      @.res =
-        render: (jade_Page, view_Model)=>
-          jade_Page.assert_Is 'guest/pwd-reset-fail.jade'
-          view_Model.assert_Is { errorMessage: 'Invalid token, perhaps it has expired' }
-          done()
+      @.render_Page = (jade_Page, view_Model)=>
+        jade_Page.assert_Is 'guest/pwd-reset-fail.jade'
+        view_Model.assert_Is { errorMessage: 'Invalid token, perhaps it has expired' }
+        done()
 
       on_PasswordReset = (ws_Req, ws_Res)->
         ws_Res.send {d:false}
@@ -170,11 +169,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
         params : { username: 'demo' , token: '00000000-0000-0000-0000-000000000000'}
         body   : { password: '!!TmAdmin24**','confirm-password':'!!TmAdmin24**'}
 
-      @.res =
-        render: (jade_Page, view_Model)=>
-          jade_Page.assert_Is 'guest/pwd-reset-fail.jade'
-          view_Model.assert_Is { errorMessage: 'Invalid token, perhaps it has expired' }
-          done()
+      @.render_Page = (jade_Page, view_Model)=>
+        jade_Page.assert_Is 'guest/pwd-reset-fail.jade'
+        view_Model.assert_Is { errorMessage: 'Invalid token, perhaps it has expired' }
+        done()
 
       on_PasswordReset = (ws_Req, ws_Res)->
         ws_Res.send null
@@ -192,11 +190,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
           params : { username: username , token: token}
           body   : { password: password,'confirm-password':confirmPassword}
 
-        @.res =
-          render: (jade_Page, view_Model)=>
-            jade_Page.assert_Is expected_Target
-            view_Model.assert_Is { errorMessage: expected_Message }
-            callback()
+        @.render_Page = (jade_Page, view_Model)=>
+          jade_Page.assert_Is expected_Target
+          view_Model.assert_Is { errorMessage: expected_Message }
+          callback()
 
         @password_Reset_Token()
 

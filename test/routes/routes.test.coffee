@@ -1,12 +1,17 @@
-supertest       = null
-Express_Service = null
-request         = null
+bodyParser      = require 'body-parser'
+express         = require 'express'
+request         = require 'superagent'
+supertest       = require 'supertest'
+
+Express_Service = require '../../src/services/Express-Service'
+
 
 describe '| routes | routes.test |', ()->
 
     @.timeout 7000
     express_Service = null
     app             = null
+    tm_Server       = null
 
     expectedPaths = [ '/'
                       '/flare/_dev/:area/:page'
@@ -55,21 +60,39 @@ describe '| routes | routes.test |', ()->
                       '/poc/:page'
                       '/*']
 
-    dependencies = ->
-      supertest       = require 'supertest'
-      Express_Service = require '../../src/services/Express-Service'
-      request         = require('superagent')
-
     before ()->
-      dependencies()
+
+      random_Port           = 10000.random().add(10000)
+      url_Mocked_3_5_Server = "http://localhost:#{random_Port}/webServices"
+      app_35_Server         = new express().use(bodyParser.json())
+      app_35_Server.post '/webServices/SendPasswordReminder', (req,res)->res.status(201).send {}      # status(200) would trigger a redirect
+      app_35_Server.post '/webServices/Login_Response'      ,
+        (req,res)->
+          logged_In = if req.body.username is 'user' then 0 else 1
+          res.status(200).send { d: { Login_Status : logged_In } }
+      app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
+      app_35_Server.listen(random_Port)
+
+      global.config.tm_design.webServices = url_Mocked_3_5_Server
+
+      #log global.config
+
       options =
         logging_Enabled : false
         port            : 1024 + (20000).random()
+
+
+
+      #global.config.tm_design.webServices = 'http://aaaa.teammentor.net'
+
+      #log global.config
 
       express_Service  = new Express_Service(options).setup().start()
 
       app              = express_Service.app
       #app.server       = app.listen();
+
+      tm_Server = supertest(app)
 
     after ()->
       app.server.close()
@@ -90,7 +113,7 @@ describe '| routes | routes.test |', ()->
         paths.forEach (path)->
             expectedPaths.assert_Contains(path,"Path not found: #{path}")
 
-  #dynamically create the tests
+    #dynamically create the tests
     runTest = (originalPath) ->
       path = originalPath.replace(':version','flare')
                          .replace(':area/:page','help/index')
@@ -126,11 +149,11 @@ describe '| routes | routes.test |', ()->
         if (postRequest)
           postData = {}
           postData ={username:"test",password:"somevalues",email:"someemail"} if path == '/user/sign-up'
-          supertest(app).post(path).send(postData)
+          tm_Server.post(path).send(postData)
                         .expect(expectedStatus,checkResponse)
         else
-          supertest(app).get(path)
-                        .expect(expectedStatus,checkResponse)
+          tm_Server.get(path)
+                   .expect(expectedStatus,checkResponse)
 
     for route in expectedPaths
       runTest(route)

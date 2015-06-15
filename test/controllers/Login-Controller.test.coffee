@@ -59,11 +59,13 @@ describe '| controllers | Login-Controller.test |', ->
       redirect: (target)->
         target.assert_Is(expected_Target)
         callback()
-      render : (target) ->
-        target.assert_Is(expected_Target)
-        callback()
+
+    render_Page = (target) ->
+      target.assert_Is(expected_Target)
+      callback()
 
     using new Login_Controller(req, res), ->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @[method]()
 
@@ -85,13 +87,14 @@ describe '| controllers | Login-Controller.test |', ->
 
   it "loginUser (server not ok)", (done)->
     req = body: {username:'aaaa', password:'bbb'}
-    res =
-      render: (jade_Page, params)->
+    res = null
+    render_Page = (jade_Page, params)->
         jade_Page.assert_Is loginPage_Unavailable
         params.assert_Is { viewModel: {"username":"","password":"", errorMessage: "TEAM Mentor is unavailable, please contact us at " } }
         done()
 
     using new Login_Controller(req, res), ->
+      @.render_Page = render_Page
       @.webServices = 'http://aaaaaabbb.teammentor.net'
       @.loginUser()
 
@@ -130,15 +133,16 @@ describe '| controllers | Login-Controller.test |', ->
     newPassword  = 'aaa'.add_5_Letters()
 
     #render contains the file to render and the view model object
-    render = (jadePage,model)->
+    render_Page = (jadePage,model)->
       #Verifying the message from the backend.
       model.viewModel.errorMessage.assert_Is(blank_credentials_message)
       jadePage.assert_Is('guest/login-Fail.jade')
       done()
     req = body:{username:newUsername,password:newPassword},session:'';
-    res = {render: render}
+    res = null
 
     using new Login_Controller(req, res) ,->
+      @.render_Page = render_Page
       @.loginUser()
 
 
@@ -147,15 +151,16 @@ describe '| controllers | Login-Controller.test |', ->
     newPassword         =''
 
     #render contains the file to render and the view model object
-    render = (jadePage,model)->
+    render_Page = (jadePage,model)->
       model.viewModel.errorMessage.assert_Is(blank_credentials_message)
       #Verifying the message from the backend.
       jadePage.assert_Is('guest/login-Fail.jade')
       done()
     req = body:{username:newUsername,password:newPassword},session:'';
-    res = {render: render}
+    res = null
 
     using new Login_Controller(req, res) ,->
+      @.render_Page = render_Page
       @.loginUser()
 
   it 'invalid Username or Password (missing both username and password)',(done)->
@@ -163,15 +168,16 @@ describe '| controllers | Login-Controller.test |', ->
     newPassword         =''
 
     #render contains the file to render and the view model object
-    render = (jadePage,model)->
+    render_Page = (jadePage,model)->
       #Verifying the message from the backend.
       model.viewModel.errorMessage.assert_Is(blank_credentials_message)
       jadePage.assert_Is('guest/login-Fail.jade')
       done()
     req = body:{username:newUsername,password:newPassword},session:'';
-    res = {render: render}
+    res = null
 
     using new Login_Controller(req, res) ,->
+      @.render_Page = render_Page
       @.loginUser()
 
   it 'login form persist HTML form fields on error (Wrong Password)',(done)->
@@ -179,15 +185,16 @@ describe '| controllers | Login-Controller.test |', ->
     newPassword         ='aaa'.add_5_Letters()
 
     #render contains the file to render and the view model object
-    render = (html,model)->
+    render_Page = (html,model)->
       model.viewModel.username.assert_Is(newUsername)
       model.viewModel.password.assert_Is('')
       model.viewModel.errorMessage.assert_Is('Wrong Password')
       done()
     req = body:{username:newUsername,password:newPassword}, session:''
-    res = render: render
+    res = null
 
     using new Login_Controller(req, res), ->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @.loginUser()
 
@@ -195,15 +202,16 @@ describe '| controllers | Login-Controller.test |', ->
     newUsername         = 'aaa'.add_5_Letters()
     newPassword         = 'bbb'.add_5_Letters()
 
-    render = (jade_Page,params)->
+    render_Page = (jade_Page,params)->
       jade_Page.assert_Is loginPage
       params.viewModel.errorMessage.assert_Is 'Bad user and pwd'
       done()
 
     req = body: {username:newUsername, password:newPassword}, session:''
-    res = render: render
+    res = null
 
     using new Login_Controller(req, res), ->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @.loginUser()
 

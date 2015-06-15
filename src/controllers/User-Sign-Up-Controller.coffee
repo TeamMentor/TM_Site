@@ -5,7 +5,7 @@ errorMessage            = "TEAM Mentor is unavailable, please contact us at "
 request                 = null
 Config                  = null
 Analytics_Service       = null
-
+Jade_Service            = null
 Login_Controller        = null
 request                 = null
 request                 = null
@@ -16,6 +16,7 @@ class User_Sign_Up_Controller
     request = require('request')
     Login_Controller     = require('../controllers/Login-Controller')
     Analytics_Service    = require('../services/Analytics-Service')
+    Jade_Service         = require('../services/Jade-Service')
 
   constructor: (req, res, options)->
     @.dependencies()
@@ -26,6 +27,7 @@ class User_Sign_Up_Controller
     @.webServices        = @.options.webServices || global.config?.tm_design?.webServices
     @.login              = new Login_Controller(req,res)
     @.analyticsService   = new Analytics_Service(@.req, @.res)
+    @.jade_Service       = new Jade_Service()
 
   userSignUp: ()=>
     userViewModel =
@@ -39,7 +41,7 @@ class User_Sign_Up_Controller
 
     if (@.req.body.password != @.req.body['confirm-password'])
         userViewModel.errorMessage = 'Passwords don\'t match'
-        @res.render(signUp_fail,viewModel: userViewModel)
+        @.render_Page signUp_fail,viewModel: userViewModel
         return
 
     newUser =
@@ -60,19 +62,19 @@ class User_Sign_Up_Controller
         #[QA] ADD ISSUE: Refactor this to show TM 500 error message
         logger?.info ('Could not connect with TM 3.5 server')
         userViewModel.errorMessage =errorMessage
-        return @.res.render signUpPage_Unavailable, {viewModel:userViewModel}
+        return @.render_Page signUpPage_Unavailable, {viewModel:userViewModel}
 
       if (error or response.body is null or response.statusCode isnt 200)
         logger?.info ('Bad response received from TM 3.5 server')
         userViewModel.errorMessage =errorMessage
-        return @.res.render signUpPage_Unavailable, {viewModel:userViewModel}
+        return @.render_Page signUpPage_Unavailable, {viewModel:userViewModel}
 
 
       signUpResponse = response.body?.d
 
       if (not signUpResponse) or (not signUpResponse.Validation_Results)
         logger?.info ('Bad data received from TM 3.5 server')
-        return @.res.render signUpPage_Unavailable, {viewModel: errorMessage : 'An error occurred' }
+        return @.render_Page signUpPage_Unavailable, {viewModel: errorMessage : 'An error occurred' }
 
       message = ''
 
@@ -86,7 +88,10 @@ class User_Sign_Up_Controller
         message = signUpResponse.Validation_Results.first().Message
       userViewModel.errorMessage = message
       @.analyticsService.track('','User Account',"Signup Failed #{@.req.body.username}")
-      @res.render(signUp_fail, {viewModel:userViewModel})
+      @.render_Page signUp_fail, {viewModel:userViewModel}
+
+  render_Page: (jade_Page,params)=>
+    @.res.send @.jade_Service.render_Jade_File jade_Page, params
 
 
 module.exports = User_Sign_Up_Controller

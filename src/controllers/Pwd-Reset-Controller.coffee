@@ -16,14 +16,16 @@ class Pwd_Reset_Controller
     @.res                          = res
     @.request_Timeout              = @.options.request_Timeout || 1500
     @.webServices                  = @.options.webServices || global.config?.tm_design?.webServices
-    @.jade_password_reset_fail     = 'guest/pwd-reset-fail.jade'
     @.jade_loginPage_Unavailable   = 'guest/login-cant-connect.jade'
+    @.jade_password_reset_fail     = 'guest/pwd-reset-fail.jade'
+    @.jade_password_reset          = 'guest/pwd-reset.jade'
     @.url_password_reset_ok        = '/guest/login-pwd-reset.html'
     @.url_password_sent            = '/guest/pwd-sent.html'
     @.url_WS_SendPasswordReminder  = @.webServices + '/SendPasswordReminder'
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
+    @.jade_Service                 = new Jade_Service()
 
 
   password_Reset: ()=>
@@ -37,17 +39,16 @@ class Pwd_Reset_Controller
                     url    : @.url_WS_SendPasswordReminder
               }
 
-    request options, (error, response, body)=>
+    request options, (error, response)=>
       if ((not error) and response?.statusCode == 200)
           @.res.redirect(@.url_password_sent);
       else
           logger?.info ('Could not connect with TM 3.5 server')
           userViewModel = {errorMessage:@.errorMessage,username:'',password:''}
-          return @.res.render @.jade_loginPage_Unavailable, {viewModel:userViewModel }
+          return @.render_Page @.jade_loginPage_Unavailable, {viewModel:userViewModel }
 
   password_Reset_Page: ()=>
-    html = new Jade_Service().render_Jade_File '/source/jade/guest/pwd-reset.jade'
-    @.res.send html
+    @.render_Page @.jade_password_reset
 
   password_Reset_Token : ()=>
 
@@ -65,32 +66,26 @@ class Pwd_Reset_Controller
 
     #Validating token
     if (token == null or username == null or username is '' or token is '')
-      @res.render(@.jade_password_reset_fail, {errorMessage: 'Token is invalid'})
-      return
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Token is invalid'}
 
     #Password not provided
     if (@.req.body?.password?.length is 0)
-      @res.render(@.jade_password_reset_fail, {errorMessage: 'Password must not be empty'})
-      return
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Password must not be empty'}
 
     #Confirmation password not provided
     if (@.req.body?['confirm-password']?.length is 0)
-      @res.render(@.jade_password_reset_fail, {errorMessage: 'Confirmation Password must not be empty'})
-      return
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Confirmation Password must not be empty'}
 
     #Passwords must match
     if (@.req.body?.password != @.req.body?['confirm-password'])
-      @res.render(@.jade_password_reset_fail, {errorMessage: 'Passwords don\'t match'})
-      return
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Passwords don\'t match'}
     #length check
     if (@.req.body?.password?.length < 8 || @.req.body?.password?.length > 256 )
-      @res.render(@.jade_password_reset_fail, {errorMessage: 'Password must be 8 to 256 character long'})
-      return
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Password must be 8 to 256 character long'}
 
     #Complexity
     if (!@.req.body?.password?.match(passwordStrengthRegularExpression))
-      @.res.render(@.jade_password_reset_fail, {errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character'})
-      return
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character'}
 
     #request options
     options = {
@@ -99,14 +94,17 @@ class Pwd_Reset_Controller
                    json  : true
                    url   : @.url_WS_PasswordReset
               }
-    request options, (error, response, body)=>
+    request options, (error, response)=>
       if (not error) and response.statusCode is 200
         if response?.body?.d
           @res.redirect(@.url_password_reset_ok )
         else
-          @res.render(@.jade_password_reset_fail,{errorMessage: 'Invalid token, perhaps it has expired'})
+          @.render_Page @.jade_password_reset_fail,{errorMessage: 'Invalid token, perhaps it has expired'}
       else
         @res.redirect(@.url_error_page)
+
+  render_Page: (jade_Page,params)=>
+    @.res.send @.jade_Service.render_Jade_File jade_Page, params
 
 Pwd_Reset_Controller.register_Routes =  (app)=>
 

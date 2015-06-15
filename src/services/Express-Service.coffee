@@ -22,13 +22,13 @@ class Express_Service
     @.config                  = config || global.config
     @.logging_Enabled         = @.config?.logging_Enabled || true
     @.app                     = express()
-    @loginEnabled             = true;
+    @.loginEnabled            = true;
     @.app.port                = @.config.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
 
-    @.path_To_Jade            = __dirname.path_Combine '../../../TM_Jade'
-    @.path_To_Static          = __dirname.path_Combine '../../../TM_Static'
+    @.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
+    @.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
 
   setup: ()=>
     if @.logging_Enabled

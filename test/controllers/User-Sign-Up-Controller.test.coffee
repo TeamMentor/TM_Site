@@ -79,7 +79,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
       redirect: (target)->
         target.assert_Is(expected_Target)
         callback()
-      render : (jade_Page, params) ->
+    render_Page = (jade_Page, params) ->
         params.viewModel.errorMessage.assert_Is expected_ErrorMessage
         jade_Page.assert_Is(expected_Target)
         callback()
@@ -87,6 +87,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
     mockedLogin = new Login_Controller(req,res)
     mockedLogin.webServices = url_WebServices
     using new User_Sign_Up_Controller(req, res), ->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @.login= mockedLogin
       @.userSignUp()
@@ -110,12 +111,12 @@ describe '| controllers | User-Sign-Up-Controller', ->
 
   it 'userSignUp (webServices - bad server)', (done)->
     req = body : {}
-    res =
-      render: (jade_Page, params)->
+    render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
         params.assert_Is { viewModel:{ username: undefined,password: undefined,confirmpassword: undefined,email: undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
         done()
-    using new User_Sign_Up_Controller(req,res),->
+    using new User_Sign_Up_Controller(req,null),->
+      @.render_Page = render_Page
       @.webServices = "http://aaaaaaa.teammentor.net"
       @userSignUp()
 
@@ -124,13 +125,13 @@ describe '| controllers | User-Sign-Up-Controller', ->
       res.status(201).send {}
 
     req = body : {}
-    res =
-      render: (jade_Page, params)->
+    render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
         params.assert_Is { viewModel:{ username: undefined,password: undefined,confirmpassword: undefined,email: undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
         done()
 
-    using new User_Sign_Up_Controller(req,res),->
+    using new User_Sign_Up_Controller(req,null),->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @userSignUp()
 
@@ -139,13 +140,13 @@ describe '| controllers | User-Sign-Up-Controller', ->
       res.send null
 
     req = body : {}
-    res =
-      render: (jade_Page, params)->
-        jade_Page.assert_Is signUpPage_Unavailable
-        params.assert_Is { viewModel: { errorMessage: 'An error occurred' } }
-        done()
+    render_Page = (jade_Page, params)->
+      jade_Page.assert_Is signUpPage_Unavailable
+      params.assert_Is { viewModel: { errorMessage: 'An error occurred' } }
+      done()
 
-    using new User_Sign_Up_Controller(req,res),->
+    using new User_Sign_Up_Controller(req,null),->
+      @.render_Page =render_Page
       @.webServices = url_WebServices
       @userSignUp()
 
@@ -154,13 +155,13 @@ describe '| controllers | User-Sign-Up-Controller', ->
       res.send 'aaaaaa'
 
     req = body : {}
-    res =
-      render: (jade_Page, params)->
+    render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
         params.assert_Is { viewModel: { errorMessage: 'An error occurred' } }
         done()
 
-    using new User_Sign_Up_Controller(req,res),->
+    using new User_Sign_Up_Controller(req,null),->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @userSignUp()
 
@@ -184,12 +185,13 @@ describe '| controllers | User-Sign-Up-Controller', ->
   it 'userSignUp (pwd dont match)', (done)->
     req =
       body   : { password:'aa' , 'password-confirm':'bb'}
-    res =
-      render : (target) ->
+
+    render_Page = (target) ->
         target.assert_Contains(signUp_fail)
         done()
 
-    using new User_Sign_Up_Controller(req,res),->
+    using new User_Sign_Up_Controller(req, null),->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @userSignUp()
 
@@ -197,12 +199,12 @@ describe '| controllers | User-Sign-Up-Controller', ->
   it 'userSignUp (error handling)', (done)->
     req =
       body   : { password:'aa' , 'confirm-password':'aa'}
-    res =
-      render: (jade_Page, params)->
+    render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
         params.assert_Is { viewModel:{ username: undefined,password: 'aa',confirmpassword:'aa',email: undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at ' } }
         done()
-    using new User_Sign_Up_Controller(req,res),->
+    using new User_Sign_Up_Controller(req,null),->
+      @.render_Page = render_Page
       @.webServices = 'https://aaaaaaaa.teammentor.net/'
       @userSignUp()
 
@@ -213,7 +215,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
     newEmail            ='ab'.add_5_Letters()+'@mailinator.com'
 
     #render contains the file to render and the view model object
-    render = (html,model)->
+    render_Page = (html,model)->
         model.viewModel.username.assert_Is(newUsername)
         model.viewModel.password.assert_Is(newPassword)
         model.viewModel.confirmpassword.assert_Is(newConfirmPassword)
@@ -221,9 +223,9 @@ describe '| controllers | User-Sign-Up-Controller', ->
         model.viewModel.errorMessage.assert_Is('Passwords don\'t match')
         done()
     req = body:{username:newUsername,password:newPassword,'confirm-password':newConfirmPassword, email:newEmail};
-    res = {render: render}
 
-    using new User_Sign_Up_Controller(req, res), ->
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
       @.userSignUp()
 
   it 'Persist HTML form fields on error (Password too short)',(done)->
@@ -232,7 +234,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
     newEmail            ='ab'.add_5_Letters()+'@mailinator.com'
 
     #render contains the file to render and the view model object
-    render = (html,model)->
+    render_Page = (html,model)->
       model.viewModel.username.assert_Is(newUsername)
       model.viewModel.password.assert_Is(newPassword)
       model.viewModel.confirmpassword.assert_Is(newPassword)
@@ -240,9 +242,10 @@ describe '| controllers | User-Sign-Up-Controller', ->
       model.viewModel.errorMessage.assert_Is('Password must be 8 to 256 character long')
       done()
     req = body:{username:newUsername,password:newPassword,'confirm-password':newPassword, email:newEmail};
-    res = {render: render}
 
-    using new User_Sign_Up_Controller(req, res), ->
+
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @.userSignUp()
 
@@ -253,7 +256,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
     newEmail            ='ab'.add_5_Letters()+'@mailinator.com'
 
     #render contains the file to render and the view model object
-    render = (html,model)->
+    render_Page = (html,model)->
       model.viewModel.username.assert_Is(newUsername)
       model.viewModel.password.assert_Is(newPassword)
       model.viewModel.confirmpassword.assert_Is(newPassword)
@@ -261,8 +264,9 @@ describe '| controllers | User-Sign-Up-Controller', ->
       model.viewModel.errorMessage.assert_Is('Password must contain a non-letter and a non-number character')
       done()
     req = body:{username:newUsername,password:newPassword,'confirm-password':newPassword, email:newEmail};
-    res = {render: render}
 
-    using new User_Sign_Up_Controller(req, res), ->
+
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
       @.webServices = url_WebServices
       @.userSignUp()

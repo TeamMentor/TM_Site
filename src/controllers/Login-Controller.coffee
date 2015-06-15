@@ -1,7 +1,7 @@
 
-request    = null
-Config     = null
-analytics_Service = null
+request                    = null
+analytics_Service          = null
+Jade_Service               = null
 
 loginPage                  = 'guest/login-Fail.jade'
 loginPage_Unavailable      = 'guest/login-cant-connect.jade'
@@ -15,17 +15,20 @@ loginSuccess               = 0
 errorMessage               = "TEAM Mentor is unavailable, please contact us at "
 
 class Login_Controller
-  constructor: (req, res)->
-
-    request      = require('request')
+  dependencies: ->
+    request             = require('request')
     analytics_Service   = require('../services/Analytics-Service')
+    Jade_Service        = require('../services/Jade-Service')
 
-    #@.users              = users
+  constructor: (req, res)->
+    @.dependencies()
+
     @.req                = req || {}
     @.res                = res || {}
     @.webServices        = global.config?.tm_design?.webServices
     @.analyticsService   = new analytics_Service(@.req, @.res)
-        
+    @.jade_Service       = new Jade_Service()
+
   redirectToLoginPage:  ()=>
     @.res.redirect(loginPage)
 
@@ -35,8 +38,7 @@ class Login_Controller
     if (@.req.body.username == '' or @.req.body.password == '')
         @.req.session.username = undefined;
         userViewModel.errorMessage=blank_credentials_message
-        @.res.render(loginPage,{viewModel:userViewModel})
-        return
+        return @.render_Page loginPage,{viewModel:userViewModel}
 
     username = @.req.body.username
     password = @.req.body.password
@@ -54,14 +56,14 @@ class Login_Controller
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''
         userViewModel.password=''
-        return @.res.render loginPage_Unavailable, {viewModel:userViewModel }
+        return @.render_Page loginPage_Unavailable, {viewModel:userViewModel }
 
       if not (response?.body?.d)
         logger?.info ('Could not connect with TM 3.5 server')
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''
         userViewModel.password=''
-        return @.res.render loginPage_Unavailable, {viewModel:userViewModel }
+        return @.render_Page loginPage_Unavailable, {viewModel:userViewModel }
 
       loginResponse = response.body.d
       success = loginResponse?.Login_Status
@@ -81,16 +83,20 @@ class Login_Controller
               userViewModel.errorMessage  = loginResponse.Validation_Results.first().Message
           else
               userViewModel.errorMessage  = loginResponse?.Simple_Error_Message
-          @.res.render(loginPage,{viewModel:userViewModel})
+          @.render_Page loginPage,{viewModel:userViewModel}
 
   logoutUser: ()=>
     @.req.session.username = undefined
     @.res.redirect(mainPage_no_user)
 
+  render_Page: (page, view_Model)=>
+    @.res.send @.jade_Service.render_Jade_File page, view_Model
+
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName
     token    = @.req.query.requestToken
     format   = @.req.query.format
+
     if username and token
       server = @.config.tm_35_Server
       path   = @.req.route.path.substring(1)
@@ -113,9 +119,9 @@ class Login_Controller
             @.res.writeHead(200, {'Content-Type': 'image/gif' });
             @.res.write(gifImage)
             return @.res.end()
-        @.res.render guestPage_403
+        @.res.send @.jade_Service.render_Jade_File guestPage_403
     else
-      @.res.render guestPage_403
+      @.res.send @.jade_Service.render_Jade_File  guestPage_403
 
 
 module.exports = Login_Controller
