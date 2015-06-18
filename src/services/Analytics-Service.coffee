@@ -62,6 +62,7 @@ class Analytics_Service
       lang           :@.req.header?("Accept-Language"),
       token_auth     :@.apiKey(),
       cip            :ipAddress,
+      urlref         :@.req.headers?["referer"],                         #referer HTTP header
       e_c            :eventCategory,                                     #Event category
       e_a            :@.req.url,                                         #Event action
       e_n            :eventName?,                                        #Event name
