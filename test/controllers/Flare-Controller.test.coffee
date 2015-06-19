@@ -2,7 +2,7 @@ express          = require 'express'
 supertest        = require 'supertest'
 Flare_Controller = require '../../src/controllers/Flare-Controller'
 
-describe.only '| controllers | Flare-Controller |', ->
+describe '| controllers | Flare-Controller |', ->
 
   it 'constructor',->
 
@@ -19,7 +19,7 @@ describe.only '| controllers | Flare-Controller |', ->
 
     it 'check route ', (done)->
       supertest(app)
-        .get('/api/graph-db/predicates')
+        .get('/flare')
         .end (err, response, html)->
           log response.text
           done()

@@ -37,7 +37,6 @@ class Express_Service
     @.set_Static_Route()
     @.add_Session()      # for now not using the async version of add_Session
     @.set_Views_Path()
-    @.map_Route('../routes/flare_routes')
     @.map_Route('../routes/routes')
     @
 

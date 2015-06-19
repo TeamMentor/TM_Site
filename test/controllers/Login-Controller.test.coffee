@@ -10,9 +10,6 @@ describe '| controllers | Login-Controller.test |', ->
   loginPage_Unavailable     = 'guest/login-cant-connect.jade'
   mainPage_user             = '/user/main.html'
   mainPage_no_user          = '/guest/default.html'
-  #password_sent             = '/guest/pwd-sent.html'
-  #password_reset_fail       = 'guest/pwd-reset-fail.jade'
-  #password_reset_ok         = 'guest/login-pwd-reset.html'
   blank_credentials_message = 'Invalid Username or Password'
 
   #mocked server
@@ -77,7 +74,6 @@ describe '| controllers | Login-Controller.test |', ->
 
   it 'constructor', ->
     using new Login_Controller,->
-      #@.users           .assert_Is_Array().second().username.assert_Is 'user'
       @.req             .assert_Is {}
       @.res             .assert_Is {}
 
@@ -132,10 +128,8 @@ describe '| controllers | Login-Controller.test |', ->
     newUsername  =''
     newPassword  = 'aaa'.add_5_Letters()
 
-    #render contains the file to render and the view model object
-    render_Page = (jadePage,model)->
-      #Verifying the message from the backend.
-      model.viewModel.errorMessage.assert_Is(blank_credentials_message)
+    render_Page = (jadePage,model)->                                     # render contains the file to render and the view model object
+      model.viewModel.errorMessage.assert_Is(blank_credentials_message)  # verifying the message from the backend.
       jadePage.assert_Is('guest/login-Fail.jade')
       done()
     req = body:{username:newUsername,password:newPassword},session:'';
@@ -150,10 +144,8 @@ describe '| controllers | Login-Controller.test |', ->
     newUsername         = 'aaa'.add_5_Letters()
     newPassword         =''
 
-    #render contains the file to render and the view model object
-    render_Page = (jadePage,model)->
-      model.viewModel.errorMessage.assert_Is(blank_credentials_message)
-      #Verifying the message from the backend.
+    render_Page = (jadePage,model)->                                      # render contains the file to render and the view model object
+      model.viewModel.errorMessage.assert_Is(blank_credentials_message)   # verifying the message from the backend.
       jadePage.assert_Is('guest/login-Fail.jade')
       done()
     req = body:{username:newUsername,password:newPassword},session:'';

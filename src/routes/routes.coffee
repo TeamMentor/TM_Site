@@ -2,6 +2,7 @@
 add_Routes = (express_Service)->
     Jade_Service            = require '../services/Jade-Service'
     Ga_Service              = require '../services/Analytics-Service'
+    Api_Controller          = require '../controllers/Api-Controller'
     Article_Controller      = require '../controllers/Article-Controller'
     Flare_Controller        = require '../controllers/Flare-Controller'
     Help_Controller         = require '../controllers/Help-Controller'
@@ -46,6 +47,7 @@ add_Routes = (express_Service)->
 
     options = { express_Service: express_Service }
 
+    Api_Controller                     .register_Routes app
     Search_Controller                  .register_Routes(app, express_Service)
     Article_Controller                 .register_Routes(app, express_Service)
     Flare_Controller                   .register_Routes(app                  )

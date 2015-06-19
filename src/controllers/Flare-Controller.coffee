@@ -18,11 +18,6 @@ class Flare_Controller
     @.jade_Service       = new Jade_Service()
     @.article_Controller = new Article_Controller(req,res)
 
-  api_Proxy: ()=>
-    url = @.graphDb_Server +  @.req.url
-    @.req.pipe(request(url)).pipe @.res
-
-
   render_Page: (params)=>
     path = '../TM_Flare/' + @.req.params.page + '.jade'
 
@@ -44,7 +39,6 @@ class Flare_Controller
 
 
 Flare_Controller.register_Routes =  (app)=>
-  app.use '/api'                , (req, res)-> new Flare_Controller(req, res).api_Proxy()
   app.get '/flare/article/:ref' , (req, res)-> new Flare_Controller(req, res).show_Article()
 
   app.get '/flare/:page'        , (req, res)-> new Flare_Controller(req, res).render_Page()
