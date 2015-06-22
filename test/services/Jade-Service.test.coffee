@@ -55,13 +55,20 @@ describe "| services | Jade-Service |", ()->
       @.apply_Highlight(with_Pre).assert_Is with_Pre_Highlight
 
   it 'cache_Enabled', ()->
+    _global_config = global.config                                # save it so it can be restored
+
     using new Jade_Service(),->
-      if not @.cache_Enabled()
-        @.cache_Enabled()    .assert_Is_False()
-        global.config = jade_Compilation : enabled :true
-        @.cache_Enabled()    .assert_Is_True()
-        global.config = null
-        @.cache_Enabled()    .assert_Is_False()
+      @.cache_Enabled()    .assert_Is_False()
+
+    global.config = tm_design : jade_Compilation_Enabled : true
+    using new Jade_Service(),->
+      @.cache_Enabled()    .assert_Is_True()
+
+    global.config = null
+    using new Jade_Service(),->
+      @.cache_Enabled()    .assert_Is_False()
+
+    global.config = _global_config
 
 
   it 'calculate_Compile_Path', ()->

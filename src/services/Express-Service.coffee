@@ -20,7 +20,6 @@ class Express_Service
     @.dependencies()
     @.options                 = options || {}
     @.app                     = express()
-    @.loginEnabled            = true;
     @.app.port                = @.options.port || global.config?.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
@@ -76,7 +75,7 @@ class Express_Service
     @
 
   checkAuth: (req, res, next)=>
-    if (@.loginEnabled and  req?.session?.username)
+    if req?.session?.username
       return next()
 
     if req.url is '/'

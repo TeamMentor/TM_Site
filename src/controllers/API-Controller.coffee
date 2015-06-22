@@ -20,9 +20,11 @@ class API_Controller
     url = @.graphDb_Server +  req.url
     req.pipe(request(url)).pipe res
 
+
   check_Auth: (req,res,next)=>
-    if req?.session?.username
+    if req?.session?.username and req?.url?.not_Contains '/user'
       return next()
+
     res.json API_Controller.LOGIN_FAIL_MESSAGE
 
   routes: =>

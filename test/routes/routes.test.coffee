@@ -14,10 +14,9 @@ describe '| routes | routes.test |', ()->
     tm_Server       = null
 
     expectedPaths = [ '/'
-                      '/flare/_dev/:area/:page'
-                      '/flare/_dev/all'
-                      '/flare/_dev'
+                      #'/flare/_dev/:area/:page'
                       '/flare/:page'
+                      '/flare/article/:ref'
                       '/flare'
                       '/Image/:name'
                       '/a/:ref'
@@ -99,11 +98,10 @@ describe '| routes | routes.test |', ()->
             if (item.route)
               paths.push(item.route.path)
 
-        #console.log("\nsorted paths: " + paths.sort())
+        paths.forEach (path)->
+          expectedPaths.assert_Contains(path,"Path not found: #{path}")
 
         paths.length.assert_Is(expectedPaths.length)
-        paths.forEach (path)->
-            expectedPaths.assert_Contains(path,"Path not found: #{path}")
 
     #dynamically create the tests
     runTest = (originalPath) ->

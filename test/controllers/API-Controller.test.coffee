@@ -2,7 +2,7 @@ express          = require 'express'
 supertest        = require 'supertest'
 API_Controller   = require '../../src/controllers/Api-Controller'
 
-describe.only '| controllers | Api-Controller |', ->
+describe '| controllers | Api-Controller |', ->
 
   app            = null
   api_Controller = null

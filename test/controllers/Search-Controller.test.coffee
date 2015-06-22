@@ -289,8 +289,11 @@ describe "| controllers | Search-Controller.test |", ->
     it '/user/main.html', (done)->
       using new Express_Service(),->
         @.add_Session(tmpSessionFile)
-        @.loginEnabled = false
         @.set_Views_Path()
+        @.app.use '*', (req,res,next)->
+          req.session.username = 'qa-test'
+          next()
+
         Search_Controller.register_Routes @.app, @
 
         supertest(@.app).get("/user/main.html")

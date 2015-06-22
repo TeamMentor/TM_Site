@@ -67,7 +67,7 @@ describe '| services | Session.test', ()->
                                       { id :'abc2', title: 'search b' , results:13}
                                       { id :'abc3', title: 'search c' , results:0}]}, =>
         @.users_Searches (result)=>
-          result.assert_Size_Is 6
+          result.assert_Size_Is_Bigger_Than 6
           result.fourth().assert_Is { id :'abc1', title: 'search a' , results:11}
           done()
 
