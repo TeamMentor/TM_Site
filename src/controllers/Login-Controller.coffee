@@ -2,13 +2,6 @@ request                    = null
 analytics_Service          = null
 Jade_Service               = null
 
-loginPage                  = 'guest/login-Fail.jade'
-loginPage_Unavailable      = 'guest/login-cant-connect.jade'
-guestPage_403              = 'guest/403.jade'
-password_reset_fail        = 'guest/pwd-reset-fail.jade'
-mainPage_user              = '/user/main.html'
-mainPage_no_user           = '/guest/default.html'
-password_reset_ok          = '/guest/login-pwd-reset.html'
 blank_credentials_message  = 'Invalid Username or Password'
 loginSuccess               = 0
 errorMessage               = "TEAM Mentor is unavailable, please contact us at "
@@ -28,8 +21,11 @@ class Login_Controller
     @.analyticsService   = new analytics_Service(@.req, @.res)
     @.jade_Service       = new Jade_Service()
 
-  redirectToLoginPage:  ()=>
-    @.res.redirect(loginPage)
+    @.jade_LoginPage             = 'guest/login-Fail.jade'
+    @.jade_LoginPage_Unavailable = 'guest/login-cant-connect.jade'
+    @.jade_GuestPage_403         = 'guest/403.jade'
+    @.page_MainPage_user         = '/user/main.html'
+    @.page_MainPage_no_user      = '/guest/default.html'
 
   loginUser: ()=>
     userViewModel ={username: @.req.body.username,password:'',errorMessage:''}
@@ -37,7 +33,7 @@ class Login_Controller
     if (@.req.body.username == '' or @.req.body.password == '')
         @.req.session.username = undefined;
         userViewModel.errorMessage=blank_credentials_message
-        return @.render_Page loginPage,{viewModel:userViewModel}
+        return @.render_Page @.jade_LoginPage,{viewModel:userViewModel}
 
     username = @.req.body.username
     password = @.req.body.password
@@ -48,21 +44,21 @@ class Login_Controller
               json: true,
               url: @.webServices + '/Login_Response'
 
-    request options, (error, response, body)=>
+    request options, (error, response)=>
       if error
         logger?.info ('Could not connect with TM 3.5 server')
         console.log (errorMessage)
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''
         userViewModel.password=''
-        return @.render_Page loginPage_Unavailable, {viewModel:userViewModel }
+        return @.render_Page @.jade_LoginPage_Unavailable, {viewModel:userViewModel }
 
       if not (response?.body?.d)
         logger?.info ('Could not connect with TM 3.5 server')
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''
         userViewModel.password=''
-        return @.render_Page loginPage_Unavailable, {viewModel:userViewModel }
+        return @.render_Page @.jade_LoginPage_Unavailable, {viewModel:userViewModel }
 
       loginResponse = response.body.d
       success = loginResponse?.Login_Status
@@ -74,7 +70,7 @@ class Login_Controller
           delete @.req.session.redirectUrl
           @.res.redirect(redirectUrl)
         else
-          @.res.redirect(mainPage_user)
+          @.res.redirect(@.page_MainPage_user)
       else
           @.req.session.username = undefined
           @.analyticsService.track('','User Account','Login Failed')
@@ -82,11 +78,11 @@ class Login_Controller
               userViewModel.errorMessage  = loginResponse.Validation_Results.first().Message
           else
               userViewModel.errorMessage  = loginResponse?.Simple_Error_Message
-          @.render_Page loginPage,{viewModel:userViewModel}
+          @.render_Page @.jade_LoginPage,{viewModel:userViewModel}
 
   logoutUser: ()=>
     @.req.session.username = undefined
-    @.res.redirect(mainPage_no_user)
+    @.res.redirect(@.page_MainPage_no_user)
 
   render_Page: (page, view_Model)=>
     @.res.send @.jade_Service.render_Jade_File page, view_Model
@@ -107,7 +103,7 @@ class Login_Controller
         url: url
         followRedirect: false
 
-      request options,(error, response, data)=>
+      request options,(error, response)=>
         if response.headers?.location is '/teammentor'
           @.req.session.username = username
           return @.res.redirect '/'
@@ -118,9 +114,9 @@ class Login_Controller
             @.res.writeHead(200, {'Content-Type': 'image/gif' });
             @.res.write(gifImage)
             return @.res.end()
-        @.res.send @.jade_Service.render_Jade_File guestPage_403
+        @.res.send @.jade_Service.render_Jade_File @.jade_GuestPage_403
     else
-      @.res.send @.jade_Service.render_Jade_File  guestPage_403
+      @.res.send @.jade_Service.render_Jade_File  @.jade_GuestPage_403
 
 
 module.exports = Login_Controller

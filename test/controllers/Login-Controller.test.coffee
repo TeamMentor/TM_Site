@@ -121,9 +121,6 @@ describe '| controllers | Login-Controller.test |', ->
   it 'logoutUser', (done)->
     invoke_Method "logoutUser", {} ,mainPage_no_user,done
 
-  it 'redirectToLoginPage', (done)->
-    invoke_Method "redirectToLoginPage", { } ,loginPage,done
-
   it 'invalid Username or Password (missing username)',(done)->
     newUsername  =''
     newPassword  = 'aaa'.add_5_Letters()

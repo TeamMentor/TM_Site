@@ -27,8 +27,6 @@ add_Routes = (express_Service)->
     #run custom code hook (if available)
     global.custom?.express_Routes?(app, require('express'))
 
-
-    app.get  '/user/login'     , (req, res)-> new Login_Controller(req, res).redirectToLoginPage()
     app.post '/user/login'     , (req, res)-> new Login_Controller(req, res).loginUser()
     app.get  '/user/logout'    , (req, res)-> new Login_Controller(req, res).logoutUser()
     app.post '/user/sign-up'   , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();

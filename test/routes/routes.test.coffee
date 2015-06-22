@@ -14,7 +14,6 @@ describe '| routes | routes.test |', ()->
     tm_Server       = null
 
     expectedPaths = [ '/'
-                      #'/flare/_dev/:area/:page'
                       '/flare/:page'
                       '/flare/article/:ref'
                       '/flare'
@@ -42,7 +41,6 @@ describe '| routes | routes.test |', ()->
                       '/help/article/:page*'
                       '/misc/:page'
                       '/index.html'
-                      '/user/login'
                       '/user/login'
                       '/user/logout'
                       '/_Customizations/SSO.aspx'
