@@ -1,4 +1,3 @@
-
 request                    = null
 analytics_Service          = null
 Jade_Service               = null

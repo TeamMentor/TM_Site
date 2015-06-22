@@ -2,24 +2,43 @@ request            = null
 Jade_Service       = null
 Article_Controller = null
 
-class Api_Controller
+http               = require 'http'
+Router             = null
+
+
+
+class API_Controller
+
+  @.LOGIN_FAIL_MESSAGE = { error: 'user login required'}
 
   dependencies: ->
+    #http         =
     request      = require 'request'
+    {Router}     = require 'express'
 
-  constructor: (req, res)->
+  constructor: ()->
     @.dependencies()
-    @.req                = req
-    @.res                = res
     @.graphDb_Port       = global.config?.tm_graph?.port
     @.graphDb_Server     = "http://localhost:#{@.graphDb_Port}"
 
-  api_Proxy: ()=>
-    url = @.graphDb_Server +  @.req.url
-    @.req.pipe(request(url)).pipe @.res
+  api_Proxy: (req,res)=>
+    if req.user_Logged_In()
+      url = @.graphDb_Server +  req.url
+      req.pipe(request(url)).pipe res
+    else
+      res.json { error: 'user login required'}
 
-Api_Controller.register_Routes =  (app)=>
-  app.use '/api'                , (req, res)-> new Api_Controller(req, res).api_Proxy()
-  @
+  check_Auth: (req,res,next)=>
+    if req?.session?.username
+      return next()
+    res.json API_Controller.LOGIN_FAIL_MESSAGE
 
-module.exports = Api_Controller
+  routes: =>
+    router = new Router()
+    router.use '/api', @.check_Auth, @.api_Proxy
+
+  #register_Routes:  (app)=>
+  #  app.use '/api', @.api_Proxy
+  #  @
+
+module.exports = API_Controller

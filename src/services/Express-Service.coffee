@@ -71,21 +71,22 @@ class Express_Service
     @
 
   start:()=>
-    #if process.mainModule.filename.not_Contains(['node_modules','mocha','bin','_mocha'])
     console.log("Starting 'TM Jade' Poc on port " + @app.port)
     @app.server = @app.listen(@app.port)
     @
 
-  checkAuth: (req, res, next, config)=>
-    if (@.loginEnabled and req and req.session and !req.session.username)
-      if req.url is '/'
-        res.redirect '/index.html'
-      else
-        req.session.redirectUrl = req.url
-        res.status(403)
-           .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
+  checkAuth: (req, res, next)=>
+    if (@.loginEnabled and  req?.session?.username)
+      return next()
+
+    if req.url is '/'
+      res.redirect '/index.html'
     else
-      next()
+      req.session.redirectUrl = req.url
+      res.status(403)
+         .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
+
+
 
   mappedAuth: (req)->
     data = {};
