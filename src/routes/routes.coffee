@@ -47,7 +47,7 @@ add_Routes = (express_Service)->
 
     options = { express_Service: express_Service }
 
-    new Api_Controller().register_Routes app
+    app.use new Api_Controller().routes()
 
     Search_Controller                  .register_Routes(app, express_Service)
     Article_Controller                 .register_Routes(app, express_Service)
