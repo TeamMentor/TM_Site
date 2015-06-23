@@ -25,9 +25,9 @@ class Article_Controller
   article: =>
     send_Article = (view_Model)=>
       if view_Model
-        @res.send @jade_Service.render_Jade_File(@jade_Article, view_Model)
+        @res.send @jade_Service.render_Jade_File(@.jade_Article, view_Model)
       else
-        @res.send @jade_Service.render_Jade_File(@jade_No_Article)
+        @res.send @jade_Service.render_Jade_File(@.jade_No_Article)
 
     article_Ref = @req.params.ref
 
