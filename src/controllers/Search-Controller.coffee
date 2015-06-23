@@ -18,13 +18,12 @@ class SearchController
         Express_Service    = require('../services/Express-Service')
         Jade_Service       = require('../services/Jade-Service')
         Graph_Service      = require('../services/Graph-Service')
+
         @.req                = req
         @.res                = res
         @.express_Service    = express_Service
         @.jade_Service       = new Jade_Service()
         @.graph_Service      = new Graph_Service()
-        @.jade_Page          = 'user/search.jade'
-        @.jade_Error_Page    = 'guest/404.jade'
         @.defaultUser        = 'TMContent'
         @.defaultRepo        = 'TM_Test_GraphData'
         @.defaultFolder      = '/SearchData/'
@@ -32,10 +31,18 @@ class SearchController
         @.urlPrefix          = url_Prefix
         @.searchData         = null
 
+        @.jade_Main               = 'user/main.jade'
+        @.jade_Search             = 'user/search.jade'
+        @.jade_Error_Page         = 'guest/404.jade'
+        @.jade_Search_two_columns = 'user/search-two-columns.jade'
+
 
     
-    renderPage: ()->
-        @jade_Service.render_Jade_File(@jade_Page, @searchData)
+    #renderPage: ()->
+    #    @jade_Service.render_Jade_File(@jade_Page, @searchData)
+
+    render_Page: (jade_Page,params)=>
+      @.res.send @.jade_Service.render_Jade_File jade_Page, params
 
     get_Navigation: (queryId, callback)=>
 
@@ -64,28 +71,32 @@ class SearchController
           @graph_Service.graphDataFromGraphDB target.id, filters,  (searchData)=>
             @searchData = searchData
             if not searchData
-              @res.send(@renderPage())
-              return
+              return @.render_Page @.jade_Search
+              #@res.send(@renderPage())
+
             searchData.filter_container = filters
             @searchData.breadcrumbs = navigation
             @searchData.href = target.href
+
             if filters
               @graph_Service.resolve_To_Ids filters, (results)=>
                 @searchData.activeFilter         = results.values()
                 @searchData.activeFilter.ids     = (value.id for value in results.values())
                 @searchData.activeFilter.titles  = (value.title for value in results.values())
                 @searchData.activeFilter.filters = filters
-                if (@searchData.results?)
-                  @res.send(@renderPage())
+                if (@.searchData.results?)
+                  return @.render_Page @.jade_Search, @.searchData
+                  #@res.send(@renderPage())
                 else
                   logger?.info {Error:'There are no results that match the search.',queryId: queryId, filters:filters}
-                  @res.send @jade_Service.render_Jade_File(@.jade_Error_Page,{loggedIn:@.req.session?.username isnt undefined})
+                  return @.render_Page @.jade_Error_Page,{loggedIn:@.req.session?.username isnt undefined}
             else
-              if (@searchData.results?)
-                @res.send(@renderPage())
-              else
-                logger?.info {Error:'There are no results that match the search.',queryId: queryId, filters:filters}
-                @res.send @jade_Service.render_Jade_File(@.jade_Error_Page,{loggedIn:@.req.session?.username isnt undefined})
+              if (@.searchData.results?)
+                return @.render_Page @.jade_Search, @.searchData
+                #@res.send(@renderPage())
+
+              logger?.info {Error:'There are no results that match the search.',queryId: queryId, filters:filters}
+              return @.render_Page  @.jade_Error_Page,{loggedIn:@.req.session?.username isnt undefined}
 
     search_Via_Url: =>
       @.req.query.text = @.req.params.text
@@ -107,14 +118,14 @@ class SearchController
 
       logger?.info {user: @.req.session?.username, action:'search', target: target, filters:filters}
 
-      jade_Page = 'user/search-two-columns.jade'
+      #jade_Page = 'user/search-two-columns.jade'
+
 
       @graph_Service.query_From_Text_Search target,  (query_Id)=>
         query_Id = query_Id?.remove '"'
         @graph_Service.graphDataFromGraphDB query_Id, filters,  (searchData)=>
           if not searchData
-            @res.send @jade_Service.render_Jade_File(jade_Page, {})
-            return
+            return @.render_Page  @.jade_Search_two_columns, {}
 
           searchData.text         =  target
           searchData.href         = "/search?text=#{target?.url_Encode()}&filters="
@@ -127,7 +138,7 @@ class SearchController
           else
             @graph_Service.search_Log_Empty_Search @.req.session?.username , target, =>
               searchData.no_Results = true
-              @res.send @jade_Service.render_Jade_File(jade_Page, searchData)
+              @.render_Page @.jade_Search_two_columns, searchData
             return
 
           if filters
@@ -136,9 +147,9 @@ class SearchController
               searchData.activeFilter.ids     = (value.id for value in results.values())
               searchData.activeFilter.titles  = (value.title for value in results.values())
               searchData.activeFilter.filters = filters
-              @res.send @jade_Service.render_Jade_File(jade_Page, searchData)
+              @.render_Page @.jade_Search_two_columns, searchData
           else
-            @res.send @jade_Service.render_Jade_File(jade_Page, searchData)
+            @.render_Page @.jade_Search_two_columns, searchData
 
 
     show_Root_Query: ()=>
@@ -147,10 +158,10 @@ class SearchController
         @.showSearchFromGraph()
 
     showMainAppView: =>
-        jadePage  = 'user/main.jade'  # relative to the /views folder
 
+        #jadePage  = 'user/main.jade'
         @.express_Service.session_Service.user_Data @.req.session, (user_Data)=>
-          @.res.send @jade_Service.render_Jade_File(jadePage, user_Data)
+          @.render_Page @.jade_Main, user_Data
 
 SearchController.register_Routes = (app, expressService) ->
 

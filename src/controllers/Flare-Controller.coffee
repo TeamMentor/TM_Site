@@ -37,24 +37,12 @@ class Flare_Controller
       @.loginUser()
 
 
-#../TM_Flare/article-new-window-view.jade
-
-
-
 Flare_Controller.register_Routes =  (app)=>
   flare_Controller = new Flare_Controller()
   app.get  '/flare/article/:ref' , flare_Controller.show_Article
   app.post '/flare/user/login'   , flare_Controller.user_Login
   app.get  '/flare/:page'        , flare_Controller.render_Page
   app.get  '/flare'              , (req, res)-> res.redirect '/flare/index'
-
-
-  #app.get '/flare/_dev'              , (req, res)->  res.redirect '/flare/_dev/all'
-  #app.get '/flare/_dev/:area/:page'  , (req, res)->  res.send preCompiler.render_Jade_File '../TM_Flare/' + req.params.area + '/' + req.params.page + '.jade'
-  #app.get '/flare/_dev/all'          , (req, res)->  res.send preCompiler.render_Jade_File '../TM_Flare/index.jade'
-  #app.get '/flare/:page'             , (req, res)->  res.send preCompiler.render_Jade_File '../TM_Flare/' + req.params.page + '.jade'
-
-
   @
 
 module.exports = Flare_Controller

@@ -11,6 +11,7 @@ class API_Controller
     request      = require 'request'
     {Router}     = require 'express'
 
+
   constructor: ()->
     @.dependencies()
     @.graphDb_Port       = global.config?.tm_graph?.port
