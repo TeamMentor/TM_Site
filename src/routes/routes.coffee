@@ -45,11 +45,13 @@ add_Routes = (express_Service)->
 
     options = { express_Service: express_Service }
 
-    app.use new API_Controller().routes()
+    app.use new API_Controller(  ).routes()
+    app.use '/flare', new Flare_Controller().routes()
+
 
     Search_Controller                  .register_Routes(app, express_Service)
     Article_Controller                 .register_Routes(app, express_Service)
-    Flare_Controller                   .register_Routes(app                  )
+
     Pwd_Reset_Controller               .register_Routes(app                  )
     Help_Controller                    .register_Routes(app                  )
     Misc_Controller                    .register_Routes(app                  )

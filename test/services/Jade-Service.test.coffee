@@ -1,7 +1,4 @@
 require 'fluentnode'
-#fs           = require 'fs'
-#path         = require 'path'
-#{expect}     = require "chai"
 Jade_Service = require '../../src/services/Jade-Service'
 
 describe "| services | Jade-Service |", ()->
@@ -32,19 +29,11 @@ describe "| services | Jade-Service |", ()->
   it 'constructor', ()->
     using new Jade_Service(),->
       @.assert_Is_Object()
-
-      #@.target_Folder .assert_Is_String()
-      #@.repo_Path     .folder_Name().replace(/-/g,'_').lower().assert_Is('tm_4_0_design') # in appveyor this is tm-4-0-design
-      #@.mixins_Folder .folder_Name().assert_Is('_mixins')
-      #@.mixin_Extends .assert_Is("..#{path.sep}_layouts#{path.sep}page_clean")
-
       @.apply_Highlight         .assert_Is_Function()
       @.calculate_Compile_Path  .assert_Is_Function()
       @.cache_Enabled           .assert_Is_Function()
       @.compile_JadeFile_To_Disk.assert_Is_Function()
       @.render_Jade_File        .assert_Is_Function()
-      #@.render_Mixin           .assert_Is_Function()
-      #@.target_Folder          .assert_Is(@.config.jade_Compilation)
 
   it 'apply_Highlight', ->
     no_Pre             = '<b>aaaa</b>'

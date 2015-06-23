@@ -1,15 +1,19 @@
 request            = null
-Jade_Service       = null
 Article_Controller = null
+Jade_Service       = null
 Login_Controller   = null
+Search_Controller  = null
+Router             = null
 
 class Flare_Controller
 
   dependencies: ->
     request            = require 'request'
-    Jade_Service       = require '../services/Jade-Service'
     Article_Controller = require './Article-Controller'
+    Jade_Service       = require '../services/Jade-Service'
     Login_Controller   = require './Login-Controller'
+    Search_Controller  = require './Search-Controller'
+    {Router}           = require 'express'
 
   constructor: ()->
     @.dependencies()
@@ -27,6 +31,17 @@ class Flare_Controller
       @.jade_Article = '../TM_Flare/article-new-window-view.jade'
       @.article()
 
+  navigate: (req,res)=>
+    #req.params.page = 'navigate'
+    using new Search_Controller(req,res),->
+
+      @.jade_Main               = '../TM_Flare/navigate.jade' # 'user/main.jade'
+      @.jade_Search             = '../TM_Flare/navigate.jade' # 'user/search.jade'
+      @.jade_Error_Page         = '../TM_Flare/error-page.jade' # 'guest/404.jade'
+      @.jade_Search_two_columns = '../TM_Flare/navigate.jade' # 'user/search-two-columns.jade'
+      @.show_Root_Query()
+      #@.render_Page req,res
+
   user_Login: (req, res)=>
     using new Login_Controller(req,res), ->
       @.jade_LoginPage             = '../TM_Flare/get-started.jade'
@@ -36,13 +51,17 @@ class Flare_Controller
       @.page_MainPage_no_user      = '/flare/index'
       @.loginUser()
 
+  routes: ()=>
+    using new Router(), ->
+      flare_Controller = new Flare_Controller()
+      @.get  '/article/:ref' , flare_Controller.show_Article
+      @.post '/flare/user/login'   , flare_Controller.user_Login
+      @.get  '/navigate'           , flare_Controller.navigate
+      @.get  '/:page'        , flare_Controller.render_Page
+      @.get  '/'              , (req, res)-> res.redirect '/flare/index'
+      @
 
-Flare_Controller.register_Routes =  (app)=>
-  flare_Controller = new Flare_Controller()
-  app.get  '/flare/article/:ref' , flare_Controller.show_Article
-  app.post '/flare/user/login'   , flare_Controller.user_Login
-  app.get  '/flare/:page'        , flare_Controller.render_Page
-  app.get  '/flare'              , (req, res)-> res.redirect '/flare/index'
-  @
+
+
 
 module.exports = Flare_Controller

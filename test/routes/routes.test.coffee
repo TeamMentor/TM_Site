@@ -12,10 +12,12 @@ describe '| routes | routes.test |', ()->
     express_Service = null
     app             = null
     tm_Server       = null
+    global_Config   = null
 
     expectedPaths = [ '/'
                       '/flare/:page'
                       '/flare/article/:ref'
+                      '/flare/user/login'
                       '/flare'
                       '/Image/:name'
                       '/a/:ref'
@@ -70,9 +72,9 @@ describe '| routes | routes.test |', ()->
       app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
       app_35_Server.listen(random_Port)
 
+      global_Config = global.config
       global.config.tm_design.webServices = url_Mocked_3_5_Server
-
-      #log global.config
+      global.config.tm_design.jade_Compilation_Enabled = true
 
       options =
         logging_Enabled : false
@@ -85,6 +87,7 @@ describe '| routes | routes.test |', ()->
 
     after ()->
       app.server.close()
+      global.config = global_Config
       #express_Service.logging_Service.restore_Console()
 
 
@@ -115,7 +118,7 @@ describe '| routes | routes.test |', ()->
 
       expectedStatus = 200;
       expectedStatus = 302 if ['','deploy', 'poc'                                 ].contains(path.split('/').second().lower())
-      expectedStatus = 302 if ['/flare','/flare/_dev','/flare/main-app-view','/user/login',
+      expectedStatus = 302 if ['/flare','/flare/_dev','/flare/main-app-view',
                                '/user/logout','/pocaaaaa','/teamMentor'           ].contains(path)
 
       expectedStatus = 403 if ['a','article','articles','show'                    ].contains(path.split('/').second().lower())
@@ -124,7 +127,8 @@ describe '| routes | routes.test |', ()->
       expectedStatus = 404 if ['/aaaaa','/Image/:name'                            ].contains(path)
       expectedStatus = 500 if ['/error'                                           ].contains(path)
 
-      postRequest = ['/user/pwd_reset','/user/sign-up'                            ].contains(path)
+      postRequest = ['/user/pwd_reset','/user/sign-up' , '/user/login',
+                    '/flare/user/login'                                           ].contains(path)
 
       testName = "[#{expectedStatus}] #{originalPath}" + (if(path != originalPath) then "  (#{path})" else  "")
 
