@@ -41,13 +41,11 @@ class Flare_Controller
       @.show_Root_Query()
       #@.render_Page req,res
 
-  showSearchFromGraph: (req,res)=>
+  show_Navigate: (req,res)=>
     using new Search_Controller(req,res),->
       @.urlPrefix               = 'flare/navigate'
-      #@.jade_Main               = '../TM_Flare/navigate.jade' # 'user/main.jade'
       @.jade_Search             = '../TM_Flare/navigate.jade' # 'user/search.jade'
-      #@.jade_Error_Page         = '../TM_Flare/error-page.jade' # 'guest/404.jade'
-      #@.jade_Search_two_columns = '../TM_Flare/navigate.jade' # 'user/search-two-columns.jade'
+      @.jade_Error_Page         = '../TM_Flare/error-page.jade' # 'guest/404.jade'
       @.showSearchFromGraph()
 
   user_Search: (req,res)=>
@@ -72,8 +70,8 @@ class Flare_Controller
       @.post '/user/login'                , flare_Controller.user_Login
       @.get  '/user/search'               , flare_Controller.user_Search
       @.get  '/navigate'                  , flare_Controller.navigate
-      @.get  '/navigate/:queryId'         , flare_Controller.showSearchFromGraph
-      @.get  '/navigate/:queryId/:filters', flare_Controller.showSearchFromGraph
+      @.get  '/navigate/:queryId'         , flare_Controller.show_Navigate
+      @.get  '/navigate/:queryId/:filters', flare_Controller.show_Navigate
       @.get  '/:page'                     , flare_Controller.render_Page
       @.get  '/'                          , (req, res)-> res.redirect '/flare/index'
       @
