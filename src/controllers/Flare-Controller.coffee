@@ -32,7 +32,6 @@ class Flare_Controller
       @.article()
 
   navigate: (req,res)=>
-    #req.params.page = 'navigate'
     using new Search_Controller(req,res),->
       @.urlPrefix               = 'flare/navigate'
       @.jade_Main               = '../TM_Flare/navigate.jade' # 'user/main.jade'
@@ -45,11 +44,16 @@ class Flare_Controller
   showSearchFromGraph: (req,res)=>
     using new Search_Controller(req,res),->
       @.urlPrefix               = 'flare/navigate'
-      @.jade_Main               = '../TM_Flare/navigate.jade' # 'user/main.jade'
+      #@.jade_Main               = '../TM_Flare/navigate.jade' # 'user/main.jade'
       @.jade_Search             = '../TM_Flare/navigate.jade' # 'user/search.jade'
-      @.jade_Error_Page         = '../TM_Flare/error-page.jade' # 'guest/404.jade'
-      @.jade_Search_two_columns = '../TM_Flare/navigate.jade' # 'user/search-two-columns.jade'
+      #@.jade_Error_Page         = '../TM_Flare/error-page.jade' # 'guest/404.jade'
+      #@.jade_Search_two_columns = '../TM_Flare/navigate.jade' # 'user/search-two-columns.jade'
       @.showSearchFromGraph()
+
+  user_Search: (req,res)=>
+    using new Search_Controller(req,res),->
+      @.jade_Search_two_columns = '../TM_Flare/navigate.jade' # 'user/search-two-columns.jade'
+      @.search()
 
   user_Login: (req, res)=>
     using new Login_Controller(req,res), ->
@@ -65,7 +69,8 @@ class Flare_Controller
       flare_Controller = new Flare_Controller()
       @.get  '/article/:ref'              , flare_Controller.show_Article
       @.get  '/article/:ref/:title'       , flare_Controller.show_Article
-      @.post '/flare/user/login'          , flare_Controller.user_Login
+      @.post '/user/login'                , flare_Controller.user_Login
+      @.get  '/user/search'               , flare_Controller.user_Search
       @.get  '/navigate'                  , flare_Controller.navigate
       @.get  '/navigate/:queryId'         , flare_Controller.showSearchFromGraph
       @.get  '/navigate/:queryId/:filters', flare_Controller.showSearchFromGraph

@@ -115,7 +115,6 @@ class SearchController
       target  = @.req.query?.text
       filters = @.fix_Filters @.req.query?.filters?.substring(1)
 
-
       logger?.info {user: @.req.session?.username, action:'search', target: target, filters:filters}
 
       #jade_Page = 'user/search-two-columns.jade'
@@ -125,13 +124,12 @@ class SearchController
         query_Id = query_Id?.remove '"'
         @graph_Service.graphDataFromGraphDB query_Id, filters,  (searchData)=>
           if not searchData
-            return @.render_Page  @.jade_Search_two_columns, {}
+            return @.render_Page  @.jade_Search_two_columns, { no_Results : true , text: target}
 
           searchData.text         =  target
           searchData.href         = "/search?text=#{target?.url_Encode()}&filters="
 
           @.req.session.user_Searches ?= []
-
           if searchData?.id
             user_Search = { id: searchData.id, title: searchData.title, results: searchData.results.size(), username: @.req.session.username }
             @.req.session.user_Searches.push user_Search
