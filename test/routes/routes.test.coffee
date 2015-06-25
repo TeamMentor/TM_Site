@@ -17,8 +17,13 @@ describe '| routes | routes.test |', ()->
     expectedPaths = [ '/'
                       '/flare/:page'
                       '/flare/article/:ref'
+                      '/flare/article/:ref/:title'
+                      '/flare/navigate'
+                      '/flare/navigate/:queryId'
+                      '/flare/navigate/:queryId/:filters'
                       '/flare/user/login'
-                      '/flare'
+                      '/flare/user/search'
+                      '/flare/'
                       '/Image/:name'
                       '/a/:ref'
                       '/article/:ref/:guid'
@@ -95,12 +100,21 @@ describe '| routes | routes.test |', ()->
         paths = []
         routes = app._router.stack;
 
-        routes.forEach (item)->
-            if (item.route)
-              paths.push(item.route.path)
+        for item in routes
+          if (item.route)                                                  # add the routes added directly
+            paths.push(item.route.path)
+          else
+            if item.handle.stack                                           # add the routes added via Route()
+              root_Path = item.regexp.str().after('/^\\').before('\\/?(?') # hack to get the root path (which only seems to be avaiable as an regexp)
+              for subitem in item.handle.stack
+                if subitem.route
+                  paths.push root_Path + subitem.route.path
 
-        paths.forEach (path)->
+        for path in paths
           expectedPaths.assert_Contains(path,"Path not found: #{path}")
+
+        for path in expectedPaths
+          paths.assert_Contains(path,"Path not found: #{path}")
 
         paths.length.assert_Is(expectedPaths.length)
 
@@ -109,8 +123,8 @@ describe '| routes | routes.test |', ()->
       path = originalPath.replace(':version','flare')
                          .replace(':area/:page','help/index')
                          .replace(':file/:mixin', 'globals/tm-support-email')
-                         #.replace(':area','help')
                          .replace(':page','default')
+                         .replace(':name','aaaaa')
                          .replace(':queryId','AAAA')
                          .replace(':filters','BBBB')
                          .replace('*','aaaaa')
@@ -118,13 +132,13 @@ describe '| routes | routes.test |', ()->
 
       expectedStatus = 200;
       expectedStatus = 302 if ['','deploy', 'poc'                                 ].contains(path.split('/').second().lower())
-      expectedStatus = 302 if ['/flare','/flare/_dev','/flare/main-app-view',
+      expectedStatus = 302 if ['/flare/','/flare/_dev','/flare/main-app-view',
                                '/user/logout','/pocaaaaa','/teamMentor'           ].contains(path)
 
       expectedStatus = 403 if ['a','article','articles','show'                    ].contains(path.split('/').second().lower())
       expectedStatus = 403 if ['/user/main.html', '/search', '/search/:text'      ].contains(path)
       expectedStatus = 403 if path is '/teamMentor/open/:guid'
-      expectedStatus = 404 if ['/aaaaa','/Image/:name'                            ].contains(path)
+      expectedStatus = 404 if ['/aaaaa','/Image/aaaaa'                            ].contains(path)
       expectedStatus = 500 if ['/error'                                           ].contains(path)
 
       postRequest = ['/user/pwd_reset','/user/sign-up' , '/user/login',

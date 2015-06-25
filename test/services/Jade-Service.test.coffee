@@ -46,6 +46,7 @@ describe "| services | Jade-Service |", ()->
   it 'cache_Enabled', ()->
     _global_config = global.config                                # save it so it can be restored
 
+    global.config = tm_design : jade_Compilation_Enabled : false
     using new Jade_Service(),->
       @.cache_Enabled()    .assert_Is_False()
 

@@ -2,7 +2,7 @@ express          = require 'express'
 supertest        = require 'supertest'
 Flare_Controller = require '../../src/controllers/Flare-Controller'
 
-describe.only '| controllers | Flare-Controller |', ->
+describe '| controllers | Flare-Controller |', ->
 
   it 'constructor',->
 
@@ -15,7 +15,7 @@ describe.only '| controllers | Flare-Controller |', ->
 
     before ->
       app  = new express()
-      Flare_Controller.register_Routes(app)
+      app.use new Flare_Controller().routes()
 
     it 'check route ', (done)->
       supertest(app)
