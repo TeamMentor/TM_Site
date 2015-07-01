@@ -2,6 +2,7 @@
 add_Routes = (express_Service)->
     Jade_Service            = require '../services/Jade-Service'
     Ga_Service              = require '../services/Analytics-Service'
+    Angular_Controller      = require '../controllers/Angular-Controller'
     API_Controller          = require '../controllers/API-Controller'
     Article_Controller      = require '../controllers/Article-Controller'
     Flare_Controller        = require '../controllers/Flare-Controller'
@@ -45,7 +46,8 @@ add_Routes = (express_Service)->
 
     options = { express_Service: express_Service }
 
-    app.use new API_Controller(  ).routes()
+    app.use new API_Controller().routes()
+    app.use '/angular',new Angular_Controller().routes()
     app.use '/flare', new Flare_Controller().routes()
 
 

@@ -5,8 +5,6 @@ require 'jade'       # 350 ms
 require 'highlight'  # 25  ms
 require 'cheerio'    # 5   ms
 
-
-
 if process.cwd().contains('.dist')
   root_Folder = process.cwd().path_Combine '../../../'
 else
