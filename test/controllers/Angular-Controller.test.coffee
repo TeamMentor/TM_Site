@@ -4,7 +4,7 @@ express            = require 'express'
 Angular_Controller = require '../../src/controllers/Angular-Controller'
 supertest          = require 'supertest'
 
-describe.only '| controllers | Angular-Controller |', ->
+describe '| controllers | Angular-Controller |', ->
 
   it 'constructor',->
     using new Angular_Controller(), ->
@@ -12,7 +12,7 @@ describe.only '| controllers | Angular-Controller |', ->
 
   it 'routes', ->
     using new Angular_Controller(), ->
-      @.routes().stack.size().assert_Is 1
+      @.routes().stack.size().assert_Is 2
 
   describe '| Using express',->
 
