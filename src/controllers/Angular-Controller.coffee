@@ -17,8 +17,6 @@ class Angular_Controller
   constructor: ()->
     @.dependencies()
     @.path_To_Static = root_Folder.path_Combine 'code/TM_Angular/build'
-    log @.path_To_Static
-    log @.path_To_Static.folder_Exists()
 
   send_Search_Auto_Complete: (term, res)->
     console.time 'search'
@@ -44,13 +42,23 @@ class Angular_Controller
         @.send_Search_Auto_Complete term, res
 
 
+  get_Compiled_Jade: (req,res)=>
+    jade = require('jade');
+    file = req.params.file
+    area = req.params.area
+    path = root_Folder.path_Combine "/code/TM_Jade/#{area}/#{file}.jade"
+    if path.file_Not_Exists()
+      return res.json { error: 'jade file not found' }
 
-
+    options = {name : "jade_#{file}" }
+    jsFunctionString = jade.compileFileClient(path, options);
+    res.send jsFunctionString
 
   routes: ()=>
     router = new Router()
     router.use express['static'](@.path_To_Static);
     router.get '/api/auto-complete', @.get_Search_Auto_Complete
+    router.get '/jade/:area/:file', @.get_Compiled_Jade
     return router
 
 module.exports = Angular_Controller
