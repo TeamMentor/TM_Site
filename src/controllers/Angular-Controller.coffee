@@ -16,14 +16,15 @@ class Angular_Controller
 
   constructor: ()->
     @.dependencies()
-    @.path_To_Static = root_Folder.path_Combine '.dist/code/TM_Angular/public'
-
+    @.path_To_Static = root_Folder.path_Combine 'code/TM_Angular/build'
+    log @.path_To_Static
+    log @.path_To_Static.folder_Exists()
 
   send_Search_Auto_Complete: (term, res)->
     console.time 'search'
     matches = {}
     for match in article_Titles when match.title.lower().contains(term.lower())
-      matches[term + ' - ' + match.title] = match.id
+      matches[match.title] = match.id
       if (matches.keys().size() > 15)
         break
     log matches.keys().size()
