@@ -15,6 +15,8 @@ describe '| routes | routes.test |', ()->
     global_Config   = null
 
     expectedPaths = [ '/'
+                      '/angular/api/auto-complete'
+                      '/angular/jade/:area/:file'
                       '/flare/:page'
                       '/flare/article/:ref'
                       '/flare/article/:ref/:title'
