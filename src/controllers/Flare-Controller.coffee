@@ -1,8 +1,9 @@
 request            = null
 Article_Controller = null
-Jade_Service       = null
+Help_Controller    = null
 Login_Controller   = null
 Search_Controller  = null
+Jade_Service       = null
 Router             = null
 
 class Flare_Controller
@@ -10,9 +11,10 @@ class Flare_Controller
   dependencies: ->
     request            = require 'request'
     Article_Controller = require './Article-Controller'
-    Jade_Service       = require '../services/Jade-Service'
+    Help_Controller    = require './Help-Controller'
     Login_Controller   = require './Login-Controller'
     Search_Controller  = require './Search-Controller'
+    Jade_Service       = require '../services/Jade-Service'
     {Router}           = require 'express'
 
   constructor: ()->
@@ -41,6 +43,17 @@ class Flare_Controller
       @.show_Root_Query()
       #@.render_Page req,res
 
+  show_Help: (req,res)=>
+    using new Help_Controller(req,res),->
+      @.jade_Help_Index  = '../TM_Flare/misc/help-index.jade'
+      @.jade_Help_Page   = '../TM_Flare/misc/help-page.jade'
+      #@.jade_No_Image    = '../TM_Flare/guest/404.jade'
+      if req.params.page
+        @.show_Help_Page()
+      else
+        @.show_Index_Page()
+
+
   show_Navigate: (req,res)=>
     using new Search_Controller(req,res),->
       @.urlPrefix               = 'flare/navigate'
@@ -67,11 +80,13 @@ class Flare_Controller
       flare_Controller = new Flare_Controller()
       @.get  '/article/:ref'              , flare_Controller.show_Article
       @.get  '/article/:ref/:title'       , flare_Controller.show_Article
-      @.post '/user/login'                , flare_Controller.user_Login
-      @.get  '/user/search'               , flare_Controller.user_Search
+      @.get  '/help-index'                , flare_Controller.show_Help
+      @.get  '/help/:page*'               , flare_Controller.show_Help
       @.get  '/navigate'                  , flare_Controller.navigate
       @.get  '/navigate/:queryId'         , flare_Controller.show_Navigate
       @.get  '/navigate/:queryId/:filters', flare_Controller.show_Navigate
+      @.post '/user/login'                , flare_Controller.user_Login
+      @.get  '/user/search'               , flare_Controller.user_Search
       @.get  '/:page'                     , flare_Controller.render_Page
       @.get  '/'                          , (req, res)-> res.redirect '/flare/index'
       @
