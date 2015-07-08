@@ -2,6 +2,7 @@ bodyParser      = require 'body-parser'
 express         = require 'express'
 request         = require 'superagent'
 supertest       = require 'supertest'
+cheerio         = require 'cheerio'
 
 Express_Service = require '../../src/services/Express-Service'
 
@@ -65,17 +66,28 @@ describe '| routes | routes.test |', ()->
                       '/poc/filters:page/:filters'
                       '/poc/:page'
                       '/*']
-
     before ()->
-
+      username =''
       random_Port           = 10000.random().add(10000)
-      url_Mocked_3_5_Server = "http://localhost:#{random_Port}/webServices"
       app_35_Server         = new express().use(bodyParser.json())
+      url_Mocked_3_5_Server = "http://localhost:#{random_Port}/webServices"
       app_35_Server.post '/webServices/SendPasswordReminder', (req,res)->res.status(201).send {}      # status(200) would trigger a redirect
       app_35_Server.post '/webServices/Login_Response'      ,
         (req,res)->
-          logged_In = if req.body.username is 'user' then 0 else 1
-          res.status(200).send { d: { Login_Status : logged_In } }
+          username = req.body.username
+          logged_In = if req.body.username is 'user' or 'expired' then 0 else 1
+          res.status(200).send { d: { Login_Status : logged_In,Token:'00000000' } }
+
+      app_35_Server.post '/webServices/Current_User'      ,
+        (req,res)->
+          PasswordExpired = if username is 'expired' then true else false
+          console.log('Expired ' + PasswordExpired)
+          res.status(200).send {d:{"UserId":1982362528,"CSRF_Token":"115362661","PasswordExpired":PasswordExpired}}
+
+      app_35_Server.post '/webServices/GetCurrentUserPasswordExpiryUrl'      ,
+        (req,res)->
+          res.status(200).send {"d":"/passwordReset/user/00000000-0000-0000-0000-000000000000"}
+
       app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
       app_35_Server.listen(random_Port)
 
@@ -135,7 +147,7 @@ describe '| routes | routes.test |', ()->
       expectedStatus = 200;
       expectedStatus = 302 if ['','deploy', 'poc'                                 ].contains(path.split('/').second().lower())
       expectedStatus = 302 if ['/flare/','/flare/_dev','/flare/main-app-view',
-                               '/user/logout','/pocaaaaa','/teamMentor'           ].contains(path)
+                               '/user/logout','/pocaaaaa','/teamMentor','/user/login','/flare/user/login'           ].contains(path)
 
       expectedStatus = 403 if ['a','article','articles','show'                    ].contains(path.split('/').second().lower())
       expectedStatus = 403 if ['/user/main.html', '/search', '/search/:text'      ].contains(path)
@@ -156,9 +168,9 @@ describe '| routes | routes.test |', ()->
           done()
         if (postRequest)
           postData = {}
-          postData ={username:"test",password:"somevalues",email:"someemail"} if path == '/user/sign-up'
+          postData ={username:"test",password:"somevalues",email:"someemail"}
           tm_Server.post(path).send(postData)
-                        .expect(expectedStatus,checkResponse)
+                              .expect(expectedStatus,checkResponse)
         else
           tm_Server.get(path)
                    .expect(expectedStatus,checkResponse)
@@ -197,3 +209,21 @@ describe '| routes | routes.test |', ()->
               get404 agent, loggedOutText, ->
                 get500 agent, loggedOutText, ->
                   done()
+
+    it 'Issue_894_PasswordReset - User should be challenged to change his/her password if it was expired', (done)->
+      agent = request.agent()
+      baseUrl = 'http://localhost:' + app.port
+
+      postData = {username:'expired', password:'a'}
+      userLogin = (agent, postData, next)-> agent.post(baseUrl + '/user/login').send(postData).end (err,res)->
+        $ = cheerio.load(res.text)
+        $('h4').html().assert_Is 'Reset your password'
+        $('p') .html().assert_Is 'Your password should be at least 8 characters long. It should have at least one of each of the following: uppercase and lowercase letters, number and special character.'
+        next()
+
+      userLogout = (next)-> agent.get(baseUrl + '/user/logout').end (err,res)->
+        res.status.assert_Is(200)
+        next()
+      userLogin agent,postData, ->
+        userLogout ->
+          done()
