@@ -19,7 +19,6 @@ class Angular_Controller
     @.path_To_Static = root_Folder.path_Combine 'code/TM_Angular/build'
 
   send_Search_Auto_Complete: (term, res)->
-    #console.time 'search'
     matches = {}
     for match in autoComplete_Data when match.title.lower().contains(term.lower())
       matches[match.title] = match.id
