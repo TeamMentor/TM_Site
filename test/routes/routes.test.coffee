@@ -20,6 +20,8 @@ describe '| routes | routes.test |', ()->
                       '/flare/:page'
                       '/flare/article/:ref'
                       '/flare/article/:ref/:title'
+                      '/flare/help-index'
+                      '/flare/help/:page*'
                       '/flare/navigate'
                       '/flare/navigate/:queryId'
                       '/flare/navigate/:queryId/:filters'
