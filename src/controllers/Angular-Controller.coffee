@@ -47,7 +47,11 @@ class Angular_Controller
     jade = require('jade');
     file = req.params.file
     area = req.params.area
-    path = root_Folder.path_Combine "/code/TM_Jade/#{area}/#{file}.jade"
+    path = if (area)
+              root_Folder.path_Combine "/code/TM_Flare/#{area}/#{file}.jade"
+           else
+              root_Folder.path_Combine "/code/TM_Flare/#{file}.jade"
+
     if path.file_Not_Exists()
       return res.json { error: 'jade file not found' }
 
@@ -59,6 +63,7 @@ class Angular_Controller
     router = new Router()
     router.use express['static'](@.path_To_Static);
     router.get '/api/auto-complete', @.get_Search_Auto_Complete
+    router.get '/jade/:file'       , @.get_Compiled_Jade
     router.get '/jade/:area/:file', @.get_Compiled_Jade
     return router
 
