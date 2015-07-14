@@ -24,7 +24,12 @@ class Flare_Controller
 
 
   render_Page: (req,res, next, params)=>
-    path = '../TM_Flare/' + req.params.page + '.jade'
+    area = req.params.area
+    page = req.params.page
+    if area
+      path = "../TM_Flare/#{req.params.area}/#{req.params.page}.jade"
+    else
+      path = "../TM_Flare/#{req.params.page}.jade"
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, params
 
@@ -88,6 +93,7 @@ class Flare_Controller
       @.post '/user/login'                , flare_Controller.user_Login
       @.get  '/user/search'               , flare_Controller.user_Search
       @.get  '/:page'                     , flare_Controller.render_Page
+      @.get  '/:area/:page'               , flare_Controller.render_Page
       @.get  '/'                          , (req, res)-> res.redirect '/flare/index'
       @
 
