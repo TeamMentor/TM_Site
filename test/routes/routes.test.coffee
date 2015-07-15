@@ -12,13 +12,22 @@ describe '| routes | routes.test |', ()->
     express_Service = null
     app             = null
     tm_Server       = null
+    global_Config   = null
 
     expectedPaths = [ '/'
-                      '/flare/_dev/:area/:page'
-                      '/flare/_dev/all'
-                      '/flare/_dev'
+                      '/angular/api/auto-complete'
+                      '/angular/jade/:area/:file'
                       '/flare/:page'
-                      '/flare'
+                      '/flare/article/:ref'
+                      '/flare/article/:ref/:title'
+                      '/flare/help-index'
+                      '/flare/help/:page*'
+                      '/flare/navigate'
+                      '/flare/navigate/:queryId'
+                      '/flare/navigate/:queryId/:filters'
+                      '/flare/user/login'
+                      '/flare/user/search'
+                      '/flare/'
                       '/Image/:name'
                       '/a/:ref'
                       '/article/:ref/:guid'
@@ -43,7 +52,6 @@ describe '| routes | routes.test |', ()->
                       '/help/article/:page*'
                       '/misc/:page'
                       '/index.html'
-                      '/user/login'
                       '/user/login'
                       '/user/logout'
                       '/_Customizations/SSO.aspx'
@@ -73,9 +81,9 @@ describe '| routes | routes.test |', ()->
       app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
       app_35_Server.listen(random_Port)
 
+      global_Config = global.config
       global.config.tm_design.webServices = url_Mocked_3_5_Server
-
-      #log global.config
+      global.config.tm_design.jade_Compilation_Enabled = true
 
       options =
         logging_Enabled : false
@@ -88,6 +96,7 @@ describe '| routes | routes.test |', ()->
 
     after ()->
       app.server.close()
+      global.config = global_Config
       #express_Service.logging_Service.restore_Console()
 
 
@@ -95,23 +104,31 @@ describe '| routes | routes.test |', ()->
         paths = []
         routes = app._router.stack;
 
-        routes.forEach (item)->
-            if (item.route)
-              paths.push(item.route.path)
+        for item in routes
+          if (item.route)                                                  # add the routes added directly
+            paths.push(item.route.path)
+          else
+            if item.handle.stack                                           # add the routes added via Route()
+              root_Path = item.regexp.str().after('/^\\').before('\\/?(?') # hack to get the root path (which only seems to be avaiable as an regexp)
+              for subitem in item.handle.stack
+                if subitem.route
+                  paths.push root_Path + subitem.route.path
 
-        #console.log("\nsorted paths: " + paths.sort())
+        for path in paths
+          expectedPaths.assert_Contains(path,"Path not found: #{path}")
+
+        for path in expectedPaths
+          paths.assert_Contains(path,"Path not found: #{path}")
 
         paths.length.assert_Is(expectedPaths.length)
-        paths.forEach (path)->
-            expectedPaths.assert_Contains(path,"Path not found: #{path}")
 
     #dynamically create the tests
     runTest = (originalPath) ->
       path = originalPath.replace(':version','flare')
                          .replace(':area/:page','help/index')
                          .replace(':file/:mixin', 'globals/tm-support-email')
-                         #.replace(':area','help')
                          .replace(':page','default')
+                         .replace(':name','aaaaa')
                          .replace(':queryId','AAAA')
                          .replace(':filters','BBBB')
                          .replace('*','aaaaa')
@@ -119,16 +136,17 @@ describe '| routes | routes.test |', ()->
 
       expectedStatus = 200;
       expectedStatus = 302 if ['','deploy', 'poc'                                 ].contains(path.split('/').second().lower())
-      expectedStatus = 302 if ['/flare','/flare/_dev','/flare/main-app-view','/user/login',
+      expectedStatus = 302 if ['/flare/','/flare/_dev','/flare/main-app-view',
                                '/user/logout','/pocaaaaa','/teamMentor'           ].contains(path)
 
       expectedStatus = 403 if ['a','article','articles','show'                    ].contains(path.split('/').second().lower())
       expectedStatus = 403 if ['/user/main.html', '/search', '/search/:text'      ].contains(path)
       expectedStatus = 403 if path is '/teamMentor/open/:guid'
-      expectedStatus = 404 if ['/aaaaa','/Image/:name'                            ].contains(path)
+      expectedStatus = 404 if ['/aaaaa','/Image/aaaaa'                            ].contains(path)
       expectedStatus = 500 if ['/error'                                           ].contains(path)
 
-      postRequest = ['/user/pwd_reset','/user/sign-up'                            ].contains(path)
+      postRequest = ['/user/pwd_reset','/user/sign-up' , '/user/login',
+                    '/flare/user/login'                                           ].contains(path)
 
       testName = "[#{expectedStatus}] #{originalPath}" + (if(path != originalPath) then "  (#{path})" else  "")
 

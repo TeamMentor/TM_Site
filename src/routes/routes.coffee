@@ -2,7 +2,10 @@
 add_Routes = (express_Service)->
     Jade_Service            = require '../services/Jade-Service'
     Ga_Service              = require '../services/Analytics-Service'
+    Angular_Controller      = require '../controllers/Angular-Controller'
+    API_Controller          = require '../controllers/API-Controller'
     Article_Controller      = require '../controllers/Article-Controller'
+    Flare_Controller        = require '../controllers/Flare-Controller'
     Help_Controller         = require '../controllers/Help-Controller'
     Jade_Controller         = require '../controllers/Jade-Controller'
     Login_Controller        = require '../controllers/Login-Controller'
@@ -25,8 +28,6 @@ add_Routes = (express_Service)->
     #run custom code hook (if available)
     global.custom?.express_Routes?(app, require('express'))
 
-
-    app.get  '/user/login'     , (req, res)-> new Login_Controller(req, res).redirectToLoginPage()
     app.post '/user/login'     , (req, res)-> new Login_Controller(req, res).loginUser()
     app.get  '/user/logout'    , (req, res)-> new Login_Controller(req, res).logoutUser()
     app.post '/user/sign-up'   , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();
@@ -45,8 +46,14 @@ add_Routes = (express_Service)->
 
     options = { express_Service: express_Service }
 
+    app.use new API_Controller().routes()
+    app.use '/angular',new Angular_Controller().routes()
+    app.use '/flare', new Flare_Controller().routes()
+
+
     Search_Controller                  .register_Routes(app, express_Service)
     Article_Controller                 .register_Routes(app, express_Service)
+
     Pwd_Reset_Controller               .register_Routes(app                  )
     Help_Controller                    .register_Routes(app                  )
     Misc_Controller                    .register_Routes(app                  )

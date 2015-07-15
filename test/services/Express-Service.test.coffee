@@ -11,7 +11,6 @@ describe '| services | Express-Service.test', ()->
     using new Express_Service(),->
       @.app        .assert_Is_Function() # can't seem to have define type(yet)
       @.app.port   .assert_Is_Number()
-      @loginEnabled.assert_Is_True()
       assert_Is_Null @.session_Service
       assert_Is_Null @.logging_Service
 
@@ -19,7 +18,6 @@ describe '| services | Express-Service.test', ()->
     using new Express_Service().setup(),->
       @.app.constructor.name.assert_Is 'EventEmitter'
       @.app.port       .assert_Is 1337
-      @loginEnabled.assert_Is_True()
 
       console.log       .assert_Is global.info
       @.logging_Service.assert_Is_Object()
@@ -95,8 +93,8 @@ describe '| services | Express-Service.test', ()->
     before ->
       expressService = new Express_Service()
 
-    it 'checkAuth (all null)', (done)->
-      expressService.checkAuth(null,null, done,null)
+    #it 'checkAuth (all null)', (done)->
+    #  expressService.checkAuth(null,null, done,null)
 
     it 'checkAuth (valid session username)', (done)->
       next = ()->

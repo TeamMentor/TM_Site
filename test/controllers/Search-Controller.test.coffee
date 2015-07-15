@@ -18,25 +18,32 @@ describe "| controllers | Search-Controller.test |", ->
 
       using new Search_Controller(req, res), ->
         assert_Is_Null @.searchData
-        @.req               .assert_Is req
-        @.res               .assert_Is res
-        @.jade_Page         .assert_Is 'user/search.jade'
-        @.jade_Service      .assert_Instance_Of require('../../src/services/Jade-Service')
-        @.graph_Service     .assert_Instance_Of require('../../src/services/Graph-Service')
-        @.defaultUser       .assert_Is 'TMContent'
-        @.defaultRepo       .assert_Is 'TM_Test_GraphData'
-        @.defaultFolder     .assert_Is '/SearchData/'
-        @.defaultDataFile   .assert_Is 'Data_Validation'
-        @.urlPrefix         .assert_Is 'show'
+        @.req                    .assert_Is req
+        @.res                    .assert_Is res
+        @.jade_Service           .assert_Instance_Of require('../../src/services/Jade-Service')
+        @.graph_Service          .assert_Instance_Of require('../../src/services/Graph-Service')
+        @.defaultUser            .assert_Is 'TMContent'
+        @.defaultRepo            .assert_Is 'TM_Test_GraphData'
+        @.defaultFolder          .assert_Is '/SearchData/'
+        @.defaultDataFile        .assert_Is 'Data_Validation'
+        @.urlPrefix              .assert_Is 'show'
+
+        @.jade_Main              .assert_Is 'user/main.jade'
+        @.jade_Search            .assert_Is 'user/search.jade'
+        @.jade_Error_Page        .assert_Is 'guest/404.jade'
+        @.jade_Search_two_columns.assert_Is 'user/search-two-columns.jade'
+
         assert_Is_Null @.searchData
 
-  it 'renderPage', (done)->
-    using new Search_Controller(),->
-      html = @.renderPage()
-      $    = cheerio.load html
-      $('#results' ).html().assert_Is_String()
-      $('#articles').html().assert_Is_String()
-      done()
+  it 'render_Page', (done)->
+    res =
+      send : (html)->
+        $ = cheerio.load html
+        $('#results' ).html().assert_Is_String()
+        $('#articles').html().assert_Is_String()
+        done()
+    using new Search_Controller(null, res),->
+      @.render_Page @.jade_Search
 
   it 'get_Navigation', (done)->
     using new Search_Controller(),->
@@ -289,8 +296,11 @@ describe "| controllers | Search-Controller.test |", ->
     it '/user/main.html', (done)->
       using new Express_Service(),->
         @.add_Session(tmpSessionFile)
-        @.loginEnabled = false
         @.set_Views_Path()
+        @.app.use '*', (req,res,next)->
+          req.session.username = 'qa-test'
+          next()
+
         Search_Controller.register_Routes @.app, @
 
         supertest(@.app).get("/user/main.html")

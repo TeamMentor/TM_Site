@@ -1,7 +1,4 @@
 require 'fluentnode'
-#fs           = require 'fs'
-#path         = require 'path'
-#{expect}     = require "chai"
 Jade_Service = require '../../src/services/Jade-Service'
 
 describe "| services | Jade-Service |", ()->
@@ -32,19 +29,11 @@ describe "| services | Jade-Service |", ()->
   it 'constructor', ()->
     using new Jade_Service(),->
       @.assert_Is_Object()
-
-      #@.target_Folder .assert_Is_String()
-      #@.repo_Path     .folder_Name().replace(/-/g,'_').lower().assert_Is('tm_4_0_design') # in appveyor this is tm-4-0-design
-      #@.mixins_Folder .folder_Name().assert_Is('_mixins')
-      #@.mixin_Extends .assert_Is("..#{path.sep}_layouts#{path.sep}page_clean")
-
       @.apply_Highlight         .assert_Is_Function()
       @.calculate_Compile_Path  .assert_Is_Function()
       @.cache_Enabled           .assert_Is_Function()
       @.compile_JadeFile_To_Disk.assert_Is_Function()
       @.render_Jade_File        .assert_Is_Function()
-      #@.render_Mixin           .assert_Is_Function()
-      #@.target_Folder          .assert_Is(@.config.jade_Compilation)
 
   it 'apply_Highlight', ->
     no_Pre             = '<b>aaaa</b>'
@@ -55,13 +44,21 @@ describe "| services | Jade-Service |", ()->
       @.apply_Highlight(with_Pre).assert_Is with_Pre_Highlight
 
   it 'cache_Enabled', ()->
+    _global_config = global.config                                # save it so it can be restored
+
+    global.config = tm_design : jade_Compilation_Enabled : false
     using new Jade_Service(),->
-      if not @.cache_Enabled()
-        @.cache_Enabled()    .assert_Is_False()
-        global.config = jade_Compilation : enabled :true
-        @.cache_Enabled()    .assert_Is_True()
-        global.config = null
-        @.cache_Enabled()    .assert_Is_False()
+      @.cache_Enabled()    .assert_Is_False()
+
+    global.config = tm_design : jade_Compilation_Enabled : true
+    using new Jade_Service(),->
+      @.cache_Enabled()    .assert_Is_True()
+
+    global.config = null
+    using new Jade_Service(),->
+      @.cache_Enabled()    .assert_Is_False()
+
+    global.config = _global_config
 
 
   it 'calculate_Compile_Path', ()->
