@@ -24,11 +24,15 @@ class User_Sign_Up_Controller
     @.req                = req || {}
     @.res                = res || {}
 
-    @.webServices        = @.options.webServices || global.config?.tm_design?.webServices
-    @.login              = new Login_Controller(req,res)
-    @.analyticsService   = new Analytics_Service(@.req, @.res)
-    @.jade_Service       = new Jade_Service()
-
+    @.webServices             = @.options.webServices || global.config?.tm_design?.webServices
+    @.login                   = new Login_Controller(req,res)
+    @.analyticsService        = new Analytics_Service(@.req, @.res)
+    @.jade_Service            = new Jade_Service()
+    #Hubspot information
+    @.HubspotEnabled          = global.config?.tm_design?.HubspotEnabled
+    @.HubspotPostUrl          = global.config?.tm_design?.HubspotEndpoint
+    @.HubspotLeadSource       = global.config?.tm_design?.HubspotLeadSource
+    @.HubspotLeadSourceDetail = global.config?.tm_design?.HubspotLeadSourceDetail
   userSignUp: ()=>
     userViewModel =
                     {
@@ -36,6 +40,12 @@ class User_Sign_Up_Controller
                         password        : @.req.body.password,
                         confirmpassword : @.req.body['confirm-password']
                         email           : @.req.body.email
+                        firstname       : @.req.body.firstName,
+                        lastname        : @.req.body.lastName,
+                        company         : @.req.body.company,
+                        title           : @.req.body.title,
+                        country         : @.req.body.country,
+                        state           : @.req.body.state
                         errorMessage    :''
                     }
 
@@ -46,9 +56,15 @@ class User_Sign_Up_Controller
 
     newUser =
               {
-                  username : @.req.body.username,
-                  password : @.req.body.password,
-                  email    : @.req.body.email
+                  username  : @.req.body.username,
+                  password  : @.req.body.password,
+                  email     : @.req.body.email,
+                  firstname : @.req.body.firstName,
+                  lastname  : @.req.body.lastName,
+                  company   : @.req.body.company,
+                  title     : @.req.body.title,
+                  country   : @.req.body.country,
+                  state     : @.req.body.state
               }
     options = {
                 method: 'post',
@@ -77,11 +93,12 @@ class User_Sign_Up_Controller
         return @.render_Page signUpPage_Unavailable, {viewModel: errorMessage : 'An error occurred' }
 
       message = ''
-
       if (signUpResponse.Signup_Status is 0)
         @.analyticsService.track('','User Account',"Signup Success #{@.req.body.username}")
+        #Submit Hubspot form if it is enabled
+        if @.HubspotEnabled
+          @.submitHubspotForm()
         return @.login.loginUser()
-
       if (signUpResponse.Validation_Results.empty())
         message = signUpResponse.Simple_Error_Message || 'An error occurred'
       else
@@ -93,5 +110,45 @@ class User_Sign_Up_Controller
   render_Page: (jade_Page,params)=>
     @.res.send @.jade_Service.render_Jade_File jade_Page, params
 
+  loadSecretFile:() ->
+    if (process.cwd().path_Combine('../../config/SiteData_TM/secrets.json').file_Exists())
+      secrets = process.cwd().path_Combine('../../config/SiteData_TM/secrets.json').load_Json()
+      return secrets
+    else
+      return ''
+
+  submitHubspotForm:() ->
+    #Load Hubspot secrets
+    secret = @.loadSecretFile()
+    if(secret?.HubspotSiteId && secret?.HubspotFormGuid)
+      siteId      = secret.HubspotSiteId
+      formguid    = secret?.HubspotFormGuid
+      baseUrl     = @.HubspotPostUrl
+      postUrl     = "#{baseUrl}#{siteId}/#{formguid}"
+      options = {
+        method: 'post',
+        form:{
+          firstname             :@.req.body.firstName,
+          lastname              :@.req.body.lastName,
+          email                 :@.req.body.email,
+          company               :@.req.body.company,
+          title                 :@.req.body.title,
+          country               :@.req.body.country,
+          state__c              :@.req.body.state,
+          leadsource            :@.HubspotLeadSource,
+          lead_source_detail__c :@.HubspotLeadSourceDetail
+        },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        url: postUrl
+      };
+      request options, (error, response)=>
+        if(error  or response?.statusCode isnt 204)
+          logger?.info ('Hubspot submit error ' + error)
+        else
+          logger?.info ('Information sent to Hubspot')
+    else
+      logger?.info ('Hubspot is enabled but secret data is not configured.')
 
 module.exports = User_Sign_Up_Controller

@@ -174,9 +174,14 @@ describe '| controllers | User-Sign-Up-Controller', ->
             done()
 
   it 'userSignUp (good values)', (done)->
-    user = "tm_ut_".add_5_Random_Letters()
-    pwd  = "**tm**pwd**"
-    email = "#{user}@teammentor.net"
+    user      = "tm_ut_".add_5_Random_Letters()
+    pwd       = "**tm**pwd**"
+    email     = "#{user}@teammentor.net"
+    Firstname = "Foo"
+    Lastname  = "Bar"
+    Company   = "Temp"
+    Title     = "Engineering"
+    State     = "California"
 
     invoke_UserSignUp user,pwd,email,mainPage_user,'', ->
       invoke_LoginUser user,pwd,mainPage_user, ->
