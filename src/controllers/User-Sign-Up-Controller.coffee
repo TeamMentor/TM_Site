@@ -5,6 +5,7 @@ errorMessage            = "TEAM Mentor is unavailable, please contact us at "
 request                 = null
 Config                  = null
 Analytics_Service       = null
+Hubspot_Service         = null
 Jade_Service            = null
 Login_Controller        = null
 request                 = null
@@ -16,6 +17,7 @@ class User_Sign_Up_Controller
     request = require('request')
     Login_Controller     = require('../controllers/Login-Controller')
     Analytics_Service    = require('../services/Analytics-Service')
+    Hubspot_Service      = require('../services/Hubspot-Service.coffee')
     Jade_Service         = require('../services/Jade-Service')
 
   constructor: (req, res, options)->
@@ -27,12 +29,8 @@ class User_Sign_Up_Controller
     @.webServices             = @.options.webServices || global.config?.tm_design?.webServices
     @.login                   = new Login_Controller(req,res)
     @.analyticsService        = new Analytics_Service(@.req, @.res)
+    @.hubspotService          = new Hubspot_Service(@.req,@.res)
     @.jade_Service            = new Jade_Service()
-    #Hubspot information
-    @.HubspotEnabled          = global.config?.tm_design?.HubspotEnabled
-    @.HubspotPostUrl          = global.config?.tm_design?.HubspotEndpoint
-    @.HubspotLeadSource       = global.config?.tm_design?.HubspotLeadSource
-    @.HubspotLeadSourceDetail = global.config?.tm_design?.HubspotLeadSourceDetail
   userSignUp: ()=>
     userViewModel =
                     {
@@ -95,9 +93,7 @@ class User_Sign_Up_Controller
       message = ''
       if (signUpResponse.Signup_Status is 0)
         @.analyticsService.track('','User Account',"Signup Success #{@.req.body.username}")
-        #Submit Hubspot form if it is enabled
-        if @.HubspotEnabled
-          @.submitHubspotForm()
+        @.hubspotService.submitHubspotForm()
         return @.login.loginUser()
       if (signUpResponse.Validation_Results.empty())
         message = signUpResponse.Simple_Error_Message || 'An error occurred'
@@ -116,39 +112,4 @@ class User_Sign_Up_Controller
       return secrets
     else
       return ''
-
-  submitHubspotForm:() ->
-    #Load Hubspot secrets
-    secret = @.loadSecretFile()
-    if(secret?.HubspotSiteId && secret?.HubspotFormGuid)
-      siteId      = secret.HubspotSiteId
-      formguid    = secret?.HubspotFormGuid
-      baseUrl     = @.HubspotPostUrl
-      postUrl     = "#{baseUrl}#{siteId}/#{formguid}"
-      options = {
-        method: 'post',
-        form:{
-          firstname             :@.req.body.firstName,
-          lastname              :@.req.body.lastName,
-          email                 :@.req.body.email,
-          company               :@.req.body.company,
-          title                 :@.req.body.title,
-          country               :@.req.body.country,
-          state__c              :@.req.body.state,
-          leadsource            :@.HubspotLeadSource,
-          lead_source_detail__c :@.HubspotLeadSourceDetail
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        url: postUrl
-      };
-      request options, (error, response)=>
-        if(error  or response?.statusCode isnt 204)
-          logger?.info ('Hubspot submit error ' + error)
-        else
-          logger?.info ('Information sent to Hubspot')
-    else
-      logger?.info ('Hubspot is enabled but secret data is not configured.')
-
 module.exports = User_Sign_Up_Controller
