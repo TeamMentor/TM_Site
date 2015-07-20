@@ -27,6 +27,18 @@ class Login_Controller
     @.page_MainPage_user         = '/user/main.html'
     @.page_MainPage_no_user      = '/guest/default.html'
 
+  json_Mode: ()=>
+    @.render_Page = (page, data)=>
+      data.page = page
+      @.res.json data
+    @.res.redirect = (page)=>
+      data =
+        page     : page
+        viewModel: {}
+        result   : 'OK'
+      @.res.json data
+    @
+
   loginUser: ()=>
     userViewModel ={username: @.req.body.username,password:'',errorMessage:''}
 

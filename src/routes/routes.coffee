@@ -29,6 +29,7 @@ add_Routes = (express_Service)->
     global.custom?.express_Routes?(app, require('express'))
 
     app.post '/user/login'     , (req, res)-> new Login_Controller(req, res).loginUser()
+    app.post '/json/user/login', (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
     app.get  '/user/logout'    , (req, res)-> new Login_Controller(req, res).logoutUser()
     app.post '/user/sign-up'   , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();
 
