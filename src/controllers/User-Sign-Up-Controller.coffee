@@ -120,10 +120,4 @@ class User_Sign_Up_Controller
   render_Page: (jade_Page,params)=>
     @.res.send @.jade_Service.render_Jade_File jade_Page, params
 
-  loadSecretFile:() ->
-    if (process.cwd().path_Combine('../../config/SiteData_TM/secrets.json').file_Exists())
-      secrets = process.cwd().path_Combine('../../config/SiteData_TM/secrets.json').load_Json()
-      return secrets
-    else
-      return ''
 module.exports = User_Sign_Up_Controller
