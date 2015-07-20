@@ -98,7 +98,7 @@ class Angular_Controller
     router = new Router()
     router.use express['static'](@.path_To_Static);
     router.get '/flare/:file'          , @.get_Static_Html
-    router.get '/user/:file'           , @.get_Static_Html_User
+    router.get '/user/:file*'          , @.get_Static_Html_User
     router.get '/guest/:file'          , @.get_Static_Html_Guest
     router.get '/api/auto-complete'    , @.get_Search_Auto_Complete
     router.get '/jade/:file'           , @.get_Compiled_Jade

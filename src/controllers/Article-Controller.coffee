@@ -29,23 +29,11 @@ class Article_Controller
       else
         @res.send @jade_Service.render_Jade_File(@.jade_No_Article)
 
-    article_Ref = @req.params.ref
+    @.resolve_Article_Ref @req.params.ref, send_Article
 
-    @.graphService.article article_Ref, (data)=>
-      article_Id = data.article_Id
-      if article_Id
-        @graphService.node_Data article_Id, (article_Data)=>
-           using new Analytics_Service(@.req, @.res), ->
-             @.track(article_Data?.title,article_Id)
-            title      = article_Data?.title
-            technology = article_Data?.technology
-            type       = article_Data?.type
-            phase       = article_Data?.phase
-            @graphService.article_Html article_Id, (data)=>
-              @recentArticles_Add article_Id, title
-              send_Article { id : article_Id, title: title,  article_Html: data?.html, technology: technology, type: type, phase: phase}
-      else
-        send_Article null
+  article_Json: =>
+    @.resolve_Article_Ref @req.params.ref, (view_Model)=>
+      @.res.json view_Model
 
   articles: =>
     @graphService.articles (articles)=>
@@ -78,6 +66,22 @@ class Article_Controller
     @.req.session.recent_Articles ?= []
     @.req.session.recent_Articles.unshift { id: id , title:title}
 
+  resolve_Article_Ref: (article_Ref, callback)=>
+    @.graphService.article article_Ref, (data)=>
+      article_Id = data.article_Id
+      if article_Id
+        @graphService.node_Data article_Id, (article_Data)=>
+          new Analytics_Service(@.req, @.res).track(article_Data?.title,article_Id)
+          title      = article_Data?.title
+          technology = article_Data?.technology
+          type       = article_Data?.type
+          phase       = article_Data?.phase
+          @graphService.article_Html article_Id, (data)=>
+            @recentArticles_Add article_Id, title
+            callback { id : article_Id, title: title,  article_Html: data?.html, technology: technology, type: type, phase: phase}
+      else
+        callback null
+
 Article_Controller.register_Routes = (app, expressService,graph_Options) ->
 
   checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res, next)
@@ -92,6 +96,7 @@ Article_Controller.register_Routes = (app, expressService,graph_Options) ->
   app.get '/article/:ref'         , checkAuth, articleController('article')
   app.get '/articles'             , checkAuth, articleController('articles')
   app.get '/teamMentor/open/:guid', checkAuth, articleController('check_Guid')
+  app.get '/json/article/:ref'    , checkAuth, articleController('article_Json')
 
 
 module.exports = Article_Controller
