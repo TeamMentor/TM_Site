@@ -53,6 +53,13 @@ class Help_Controller
     else
         @show_Content('Error fetching page from docs site','')
 
+  json_Docs_Library: =>
+    @.docs_TM_Service.getLibraryData (libraries)=>
+      @res.json libraries?.first()
+
+  json_Docs_Page: =>
+    article_Data = @.docs_TM_Service.article_Data @.page_Id()
+    @res.json { html: article_Data?.html}
 
   map_Docs_Library: (next)=>
     @.docs_TM_Service.getLibraryData (libraries)=>
@@ -116,5 +123,7 @@ Help_Controller.register_Routes =  (app)=>
   app.get '/help/article/:page*'  , (req, res)-> new Help_Controller(req, res).show_Help_Page()
   app.get '/help/:page*'          , (req, res)-> new Help_Controller(req, res).show_Help_Page()
   app.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).show_Image()
+  app.get '/json/docs/library'    , (req, res)-> new Help_Controller(req, res).json_Docs_Library()
+  app.get '/json/docs/:page'      , (req, res)-> new Help_Controller(req, res).json_Docs_Page()
 
 module.exports = Help_Controller
