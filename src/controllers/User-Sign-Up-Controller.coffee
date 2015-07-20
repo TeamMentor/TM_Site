@@ -38,32 +38,46 @@ class User_Sign_Up_Controller
                         password        : @.req.body.password,
                         confirmpassword : @.req.body['confirm-password']
                         email           : @.req.body.email
-                        firstname       : @.req.body.firstName,
-                        lastname        : @.req.body.lastName,
+                        firstname       : @.req.body.firstname,
+                        lastname        : @.req.body.lastname,
                         company         : @.req.body.company,
                         title           : @.req.body.title,
                         country         : @.req.body.country,
                         state           : @.req.body.state
                         errorMessage    :''
                     }
-
-    if (@.req.body.password != @.req.body['confirm-password'])
-        userViewModel.errorMessage = 'Passwords don\'t match'
-        @.render_Page signUp_fail,viewModel: userViewModel
-        return
-
     newUser =
               {
                   username  : @.req.body.username,
                   password  : @.req.body.password,
                   email     : @.req.body.email,
-                  firstname : @.req.body.firstName,
-                  lastname  : @.req.body.lastName,
+                  firstname : @.req.body.firstname,
+                  lastname  : @.req.body.lastname,
                   company   : @.req.body.company,
                   title     : @.req.body.title,
                   country   : @.req.body.country,
                   state     : @.req.body.state
               }
+
+    if (@.req.body.password != @.req.body['confirm-password'])
+      userViewModel.errorMessage = 'Passwords don\'t match'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+    
+
+    if(@.req.body.firstname is undefined or @.req.body.firstname =='')
+      userViewModel.errorMessage = 'First Name is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+
+    if(@.req.body.lastname is undefined or @.req.body.lastname =='')
+      userViewModel.errorMessage = 'Last Name is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+      
+      
+    if(@.req.body.country is undefined or @.req.body.country =='')
+      userViewModel.errorMessage = 'Country is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+      
+
     options = {
                 method: 'post',
                 body: {newUser: newUser},
