@@ -61,16 +61,23 @@ class Graph_Service
       callback null
       return
 
+    url_Titles  = "#{@server}/search/query_titles"
     url_Convert = "#{@server}/convert/to_ids/#{text.url_Encode()}"
-    url_Search = "#{@server}/search/query_from_text_search/#{text.url_Encode()}"
+    url_Search  = "#{@server}/search/query_from_text_search/#{text.url_Encode()}"
 
-    url_Convert.GET_Json (json)->
-      mapping = json[json.keys?().first()]
-      if mapping?.id?.contains 'query-'
-        callback mapping.id
-      else
-        url_Search.GET (search_Id)->
-          callback search_Id
+    url_Titles.GET_Json (mappings)->                  # check if there is a direct match with a query
+      text_Lower = text.lower()
+      for mapping in mappings
+        if mapping.title.lower() is text_Lower
+          return callback mapping.id
+
+      url_Convert.GET_Json (json)->                  # check if a query search found it
+        mapping = json[json.keys?().first()]
+        if mapping?.id?.contains 'query-'
+          callback mapping.id
+        else
+          url_Search.GET (search_Id)->               # finally search by keyword
+            callback search_Id
 
   node_Data: (id, callback)=>
     if not id
