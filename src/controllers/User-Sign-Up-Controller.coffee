@@ -58,7 +58,7 @@ class User_Sign_Up_Controller
                   country   : @.req.body.country,
                   state     : @.req.body.state
               }
-  
+
     if (@.req.body.password != @.req.body['confirm-password'])
       userViewModel.errorMessage = 'Passwords don\'t match'
       return @.render_Page signUp_fail,viewModel: userViewModel

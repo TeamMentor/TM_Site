@@ -10,10 +10,10 @@ class Analytics_Service
     @.dependencies()
     @.req               = req
     @.res               = res
-    @.analitycsEnabled  = global.config?.analitycsEnabled
-    @.analitycsSiteId   = global.config?.analitycsSiteId
-    @.analitycsTrackUrl = global.config?.analitycsTrackUrl
-
+    @.analitycsEnabled  = global.config?.piwikAnalytics?.analitycsEnabled
+    @.analitycsSiteId   = global.config?.piwikAnalytics?.analitycsSiteId
+    @.analitycsTrackUrl = global.config?.piwikAnalytics?.analitycsTrackUrl
+    @.apiKey            = global.config?.piwikAnalytics?.secrets?.analyticsApiKey
   setup:() =>
     if @.analitycsEnabled
       'Analytics is enabled'.log()
@@ -34,13 +34,6 @@ class Analytics_Service
       ipAddr = @.req.connection.remoteAddress
     return ipAddr
 
-  apiKey:() ->
-    if (process.cwd().path_Combine('../Site_Data/secrets.json').file_Exists())
-      secrets = process.cwd().path_Combine('../Site_Data/secrets.json').load_Json()
-      return secrets.AnalyticsApiKey
-    else
-      return ''
-
   trackUrl: (url) ->
     piwik?.track (url)
 
@@ -60,7 +53,7 @@ class Analytics_Service
       apiv           :1,                                                  #Api version always set to 1
       ua             :@.req.header?("User-Agent"),
       lang           :@.req.header?("Accept-Language"),
-      token_auth     :@.apiKey(),
+      token_auth     :@.apiKey,
       cip            :ipAddress,
       urlref         :@.req.headers?["referer"],                         #referer HTTP header
       e_c            :eventCategory,                                     #Event category
