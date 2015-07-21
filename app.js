@@ -19,11 +19,14 @@ log('------------global.config---------------')
 log(global.config);
 log('----------------------------------------')
 
-var Express_Service   = require('./src/services/Express-Service');
-var Analytics_Service = require('./src/services/Analytics-Service');
+var Express_Service    = require('./src/services/Express-Service');
+var Analytics_Service  = require('./src/services/Analytics-Service');
+var Hubspot_Service    = require('./src/services/Hubspot-Service');
 new Express_Service()
       .setup()
       .start();
 new Analytics_Service()
+      .setup();
+new Hubspot_Service()
       .setup();
 

@@ -5,6 +5,7 @@ errorMessage            = "TEAM Mentor is unavailable, please contact us at "
 request                 = null
 Config                  = null
 Analytics_Service       = null
+Hubspot_Service         = null
 Jade_Service            = null
 Login_Controller        = null
 request                 = null
@@ -16,6 +17,7 @@ class User_Sign_Up_Controller
     request = require('request')
     Login_Controller     = require('../controllers/Login-Controller')
     Analytics_Service    = require('../services/Analytics-Service')
+    Hubspot_Service      = require('../services/Hubspot-Service.coffee')
     Jade_Service         = require('../services/Jade-Service')
 
   constructor: (req, res, options)->
@@ -24,11 +26,11 @@ class User_Sign_Up_Controller
     @.req                = req || {}
     @.res                = res || {}
 
-    @.webServices        = @.options.webServices || global.config?.tm_design?.webServices
-    @.login              = new Login_Controller(req,res)
-    @.analyticsService   = new Analytics_Service(@.req, @.res)
-    @.jade_Service       = new Jade_Service()
-
+    @.webServices             = @.options.webServices || global.config?.tm_design?.webServices
+    @.login                   = new Login_Controller(req,res)
+    @.analyticsService        = new Analytics_Service(@.req, @.res)
+    @.hubspotService          = new Hubspot_Service(@.req,@.res)
+    @.jade_Service            = new Jade_Service()
   userSignUp: ()=>
     userViewModel =
                     {
@@ -36,20 +38,46 @@ class User_Sign_Up_Controller
                         password        : @.req.body.password,
                         confirmpassword : @.req.body['confirm-password']
                         email           : @.req.body.email
+                        firstname       : @.req.body.firstname,
+                        lastname        : @.req.body.lastname,
+                        company         : @.req.body.company,
+                        title           : @.req.body.title,
+                        country         : @.req.body.country,
+                        state           : @.req.body.state
                         errorMessage    :''
                     }
-
-    if (@.req.body.password != @.req.body['confirm-password'])
-        userViewModel.errorMessage = 'Passwords don\'t match'
-        @.render_Page signUp_fail,viewModel: userViewModel
-        return
-
     newUser =
               {
-                  username : @.req.body.username,
-                  password : @.req.body.password,
-                  email    : @.req.body.email
+                  username  : @.req.body.username,
+                  password  : @.req.body.password,
+                  email     : @.req.body.email,
+                  firstname : @.req.body.firstname,
+                  lastname  : @.req.body.lastname,
+                  company   : @.req.body.company,
+                  title     : @.req.body.title,
+                  country   : @.req.body.country,
+                  state     : @.req.body.state
               }
+
+    if (@.req.body.password != @.req.body['confirm-password'])
+      userViewModel.errorMessage = 'Passwords don\'t match'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+    
+
+    if(@.req.body.firstname is undefined or @.req.body.firstname =='')
+      userViewModel.errorMessage = 'First Name is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+
+    if(@.req.body.lastname is undefined or @.req.body.lastname =='')
+      userViewModel.errorMessage = 'Last Name is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+      
+      
+    if(@.req.body.country is undefined or @.req.body.country =='')
+      userViewModel.errorMessage = 'Country is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+      
+
     options = {
                 method: 'post',
                 body: {newUser: newUser},
@@ -77,11 +105,10 @@ class User_Sign_Up_Controller
         return @.render_Page signUpPage_Unavailable, {viewModel: errorMessage : 'An error occurred' }
 
       message = ''
-
       if (signUpResponse.Signup_Status is 0)
         @.analyticsService.track('','User Account',"Signup Success #{@.req.body.username}")
+        @.hubspotService.submitHubspotForm()
         return @.login.loginUser()
-
       if (signUpResponse.Validation_Results.empty())
         message = signUpResponse.Simple_Error_Message || 'An error occurred'
       else
@@ -92,6 +119,5 @@ class User_Sign_Up_Controller
 
   render_Page: (jade_Page,params)=>
     @.res.send @.jade_Service.render_Jade_File jade_Page, params
-
 
 module.exports = User_Sign_Up_Controller
