@@ -83,7 +83,6 @@ describe '| routes | routes.test |', ()->
       app_35_Server.post '/webServices/Current_User'      ,
         (req,res)->
           PasswordExpired = if username is 'expired' then true else false
-          console.log('Expired ' + PasswordExpired)
           res.status(200).send {d:{"UserId":1982362528,"CSRF_Token":"115362661","PasswordExpired":PasswordExpired}}
 
       app_35_Server.post '/webServices/GetCurrentUserPasswordExpiryUrl'      ,
