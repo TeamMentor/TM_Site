@@ -1,7 +1,6 @@
 request                    = null
 analytics_Service          = null
 Jade_Service               = null
-
 blank_credentials_message  = 'Invalid Username or Password'
 loginSuccess               = 0
 errorMessage               = "TEAM Mentor is unavailable, please contact us at "
@@ -17,7 +16,8 @@ class Login_Controller
 
     @.req                = req || {}
     @.res                = res || {}
-    @.webServices        = global.config?.tm_design?.webServices
+    @.webServices        = "#{global.config?.tm_design?.tm_35_Server}#{global.config?.tm_design?.webServices}"
+    @.tm_35_Server       = global.config?.tm_design?.tm_35_Server
     @.analyticsService   = new analytics_Service(@.req, @.res)
     @.jade_Service       = new Jade_Service()
 
@@ -105,10 +105,9 @@ class Login_Controller
     format   = @.req.query.format
 
     if username and token
-      server = @.config.tm_35_Server
+      server = @.tm_35_Server
       path   = @.req.route.path.substring(1)
-      url = "#{server}#{path}?username=#{username}&requestToken=#{token}"
-
+      url    = "#{server}/#{path}?username=#{username}&requestToken=#{token}"
       if (format?)
         url = url + "&format=#{format}"
       options =

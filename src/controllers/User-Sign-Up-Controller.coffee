@@ -26,7 +26,7 @@ class User_Sign_Up_Controller
     @.req                = req || {}
     @.res                = res || {}
 
-    @.webServices             = @.options.webServices || global.config?.tm_design?.webServices
+    @.webServices             = @.options.webServices ||"#{global.config?.tm_design?.tm_35_Server}#{global.config?.tm_design?.webServices}"
     @.login                   = new Login_Controller(req,res)
     @.analyticsService        = new Analytics_Service(@.req, @.res)
     @.hubspotService          = new Hubspot_Service(@.req,@.res)
@@ -58,7 +58,8 @@ class User_Sign_Up_Controller
                   country   : @.req.body.country,
                   state     : @.req.body.state
               }
-
+    console.log(@.req.body.firstname)
+    console.log(@.req.body.lastname)
     if (@.req.body.password != @.req.body['confirm-password'])
       userViewModel.errorMessage = 'Passwords don\'t match'
       return @.render_Page signUp_fail,viewModel: userViewModel

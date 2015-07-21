@@ -15,7 +15,7 @@ class Pwd_Reset_Controller
     @.req                          = req
     @.res                          = res
     @.request_Timeout              = @.options.request_Timeout || 1500
-    @.webServices                  = @.options.webServices || global.config?.tm_design?.webServices
+    @.webServices                  = @.options.webServices ||"#{global.config?.tm_design?.tm_35_Server}#{global.config?.tm_design?.webServices}"
     @.jade_loginPage_Unavailable   = 'guest/login-cant-connect.jade'
     @.jade_password_reset_fail     = 'guest/pwd-reset-fail.jade'
     @.jade_password_reset          = 'guest/pwd-reset.jade'
