@@ -26,7 +26,7 @@ class User_Sign_Up_Controller
     @.req                = req || {}
     @.res                = res || {}
 
-    @.webServices             = @.options.webServices || global.config?.tm_design?.webServices
+    @.webServices             = @.options.webServices ||"#{global.config?.tm_design?.tm_35_Server}#{global.config?.tm_design?.webServices}"
     @.login                   = new Login_Controller(req,res)
     @.analyticsService        = new Analytics_Service(@.req, @.res)
     @.hubspotService          = new Hubspot_Service(@.req,@.res)
