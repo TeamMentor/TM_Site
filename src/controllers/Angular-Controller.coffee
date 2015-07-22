@@ -67,6 +67,10 @@ class Angular_Controller
     req.params.area = '_layouts'
     @.get_Rendered_Jade req,res
 
+  get_Static_Html_Component:  (req,res)=>
+    req.params.file = 'page-component'
+    req.params.area = '_layouts'
+    @.get_Rendered_Jade req,res
 
   resolve_Jade_file: (file,area)=>
     return if (area)
@@ -100,6 +104,7 @@ class Angular_Controller
     router.get '/flare/:file'          , @.get_Static_Html
     router.get '/user/:file*'          , @.get_Static_Html_User
     router.get '/guest/:file'          , @.get_Static_Html_Guest
+    router.get '/component/:file'      , @.get_Static_Html_Component
     router.get '/api/auto-complete'    , @.get_Search_Auto_Complete
     router.get '/jade/:file'           , @.get_Compiled_Jade
     router.get '/jade/:area/:file'     , @.get_Compiled_Jade

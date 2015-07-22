@@ -25,7 +25,13 @@ class Pwd_Reset_Controller
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
+    @.okMessage                    = "If you entered a valid address, then a password reset link has been sent to your email address."
     @.jade_Service                 = new Jade_Service()
+
+  json_Mode: =>
+    @.res.redirect = => @.res.json { message: @.okMessage    , status: 'Ok'    }
+    @.render_Page  = => @.res.json { message: @.errorMessage , status: 'Failed'}
+    @
 
 
   password_Reset: ()=>
@@ -110,6 +116,8 @@ Pwd_Reset_Controller.register_Routes =  (app)=>
 
   app.post '/user/pwd_reset'                  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset()
   app.post '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Token()
-  app.get '/passwordReset/:username/:token'   , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Page()
+  app.get  '/passwordReset/:username/:token'   , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Page()
+
+  app.post '/json/user/pwd_reset'              , (req, res)-> new Pwd_Reset_Controller(req, res).json_Mode().password_Reset()
 
 module.exports = Pwd_Reset_Controller
