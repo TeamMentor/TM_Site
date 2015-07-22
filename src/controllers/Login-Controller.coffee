@@ -43,18 +43,18 @@ class Login_Controller
     userViewModel ={username: @.req.body.username,password:'',errorMessage:''}
 
     if (@.req.body.username == '' or @.req.body.password == '')
-        @.req.session.username = undefined;
-        userViewModel.errorMessage=blank_credentials_message
-        return @.render_Page @.jade_LoginPage,{viewModel:userViewModel}
+      @.req.session.username      = undefined
+      userViewModel.errorMessage  = blank_credentials_message
+      return @.render_Page @.jade_LoginPage,{viewModel:userViewModel}
 
     username = @.req.body.username
     password = @.req.body.password
 
     options =
-              method: 'post',
-              body: {username:username, password:password},
-              json: true,
-              url: @.webServices + '/Login_Response'
+      method : 'post',
+      body   : { username:username, password:password },
+      json   : true,
+      url    : "#{@.webServices}/Login_Response"
 
     request options, (error, response)=>
       if error
@@ -64,7 +64,6 @@ class Login_Controller
         userViewModel.username =''
         userViewModel.password=''
         return @.render_Page @.jade_LoginPage_Unavailable, {viewModel:userViewModel }
-
       if not (response?.body?.d)
         logger?.info ('Could not connect with TM 3.5 server')
         userViewModel.errorMessage = errorMessage
@@ -72,25 +71,32 @@ class Login_Controller
         userViewModel.password=''
         return @.render_Page @.jade_LoginPage_Unavailable, {viewModel:userViewModel }
 
-      loginResponse = response.body.d
-      success = loginResponse?.Login_Status
+      loginResponse   = response.body.d
+      success         = loginResponse?.Login_Status
       if (success == loginSuccess)
-        @.analyticsService.track('','User Account','Login Success')
-        @.req.session.username = username
-        redirectUrl =@.req.session.redirectUrl
-        if(redirectUrl? && redirectUrl.is_Local_Url())
-          delete @.req.session.redirectUrl
-          @.res.redirect(redirectUrl)
-        else
-          @.res.redirect(@.page_MainPage_user)
-      else
-          @.req.session.username = undefined
-          @.analyticsService.track('','User Account','Login Failed')
-          if (loginResponse?.Validation_Results !=null && loginResponse?.Validation_Results?.not_Empty())
-              userViewModel.errorMessage  = loginResponse.Validation_Results.first().Message
+        #If Password was expired,
+        @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
+          if(redirectUrl)
+            @.res.redirect(redirectUrl)
           else
-              userViewModel.errorMessage  = loginResponse?.Simple_Error_Message
-          @.render_Page @.jade_LoginPage,{viewModel:userViewModel}
+            @.analyticsService.track('','User Account','Login Success')
+            @.req.session.username = username
+            redirectUrl            = @.req.session.redirectUrl
+
+            if(redirectUrl?.is_Local_Url())
+              delete @.req.session.redirectUrl
+              @.res.redirect(redirectUrl)
+            else
+              @.res.redirect(@.page_MainPage_user)
+      else
+        @.req.session.username = undefined
+        @.analyticsService.track('','User Account','Login Failed')
+        if (loginResponse?.Validation_Results?.not_Empty())
+          userViewModel.errorMessage  = loginResponse.Validation_Results.first().Message
+        else
+          userViewModel.errorMessage  = loginResponse?.Simple_Error_Message
+
+        @.render_Page @.jade_LoginPage,{ viewModel:userViewModel }
 
   logoutUser: ()=>
     @.req.session.username = undefined
@@ -98,6 +104,28 @@ class Login_Controller
 
   render_Page: (page, view_Model)=>
     @.res.send @.jade_Service.render_Jade_File page, view_Model
+
+  webServiceResponse: (methodName,Token,callback)->
+    options =
+      method: 'post',
+      body: {},
+      json: true,
+      headers: {'Cookie':'Session='+Token}
+      url: @.webServices + '/' + methodName
+    request options, (error, response)=>
+      if error
+        logger?.info ('Could not connect with TM 3.5 server')
+        callback null
+      else
+        callback response?.body?.d
+
+  redirectIfPasswordExpired: (token,callback)->
+    @.webServiceResponse "Current_User",token,(userProfile)=>
+      if(userProfile?.PasswordExpired)
+        @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
+          callback url
+      else
+        callback null
 
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName
