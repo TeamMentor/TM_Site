@@ -16,9 +16,19 @@ describe '| routes | routes.test |', ()->
     global_Config   = null
 
     expectedPaths = [ '/'
+                      '/angular/flare/:file'
+                      '/angular/user/:file*'
+                      '/angular/guest/:file'
+                      '/angular/component/:file'
+                      '/angular/jade/:file'
                       '/angular/api/auto-complete'
                       '/angular/jade/:area/:file'
+                      '/angular/jade/:section/:area/:file'
+                      '/angular/jade-html/:file'
+                      '/angular/jade-html/:area/:file'
+                      '/angular/jade-html/:section/:area/:file'
                       '/flare/:page'
+                      '/flare/:area/:page'
                       '/flare/article/:ref'
                       '/flare/article/:ref/:title'
                       '/flare/help-index'
@@ -67,6 +77,11 @@ describe '| routes | routes.test |', ()->
                       '/poc/filters:page'
                       '/poc/filters:page/:filters'
                       '/poc/:page'
+                      '/json/user/login'
+                      '/json/article/:ref'
+                      '/json/user/pwd_reset'
+                      '/json/docs/library'
+                      '/json/docs/:page'
                       '/*']
     before ()->
       username =''
@@ -157,7 +172,11 @@ describe '| routes | routes.test |', ()->
       expectedStatus = 500 if ['/error'                                           ].contains(path)
 
       postRequest = ['/user/pwd_reset','/user/sign-up' , '/user/login',
-                    '/flare/user/login'                                           ].contains(path)
+                    '/flare/user/login','/json/user/login'
+                     '/json/article/AAAAA'
+                     '/json/user/pwd_reset'
+                     '/json/docs/library'
+                     '/json/docs/AAAAA'                                           ].contains(path)
 
       testName = "[#{expectedStatus}] #{originalPath}" + (if(path != originalPath) then "  (#{path})" else  "")
 

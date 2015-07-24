@@ -12,7 +12,7 @@ describe '| controllers | Angular-Controller |', ->
 
   it 'routes', ->
     using new Angular_Controller(), ->
-      @.routes().stack.size().assert_Is 3
+      @.routes().stack.size().assert_Is 12
 
   describe '| Using express',->
 
