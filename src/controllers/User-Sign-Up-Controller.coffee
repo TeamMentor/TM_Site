@@ -59,10 +59,25 @@ class User_Sign_Up_Controller
                   state     : @.req.body.state
               }
 
+    if(@.req.body.username is undefined or @.req.body.username =='')
+      userViewModel.errorMessage = 'Username is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+
+    if(@.req.body.password is undefined or @.req.body.password =='')
+      userViewModel.errorMessage = 'Password is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+
+    if(@.req.body['confirm-password'] is undefined or @.req.body['confirm-password'] =='')
+      userViewModel.errorMessage = 'Confirm password is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
+
     if (@.req.body.password != @.req.body['confirm-password'])
       userViewModel.errorMessage = 'Passwords don\'t match'
       return @.render_Page signUp_fail,viewModel: userViewModel
-    
+
+    if(@.req.body.email is undefined or @.req.body.email =='')
+      userViewModel.errorMessage = 'Email is a required field.'
+      return @.render_Page signUp_fail,viewModel: userViewModel
 
     if(@.req.body.firstname is undefined or @.req.body.firstname =='')
       userViewModel.errorMessage = 'First Name is a required field.'
