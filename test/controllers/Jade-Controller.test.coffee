@@ -7,8 +7,6 @@ describe '| controllers | Jade-Controller.test.js |', ()->
   describe 'render mixin', ->
     mixin_File   = null
     extends_File = null
-    res_Mock     = null
-    req_Mock     = null
     mixin_Name   = 'an-mixin-method'
     mixin_Code   = "mixin #{mixin_Name}\n" +
                    "  h3 static_h3 (in mixin)\n" +
@@ -18,10 +16,11 @@ describe '| controllers | Jade-Controller.test.js |', ()->
     dynamic_h2   = 'from test_'.add_5_Random_Letters()
 
     before ->
-      using new Jade_Service(),->
+      #check global values
+      using new Jade_Service(), ->
+
         mixin_File   =  @.calculate_Jade_Path '_mixins/_tmp_Mixin_'.add_5_Letters().add('.jade')
         extends_File = mixin_File.replace('.jade','_extends.jade')
-
         mixin_File   .file_Write(mixin_Code  ).assert_File_Contents(mixin_Code)
         extends_File .file_Write(extends_Code).assert_File_Contents(extends_Code)
 
@@ -49,7 +48,6 @@ describe '| controllers | Jade-Controller.test.js |', ()->
     after ->
       mixin_File.assert_File_Deleted()
       extends_File.assert_File_Deleted()
-
 
     it 'renderMixin', (done)->
       using_Jade_Controller done, ()->

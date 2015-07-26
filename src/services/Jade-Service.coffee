@@ -48,7 +48,7 @@ class JadeService
       return null
 
     calculate_Jade_Path: (jade_File)=>
-      if jade_File.file_Exists()                                    then return jade_File
+      if jade_File.file_Exists()           then return jade_File
       if jade_Folder = @.folder_Jade_Files then return jade_Folder.path_Combine(jade_File)
       return null
 
