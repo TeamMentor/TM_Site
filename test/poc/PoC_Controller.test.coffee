@@ -62,6 +62,7 @@ describe '| poc | Controller-PoC.test |' ,->
     new PoC_Controller().show_Index(req,res)
 
   it 'show_Page (good link)', (done)->
+    @.timeout 5000
     express_Service =
       session_Service:
           users_Searches: (callback) -> callback []
