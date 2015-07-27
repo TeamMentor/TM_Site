@@ -5,21 +5,26 @@ User_Sign_Up_Controller = require('../../src/controllers/User-Sign-Up-Controller
 
 describe '| controllers | User-Sign-Up-Controller', ->
 
-  signUp_fail             = "guest/sign-up-Fail.jade"
-  signUpPage_Unavailable  = 'guest/sign-up-cant-connect.jade'
-  signUp_Ok               = '/guest/sign-up-OK.html'
-  mainPage_user           = '/user/main.html'
-  text_Short_Pwd          = 'Password must be 8 to 256 character long'
-  text_Bad_Pwd            = 'Password must contain a non-letter and a non-number character'
-  text_firstName_Required = 'First Name is a required field.'
-  text_lastName_Required  = 'Last Name is a required field.'
-  text_country_Required   = 'Country is a required field.'
-  text_An_Error           = 'An error occurred'
+  signUp_fail                     = "guest/sign-up-Fail.jade"
+  signUpPage_Unavailable          = 'guest/sign-up-cant-connect.jade'
+  signUp_Ok                       = '/guest/sign-up-OK.html'
+  mainPage_user                   = '/user/main.html'
+  text_Short_Pwd                  = 'Password must be 8 to 256 character long'
+  text_Bad_Pwd                    = 'Password must contain a non-letter and a non-number character'
+  text_password_NoMatch           =  'Passwords don\'t match'
+  text_username_Required          = 'Username is a required field.'
+  text_password_Required          = 'Password is a required field.'
+  text_confirmpassword_Required   = 'Confirm password is a required field.'
+  text_email_Required             = 'Email is a required field.'
+  text_firstName_Required         = 'First Name is a required field.'
+  text_lastName_Required          = 'Last Name is a required field.'
+  text_country_Required           = 'Country is a required field.'
+  text_An_Error                   = 'An error occurred'
 
-  server                   = null
-  url_WebServices          = null
-  on_CreateUser_Response   = null
-  users                    = {}
+  server                          = null
+  url_WebServices                 = null
+  on_CreateUser_Response          = null
+  users                           = {}
   passwordStrengthRegularExpression =///(
         #(?=.*\d)            # at least 1 digit
         #(?=.*[A-Z])         # at least 1 upper case letter
@@ -72,11 +77,11 @@ describe '| controllers | User-Sign-Up-Controller', ->
   after ->
     server.close()
 
-  invoke_UserSignUp = (username, password, email, firstname, lastname, country,expected_Target, expected_ErrorMessage, callback)->
+  invoke_UserSignUp = (username, password,confirmpassword, email, firstname, lastname, country,expected_Target, expected_ErrorMessage, callback)->
     req =
       session: {}
       url    : '/passwordReset/temp/00000000-0000-0000-0000-000000000000'
-      body   : { username: username , password: password,'confirm-password':password , email: email,firstname:firstname, lastname:lastname,country:country}
+      body   : { username: username , password: password,'confirm-password':confirmpassword , email: email,firstname:firstname, lastname:lastname,country:country}
 
     res =
       redirect: (target)->
@@ -113,11 +118,18 @@ describe '| controllers | User-Sign-Up-Controller', ->
 
 
   it 'userSignUp (webServices - bad server)', (done)->
-    req = body : {firstname:'si',lastname:'si',country:'us'}
+    username    = 'a'.add_5_Random_Letters()
+    password    = 'b'.add_5_Random_Letters()
+    email       = 'c'.add_5_Letters() + "@".add_5_Letters()
+    firstname   = 'd'.add_5_Random_Letters()
+    lastname    = 'e'.add_5_Random_Letters()
+    country     = 'f'.add_5_Random_Letters()
+    req = body : {username: username,password: password,"confirm-password": password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country}
     render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
-        params.assert_Is { viewModel:{username: undefined,password: undefined,confirmpassword: undefined,email: undefined,firstname:'si',lastname:'si',company:undefined ,title:undefined ,country:'us',state:undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
+        params.assert_Is { viewModel:{username: username,password: password,"confirmpassword": password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country,state:undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
         done()
+
     using new User_Sign_Up_Controller(req,null),->
       @.render_Page = render_Page
       @.webServices = "http://aaaaaaa.teammentor.net"
@@ -127,10 +139,17 @@ describe '| controllers | User-Sign-Up-Controller', ->
     on_CreateUser_Response = (req,res)->
       res.status(201).send {}
 
-    req = body : {firstname:'si',lastname:'si',country:'us'}
+    username    = 'a'.add_5_Random_Letters()
+    password    = 'b'.add_5_Random_Letters()
+    email       = 'c'.add_5_Letters() + "@".add_5_Letters()
+    firstname   = 'd'.add_5_Random_Letters()
+    lastname    = 'e'.add_5_Random_Letters()
+    country     = 'f'.add_5_Random_Letters()
+    req = body : {username: username,password: password,"confirm-password": password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country}
+
     render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
-        params.assert_Is { viewModel:{username: undefined,password: undefined,confirmpassword: undefined,email: undefined,firstname:'si',lastname:'si',company:undefined ,title:undefined ,country:'us',state:undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
+        params.assert_Is { viewModel:{username: username,password: password,confirmpassword: password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country,state:undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
         done()
 
     using new User_Sign_Up_Controller(req,null),->
@@ -142,7 +161,14 @@ describe '| controllers | User-Sign-Up-Controller', ->
     on_CreateUser_Response = (req,res)->
       res.send null
 
-    req = body : { password:'aa' , 'confirm-password':'aa',firstname:'si',lastname:'si',country:'us'}
+    username    = 'a'.add_5_Random_Letters()
+    password    = 'b'.add_5_Random_Letters()
+    email       = 'c'.add_5_Letters() + "@".add_5_Letters()
+    firstname   = 'd'.add_5_Random_Letters()
+    lastname    = 'e'.add_5_Random_Letters()
+    country     = 'f'.add_5_Random_Letters()
+    req = body : {username: username,password: password,"confirm-password": password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country}
+
     render_Page = (jade_Page, params)->
       jade_Page.assert_Is signUpPage_Unavailable
       params.assert_Is { viewModel: { errorMessage: 'An error occurred' } }
@@ -157,7 +183,14 @@ describe '| controllers | User-Sign-Up-Controller', ->
     on_CreateUser_Response = (req,res)->
       res.send 'aaaaaa'
 
-    req = body : { password:'aa' , 'confirm-password':'aa',firstname:'si',lastname:'si',country:'us'}
+    username    = 'a'.add_5_Random_Letters()
+    password    = 'b'.add_5_Random_Letters()
+    email       = 'c'.add_5_Letters() + "@".add_5_Letters()
+    firstname   = 'd'.add_5_Random_Letters()
+    lastname    = 'e'.add_5_Random_Letters()
+    country     = 'f'.add_5_Random_Letters()
+    req = body : {username: username,password: password,"confirm-password": password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country}
+
     render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
         params.assert_Is { viewModel: { errorMessage: 'An error occurred' } }
@@ -170,13 +203,23 @@ describe '| controllers | User-Sign-Up-Controller', ->
 
   it 'userSignUp (bad values)', (done)->
     on_CreateUser_Response = null
-    invoke_UserSignUp        ''    ,'aa'     ,'aa@teammentor.net','si','si','us',   signUp_fail, text_An_Error           ,->  #empty username
-      invoke_UserSignUp      'aaa' ,''       ,'aa@teammentor.net','si','si','us',   signUp_fail, text_An_Error           ,->  #empty password
-        invoke_UserSignUp    'aa'  ,'aa'     ,''                 ,'si','si','us',   signUp_fail, text_An_Error           ,->  #empty email
-          invoke_UserSignUp  'user','weakpwd','aa@teammentor.net','si','si','us',   signUp_fail, text_Short_Pwd          ,->  #weak password
-            invoke_UserSignUp 'user','pwd','aa@teammentor.net','','si','us',        signUp_fail, text_firstName_Required ,->  #firstname is required
-              invoke_UserSignUp 'user','pwd','aa@teammentor.net','si','','us',      signUp_fail, text_lastName_Required  ,->  #lastName is required
-                invoke_UserSignUp 'user','pwd','aa@teammentor.net','si','si','',    signUp_fail, text_country_Required   ,->  #country is required
+    username     = 'a'.add_5_Random_Letters()
+    password     = 'b*Cr87aCK'.add_5_Random_Letters()
+    weakPassword = 'abc'
+    email        = 'c'.add_5_Letters() + "@".add_5_Letters()
+    firstname    = 'd'.add_5_Random_Letters()
+    lastname     = 'e'.add_5_Random_Letters()
+    country      = 'f'.add_5_Random_Letters()
+
+    invoke_UserSignUp              ''      ,password     ,password     ,email,firstname,lastname,country,signUp_fail, text_username_Required        ,->  #empty username
+      invoke_UserSignUp            username,''           ,password     ,email,firstname,lastname,country,signUp_fail, text_password_Required        ,->  #empty password
+        invoke_UserSignUp          username,password     ,''           ,email,firstname,lastname,country,signUp_fail, text_confirmpassword_Required ,->  #empty confirm
+          invoke_UserSignUp        username,password     ,'Abc288**398',email,firstname,lastname,country,signUp_fail, text_password_NoMatch         ,->  #passwords do not match
+          invoke_UserSignUp        username,weakPassword ,weakPassword ,email,firstname,lastname,country,signUp_fail, text_Short_Pwd                ,->  #weak password
+            invoke_UserSignUp      username,password     ,password     ,''   ,firstname,lastname,country,signUp_fail, text_email_Required           ,->  #email is required
+            invoke_UserSignUp      username,password     ,password     ,email,''       ,lastname,country,signUp_fail, text_firstName_Required       ,->  #firstname is required
+              invoke_UserSignUp    username,password     ,password     ,email,firstname,''      ,country,signUp_fail, text_lastName_Required        ,->  #lastName is required
+                invoke_UserSignUp  username,password     ,password     ,email,firstname,lastname,''     ,signUp_fail, text_country_Required         ,->  #country is required
                   done()
 
   it 'userSignUp (good values)', (done)->
@@ -190,7 +233,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
     Country   =  "US"
     State     = "California"
 
-    invoke_UserSignUp user,pwd,email,Firstname,Lastname,Country,mainPage_user,'', ->
+    invoke_UserSignUp user,pwd,pwd,email,Firstname,Lastname,Country,mainPage_user,'', ->
       invoke_LoginUser user,pwd,mainPage_user, ->
         done()
 
@@ -209,16 +252,82 @@ describe '| controllers | User-Sign-Up-Controller', ->
 
 
   it 'userSignUp (error handling)', (done)->
-    req =
-      body   : {password: 'aa','confirm-password':'aa',firstname:'si',lastname:'si',country:'us'}
+    username    = 'a'.add_5_Random_Letters()
+    password    = 'b'.add_5_Random_Letters()
+    email       = 'c'.add_5_Letters() + "@".add_5_Letters()
+    firstname   = 'd'.add_5_Random_Letters()
+    lastname    = 'e'.add_5_Random_Letters()
+    country     = 'f'.add_5_Random_Letters()
+    req = body : {username: username,password: password,"confirm-password": password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country}
+
     render_Page = (jade_Page, params)->
         jade_Page.assert_Is signUpPage_Unavailable
-        params.assert_Is { viewModel:{ username: undefined,password: 'aa',confirmpassword:'aa',email: undefined,firstname:'si',lastname:'si',company:undefined ,title:undefined ,country:'us',state:undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
+        params.assert_Is { viewModel:{ username: username,password:password,confirmpassword:password,email: email,firstname:firstname,lastname:lastname,company:undefined ,title:undefined ,country:country,state:undefined,errorMessage: 'TEAM Mentor is unavailable, please contact us at '} }
         done()
     using new User_Sign_Up_Controller(req,null),->
       @.render_Page = render_Page
       @.webServices = 'https://aaaaaaaa.teammentor.net/'
       @userSignUp()
+
+  it 'Persist HTML form fields on error (username is required)',(done)->
+    newUsername         =''
+    newPassword         ='aa'.add_5_Letters()
+    newConfirmPassword  ='bb'.add_5_Letters()
+    newEmail            ='ab'.add_5_Letters()+'@mailinator.com'
+
+    #render contains the file to render and the view model object
+    render_Page = (html,model)->
+      model.viewModel.username.assert_Is(newUsername)
+      model.viewModel.password.assert_Is(newPassword)
+      model.viewModel.confirmpassword.assert_Is(newConfirmPassword)
+      model.viewModel.email.assert_Is(newEmail)
+      model.viewModel.errorMessage.assert_Is(text_username_Required)
+      done()
+    req = body:{username:newUsername,password:newPassword,'confirm-password':newConfirmPassword, email:newEmail};
+
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
+      @.userSignUp()
+
+  it 'Persist HTML form fields on error (password is required)',(done)->
+    newUsername         ='xy'.add_5_Letters()
+    newPassword         =''
+    newConfirmPassword  ='bb'.add_5_Letters()
+    newEmail            ='ab'.add_5_Letters()+'@mailinator.com'
+
+    #render contains the file to render and the view model object
+    render_Page = (html,model)->
+      model.viewModel.username.assert_Is(newUsername)
+      model.viewModel.password.assert_Is(newPassword)
+      model.viewModel.confirmpassword.assert_Is(newConfirmPassword)
+      model.viewModel.email.assert_Is(newEmail)
+      model.viewModel.errorMessage.assert_Is(text_password_Required)
+      done()
+    req = body:{username:newUsername,password:newPassword,'confirm-password':newConfirmPassword, email:newEmail};
+
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
+      @.userSignUp()
+
+  it 'Persist HTML form fields on error (confirm password is required)',(done)->
+    newUsername         ='xy'.add_5_Letters()
+    newPassword         ='bb'.add_5_Letters()
+    newConfirmPassword  =''
+    newEmail            ='ab'.add_5_Letters()+'@mailinator.com'
+
+    #render contains the file to render and the view model object
+    render_Page = (html,model)->
+      model.viewModel.username.assert_Is(newUsername)
+      model.viewModel.password.assert_Is(newPassword)
+      model.viewModel.confirmpassword.assert_Is(newConfirmPassword)
+      model.viewModel.email.assert_Is(newEmail)
+      model.viewModel.errorMessage.assert_Is(text_confirmpassword_Required)
+      done()
+    req = body:{username:newUsername,password:newPassword,'confirm-password':newConfirmPassword, email:newEmail};
+
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
+      @.userSignUp()
 
   it 'Persist HTML form fields on error (Passwords do not match)',(done)->
     newUsername         ='xy'.add_5_Letters()
@@ -272,6 +381,24 @@ describe '| controllers | User-Sign-Up-Controller', ->
       @.webServices = url_WebServices
       @.userSignUp()
 
+  it 'Persist HTML form fields on error (email)',(done)->
+    newUsername         ='aa'.add_5_Letters()
+    newPassword         ='aa'.add_5_Letters()
+    newEmail            =''
+
+    #render contains the file to render and the view model object
+    render_Page = (html,model)->
+      model.viewModel.username.assert_Is(newUsername)
+      model.viewModel.password.assert_Is(newPassword)
+      model.viewModel.confirmpassword.assert_Is(newPassword)
+      model.viewModel.email.assert_Is(newEmail)
+      model.viewModel.errorMessage.assert_Is(text_email_Required)
+      done()
+    req = body:{username:newUsername,password:newPassword,'confirm-password':newPassword, email:newEmail};
+
+    using new User_Sign_Up_Controller(req, null), ->
+      @.render_Page = render_Page
+      @.userSignUp()
 
   it 'Persist HTML form fields on error (Firstname is required)',(done)->
     newUsername         ='xy'.add_5_Letters()

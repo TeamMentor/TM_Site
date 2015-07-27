@@ -1,5 +1,3 @@
-require 'fluentnode'
-
 bodyParser      = require 'body-parser'
 express         = require 'express'
 request         = require 'superagent'
@@ -9,7 +7,7 @@ cheerio         = require 'cheerio'
 Express_Service = require '../../src/services/Express-Service'
 
 
-describe '| routes | routes.paths |', ()->
+describe '| routes | routes.test |', ()->
 
     @.timeout 7000
     express_Service = null
@@ -108,9 +106,8 @@ describe '| routes | routes.paths |', ()->
 
       app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
       app_35_Server.listen(random_Port)
-      global.config ?= { tm_design : {} }
+
       global_Config = global.config
-      console.log  global.config
       global.config.tm_design.webServices = url_Mocked_3_5_Server
       global.config.tm_design.jade_Compilation_Enabled = true
 
@@ -164,10 +161,9 @@ describe '| routes | routes.paths |', ()->
 
 
       expectedStatus = 200;
-
       expectedStatus = 302 if ['','deploy', 'poc'                                 ].contains(path.split('/').second().lower())
       expectedStatus = 302 if ['/flare/','/flare/_dev','/flare/main-app-view',
-                               '/user/logout','/pocaaaaa','/teamMentor'           ].contains(path)
+                               '/user/logout','/pocaaaaa','/teamMentor'].contains(path)
 
       expectedStatus = 403 if ['a','article','articles','show'                    ].contains(path.split('/').second().lower())
       expectedStatus = 403 if ['/user/main.html', '/search', '/search/:text'      ].contains(path)

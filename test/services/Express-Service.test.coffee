@@ -21,6 +21,8 @@ describe '| services | Express-Service.test', ()->
 
       console.log       .assert_Is global.info
       @.logging_Service.assert_Is_Object()
+      if (not @.logging_Service.original_Console)           # happens when running all tests
+        return
       @.logging_Service.original_Console.assert_Is_Function()
       @.logging_Service.restore_Console()
       console.log       .assert_Is_Not global.info

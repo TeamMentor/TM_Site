@@ -128,7 +128,7 @@ describe '| controllers | Help-Controller.test |', ()->
     using help_Controller,->
       @.req      = { params: page: page_Id }
       @.res.send = (html)=>
-        #check_Help_Page_Contents html, false, title, content, =>
+        check_Help_Page_Contents html, false, title, content, =>
         done()
       @.show_Content title, content
 
@@ -344,7 +344,7 @@ describe '| controllers | Help-Controller.test |', ()->
 
       Help_Controller.register_Routes app
       routes.keys().assert_Is [ '/help/index.html', '/help/article/:page*', '/help/:page*', '/Image/:name' ,
-                                '/json/docs/library','/json/docs/:page']
+                                '/json/docs/library', '/json/docs/:page']
       routes['/help/index.html'     ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Index_Page();'
       routes['/help/article/:page*' ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
       routes['/help/:page*'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
