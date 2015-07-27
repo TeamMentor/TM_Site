@@ -17,18 +17,8 @@ class JadeService
 
     constructor: (options)->
       @.dependencies()
-      @.options                  = options || config.options?.tm_design || {}
       @.root_Path                = __dirname.path_Combine '../../../../'
-      @.folder_Jade_Files        = @.options.folder_Jade_Files
-      @.folder_Static_Files      = @.folder_Jade_Files?.path_Combine '../TM_Static'
-      @.jade_Compilation_Enabled = @.options.jade_Compilation_Enabled || false
-      @.folder_Jade_Compilation  = @.options.folder_Jade_Files?.path_Combine '../TM_Website/.tmCache/jade-Compilation'
       @.mixin_Extends            = "..#{path.sep}_layouts#{path.sep}page_clean"
-
-      #@.folder_Jade_Compilation  = global.config?.tm_design?.folder_Jade_Compilation           # can't use this due to lack of jade module on the TM root
-      console.log @.folder_Jade_Files
-      console.log '.'.real_Path()
-      console.log 13
 
     apply_Highlight: (html)=>
       if html.not_Contains('<pre>')
@@ -43,11 +33,12 @@ class JadeService
       $.html()
 
     cache_Enabled: ()=>
-      @.jade_Compilation_Enabled
+      @.jade_Compilation_Enabled()
 
 
     calculate_Compile_Path: (fileToCompile)=>
-      if compile_Folder = @.folder_Jade_Compilation
+      compile_Folder = @.folder_Jade_Compilation()
+      if compile_Folder
         if compile_Folder.folder_Not_Exists()
           compile_Folder.folder_Create()
         compile_Folder = compile_Folder.real_Path()
@@ -55,8 +46,14 @@ class JadeService
       return null
 
     calculate_Jade_Path: (jade_File)=>
-      if jade_File.file_Exists()           then return jade_File
-      if jade_Folder = @.folder_Jade_Files then return jade_Folder.path_Combine(jade_File)
+      if jade_File.file_Exists()
+        return jade_File
+
+      if @.folder_Jade_Files()
+        if @.folder_Jade_Files?().folder_Exists()
+          return @.folder_Jade_Files().path_Combine(jade_File)
+        return @.root_Path.path_Combine @.folder_Jade_Files()
+                          .path_Combine jade_File
       return null
 
 
@@ -76,6 +73,11 @@ class JadeService
 
       exportCode.save_As(targetFile_Path)
                 .file_Exists()
+
+    folder_Jade_Files        : -> config.options.tm_design.folder_Jade_Files
+    folder_Jade_Compilation  : -> @.folder_Jade_Files()?.path_Combine '../TM_Website/.tmCache/jade-Compilation'
+    folder_Static_Files      : -> @.folder_Jade_Files().path_Combine '../TM_Static'
+    jade_Compilation_Enabled : -> config.options.tm_design.jade_Compilation_Enabled || false
 
     render_Jade_File: (jadeFile, params)=>
 

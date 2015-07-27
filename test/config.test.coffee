@@ -1,3 +1,5 @@
+process.env.TM_SITE_DATA = "SiteData_TM";   # used by default in TM and in unit tests
+
 describe 'config',->
   it 'Check default import', ->
     using require('../src/config'), ->
