@@ -2,6 +2,7 @@ Jade_Service    = null
 Session_Service = null
 Logging_Service = null
 bodyParser      = null
+cookieParser    = null
 path            = null
 express         = null
 
@@ -13,6 +14,7 @@ class Express_Service
     Session_Service  = require '../services/Session-Service'
     Logging_Service  = require '../services/Logging-Service'
     bodyParser       = require 'body-parser'
+    cookieParser     = require 'cookie-parser'
     path             = require "path"
     express          = require 'express'
 
@@ -32,6 +34,7 @@ class Express_Service
     if @.logging_Enabled
       @.set_Logging()
     @.set_BodyParser()
+    @.set_CookieParser()
     @.remove_Unwanted_Headers()
     @.set_Static_Route()
     @.add_Session()      # for now not using the async version of add_Session
@@ -54,6 +57,10 @@ class Express_Service
   set_BodyParser: ()=>
     @.app.use(bodyParser.json({limit:'1kb'})                       );     # to support JSON-encoded bodies
     @.app.use(bodyParser.urlencoded({limit:'1kb', extended: true }));     # to support URL-encoded bodies
+
+  set_CookieParser: ()=>
+    @.app.use(cookieParser()                                       );     # to support JSON-encoded bodies
+
 
   remove_Unwanted_Headers : () ->
     @.app.disable "x-powered-by"
