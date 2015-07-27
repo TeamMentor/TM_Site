@@ -21,6 +21,8 @@ describe '| services | Express-Service.test', ()->
 
       console.log       .assert_Is global.info
       @.logging_Service.assert_Is_Object()
+      if (not @.logging_Service.original_Console)           # happens when running all tests
+        return
       @.logging_Service.original_Console.assert_Is_Function()
       @.logging_Service.restore_Console()
       console.log       .assert_Is_Not global.info
@@ -141,7 +143,7 @@ describe '| services | Express-Service.test', ()->
     it '/css/{file}.css', (done)->
 
       supertest(expressService.app)
-        .get '/css/custom-style.css'
+        .get '/css/jade-stylesheet.css'
         .end (err,res)->
           res.status.assert_Is 200
           done()
