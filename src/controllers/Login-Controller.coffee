@@ -40,6 +40,7 @@ class Login_Controller
     @
 
   loginUser: ()=>
+
     userViewModel ={username: @.req.body.username,password:'',errorMessage:''}
 
     if (@.req.body.username == '' or @.req.body.password == '')
@@ -56,8 +57,11 @@ class Login_Controller
       json   : true,
       url    : "#{@.webServices}/Login_Response"
 
+    console.log options.url
+
     request options, (error, response)=>
       if error
+        console.log error
         logger?.info ('Could not connect with TM 3.5 server')
         console.log (errorMessage)
         userViewModel.errorMessage = errorMessage
@@ -65,6 +69,8 @@ class Login_Controller
         userViewModel.password=''
         return @.render_Page @.jade_LoginPage_Unavailable, {viewModel:userViewModel }
       if not (response?.body?.d)
+        console.log options.url
+        console.log response.body
         logger?.info ('Could not connect with TM 3.5 server')
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''

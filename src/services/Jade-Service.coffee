@@ -2,26 +2,33 @@ fs        = null
 path      = null
 jade      = null
 cheerio   = null
+config    = null
 Highlight = null
 
 class JadeService
 
     dependencies: ()->
-      fs          = require('fs')
-      path        = require('path')
-      jade        = require('jade')   # 4 ms (with preloading)
-      cheerio     = require('cheerio')
-      {Highlight} = require('highlight')
+      fs          = require 'fs'
+      path        = require 'path'
+      jade        = require 'jade'   # 4 ms (with preloading)
+      cheerio     = require 'cheerio'
+      config      = require '../config'
+      {Highlight} = require 'highlight'
 
-    constructor: ()->
+    constructor: (options)->
       @.dependencies()
-      @.mixin_Extends = "..#{path.sep}_layouts#{path.sep}page_clean"
-
-      @.folder_Jade_Files        = global.config?.tm_design?.folder_Jade_Files
-      @.jade_Compilation_Enabled = global.config?.tm_design?.jade_Compilation_Enabled || false
-      @.folder_Jade_Compilation  = global.config?.tm_design?.folder_Jade_Files?.path_Combine '../TM_Website/.tmCache/jade-Compilation'
+      @.options                  = options || config.options?.tm_design || {}
+      @.root_Path                = __dirname.path_Combine '../../../../'
+      @.folder_Jade_Files        = @.options.folder_Jade_Files
+      @.folder_Static_Files      = @.folder_Jade_Files?.path_Combine '../TM_Static'
+      @.jade_Compilation_Enabled = @.options.jade_Compilation_Enabled || false
+      @.folder_Jade_Compilation  = @.options.folder_Jade_Files?.path_Combine '../TM_Website/.tmCache/jade-Compilation'
+      @.mixin_Extends            = "..#{path.sep}_layouts#{path.sep}page_clean"
 
       #@.folder_Jade_Compilation  = global.config?.tm_design?.folder_Jade_Compilation           # can't use this due to lack of jade module on the TM root
+      console.log @.folder_Jade_Files
+      console.log '.'.real_Path()
+      console.log 13
 
     apply_Highlight: (html)=>
       if html.not_Contains('<pre>')
@@ -80,8 +87,9 @@ class JadeService
         params.article_Html = @.apply_Highlight(params.article_Html)
 
       if (@.cache_Enabled() is false)
+        console.log jadeFile
         jadeFile_Path = @.calculate_Jade_Path(jadeFile)
-
+        console.log jadeFile_Path?.real_Path()
         if jadeFile_Path?.file_Exists()
           return jade.renderFile(jadeFile_Path,params)
         return ""

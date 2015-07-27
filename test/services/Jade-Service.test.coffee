@@ -1,5 +1,6 @@
 require 'fluentnode'
 Jade_Service = require '../../src/services/Jade-Service'
+config       = require '../../src/config'
 
 describe "| services | Jade-Service |", ()->
 
@@ -9,7 +10,9 @@ describe "| services | Jade-Service |", ()->
   jade_Path    = null
   jade_Html    = null
 
-  before ->
+  beforeEach ->
+    '_tmp_Jade_Compilation'.folder_Delete_Recursive()
+    '_tmp_Jade_Files'.folder_Delete_Recursive()
     compile_Path   = '_tmp_Jade_Compilation'.assert_Folder_Not_Exists()
     jade_Path      = '_tmp_Jade_Files'      .assert_Folder_Not_Exists()
     jade_File      = 'test.jade'
@@ -22,7 +25,7 @@ describe "| services | Jade-Service |", ()->
     mixin_Contents.save_As jade_Path.path_Combine mixin_File
     jade_Contents. save_As jade_Path.path_Combine jade_File
 
-    after ->
+    afterEach ->
       compile_Path.folder_Delete_Recursive().assert_Is_True()
       jade_Path   .folder_Delete_Recursive().assert_Is_True()
 
@@ -34,6 +37,12 @@ describe "| services | Jade-Service |", ()->
       @.cache_Enabled           .assert_Is_Function()
       @.compile_JadeFile_To_Disk.assert_Is_Function()
       @.render_Jade_File        .assert_Is_Function()
+      console.log @.functions()
+      @.options.assert_Is config.options.tm_design
+      @.root_Path.assert_Folder_Exists()
+      @.root_Path.path_Combine('code').assert_Folder_Exists()
+      #@.root_Path.path_Combine('data').assert_Folder_Exists()
+      @.root_Path.path_Combine('config').assert_Folder_Exists()
 
   it 'apply_Highlight', ->
     no_Pre             = '<b>aaaa</b>'
@@ -44,6 +53,7 @@ describe "| services | Jade-Service |", ()->
       @.apply_Highlight(with_Pre).assert_Is with_Pre_Highlight
 
   it 'cache_Enabled', ()->
+    console.log 12
     _global_config = global.config                                # save it so it can be restored
 
     global.config = tm_design : jade_Compilation_Enabled : false

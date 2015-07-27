@@ -141,7 +141,7 @@ describe '| services | Express-Service.test', ()->
     it '/css/{file}.css', (done)->
 
       supertest(expressService.app)
-        .get '/css/custom-style.css'
+        .get '/css/jade-stylesheet.css'
         .end (err,res)->
           res.status.assert_Is 200
           done()

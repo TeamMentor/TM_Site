@@ -23,10 +23,14 @@ class Express_Service
     @.app.port                = @.options.port || global.config?.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
+    @.jade_Service            = new Jade_Service()
 
     @.logging_Enabled         = global.config?.logging_Enabled || true
-    @.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
-    @.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
+    @.path_To_Jade            = @.jade_Service.folder_Jade_Files
+    @.path_To_Static          = @.jade_Service.folder_Static_Files
+
+    #@.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
+    #@.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
 
   setup: ()=>
     if @.logging_Enabled
@@ -59,7 +63,8 @@ class Express_Service
     @.app.disable "x-powered-by"
 
   set_Static_Route:()=>
-    @app.use express['static'](@.path_To_Static);
+    if @.path_To_Static
+      @app.use express['static'](@.path_To_Static);
     @
 
   set_Views_Path :()=>
@@ -83,7 +88,7 @@ class Express_Service
     else
       req.session.redirectUrl = req.url
       res.status(403)
-         .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
+         .send(@.jade_Service.render_Jade_File('guest/login-required.jade'))
 
 
 

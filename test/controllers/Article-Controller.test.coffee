@@ -6,7 +6,9 @@ Session_Service    = require '../../src/services/Session-Service'
 cheerio            = require 'cheerio'
 supertest          = require 'supertest'
 
-describe '| controllers | Article-Controller.test', ->
+describe.only '| controllers | Article-Controller.test', ->
+
+  global.config = null
 
   it 'constructor', (done)->
     using new Article_Controller(), ->
