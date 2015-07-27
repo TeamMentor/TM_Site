@@ -3,7 +3,7 @@ bodyParser              = require('body-parser')
 Login_Controller        = require('../../src/controllers/Login-Controller')
 
 
-describe '| controllers | Login-Controller.test |', ->
+describe.only '| controllers | Login-Controller.test |', ->
 
   #consts
   loginPage                 = 'guest/login-Fail.jade'
@@ -81,7 +81,7 @@ describe '| controllers | Login-Controller.test |', ->
       @.req             .assert_Is 'req'
       @.res             .assert_Is 'res'
 
-  it "loginUser (server not ok)", (done)->
+  it.only "loginUser (server not ok)", (done)->
     req = body: {username:'aaaa', password:'bbb'}
     res = null
     render_Page = (jade_Page, params)->
@@ -94,6 +94,8 @@ describe '| controllers | Login-Controller.test |', ->
       @.webServices = 'http://aaaaaabbb.teammentor.net'
       @.loginUser()
 
+  I.working.here()
+  return
   it "loginUser (server ok - null response)", (done)->
     on_Login_Response = (req,res)->
       res.send null
