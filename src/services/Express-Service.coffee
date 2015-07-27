@@ -26,8 +26,8 @@ class Express_Service
     @.jade_Service            = new Jade_Service()
 
     @.logging_Enabled         = global.config?.logging_Enabled || true
-    @.path_To_Jade            = @.jade_Service.folder_Jade_Files
-    @.path_To_Static          = @.jade_Service.folder_Static_Files
+    @.path_To_Jade            = @.jade_Service.folder_Jade_Files()
+    @.path_To_Static          = @.jade_Service.folder_Static_Files()
 
     #@.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
     #@.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
