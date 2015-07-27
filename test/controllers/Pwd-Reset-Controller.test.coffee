@@ -248,7 +248,8 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
         get:  (url, target)-> routes['get:' + url] = target
 
       Pwd_Reset_Controller.register_Routes app
-      routes.keys().assert_Is [ 'post:/user/pwd_reset', 'post:/passwordReset/:username/:token','get:/passwordReset/:username/:token'  ]
+      routes.keys().assert_Is [ 'post:/user/pwd_reset', 'post:/passwordReset/:username/:token','get:/passwordReset/:username/:token'
+                                'post:/json/user/pwd_reset']
       routes['post:/user/pwd_reset'                ].source_Code().assert_Contains 'return new Pwd_Reset_Controller(req, res).password_Reset();'
       routes['post:/passwordReset/:username/:token'].source_Code().assert_Contains 'return new Pwd_Reset_Controller(req, res).password_Reset_Token();'
       routes['get:/passwordReset/:username/:token' ].source_Code().assert_Contains 'return new Pwd_Reset_Controller(req, res).password_Reset_Page();'
