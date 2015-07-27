@@ -2,7 +2,7 @@ Express_Service   = null
 Jade_Service      = null
 Graph_Service     = null
 Analytics_Service = null
-
+Anonymous_Service = require('../services/Anonymous-Service')
 class Article_Controller
 
   dependencies: ()->
@@ -84,7 +84,10 @@ class Article_Controller
 
 Article_Controller.register_Routes = (app, expressService,graph_Options) ->
 
-  checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res, next)
+  #checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res, next)
+  checkAuth        =  (req,res,next)=>
+    using new Anonymous_Service(req,res),->
+      @.checkAuth next
 
   articleController = (method_Name) ->                                                       # pins method_Name value
         return (req, res,next) ->                                                            # returns function for express
