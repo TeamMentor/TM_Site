@@ -35,6 +35,5 @@ describe '| controllers | Angular-Controller |', ->
 
     it 'test static routes', (done)->
       tm_Site.get '/js/lib.js', (data)->
-        log data.size()
-        data.size().assert_Bigger_Than 1000000
+        data.size().assert_Bigger_Than 900000
         done()

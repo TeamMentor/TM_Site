@@ -3,6 +3,7 @@ express         = require 'express'
 request         = require 'superagent'
 supertest       = require 'supertest'
 cheerio         = require 'cheerio'
+config          = require '../../src/config'
 
 Express_Service = require '../../src/services/Express-Service'
 
@@ -32,26 +33,29 @@ describe '| routes | routes.checks |', ()->
       (req,res)->
         res.status(200).send {"d":"/passwordReset/user/00000000-0000-0000-0000-000000000000"}
 
-    app_35_Server.use (req,res,next)->
-      console.log req.url
-      log('------' + req.url)
-      res.status(500).send 'WebService route not mapped'
+    #app_35_Server.use (req,res,next)->
+    #  console.log req.url
+    #  log('------' + req.url)
+    #  res.status(500).send 'WebService route not mapped'
 
     app_35_Server.listen(random_Port)
-    global_Config = global.config
-    global.config.tm_design.tm_35_Server = url_Mocked_3_5_Server
-    global.config.tm_design.webServices  = '/webServices'
-    global.config.tm_design.jade_Compilation_Enabled = true
-    global.custom = null
 
-    options =
+    using config.options,->
+      @.tm_design.tm_35_Server             = url_Mocked_3_5_Server
+      @.tm_design.webServices              = '/webServices'
+      @.tm_design.jade_Compilation_Enabled = true
+
+    express_Options =
       logging_Enabled : false
       port            : 1024 + (20000).random()
 
-    express_Service  = new Express_Service(options).setup().start()
+    express_Service  = new Express_Service(express_Options).setup().start()
     app              = express_Service.app
 
     tm_Server = supertest(app)
+
+  afterEach ->
+    config.restore()
 
   it 'Issue_679_Validate authentication status on error page', (done)->
     agent = request.agent()

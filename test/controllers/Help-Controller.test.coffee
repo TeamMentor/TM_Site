@@ -31,8 +31,6 @@ describe '| controllers | Help-Controller.test |', ()->
     article_Data : (articleId) ->
       if (articleId=='1eda3d77-43e0-474b-be99-9ba118408dd3')
         return {html:'<p><strong>Welcome to TEAM Mentor.</strong> <br>\n</p><p>\nTEAM Mentor</p>'}
-      else
-        return {html:'<h1>Test</h1>'}
 
   check_Help_Page_Contents = (html, loggedIn, title, content, next)->
     $ = cheerio.load(html)
@@ -319,11 +317,11 @@ describe '| controllers | Help-Controller.test |', ()->
 
     it 'show_Image (image exists)', (done)->
       supertest(app)
-      .get('/Image/index01.png')
+      .get('/Image/editingoverview-img2.jpg')
       .end (err, res)->
         res.status.assert_Is 200
-        res.type  .assert_Is 'image/png'
-        res.body.length.assert_Is_Bigger_Than 100000
+        res.type  .assert_Is 'image/jpeg'
+        res.body.length.assert_Is_Bigger_Than 10000
         done()
 
     it 'show_Image (image not exists)', (done)->
@@ -345,7 +343,3 @@ describe '| controllers | Help-Controller.test |', ()->
       Help_Controller.register_Routes app
       routes.keys().assert_Is [ '/help/index.html', '/help/article/:page*', '/help/:page*', '/Image/:name' ,
                                 '/json/docs/library', '/json/docs/:page']
-      routes['/help/index.html'     ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Index_Page();'
-      routes['/help/article/:page*' ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
-      routes['/help/:page*'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
-      routes['/Image/:name'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Image();'

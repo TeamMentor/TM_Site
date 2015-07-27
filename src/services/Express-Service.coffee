@@ -63,8 +63,7 @@ class Express_Service
     @.app.disable "x-powered-by"
 
   set_Static_Route:()=>
-    if @.path_To_Static
-      @app.use express['static'](@.path_To_Static);
+    @app.use express['static'](@.path_To_Static);
     @
 
   set_Views_Path :()=>

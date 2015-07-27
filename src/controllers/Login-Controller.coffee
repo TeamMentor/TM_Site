@@ -7,17 +7,17 @@ errorMessage               = "TEAM Mentor is unavailable, please contact us at "
 
 class Login_Controller
   dependencies: ->
-    request             = require('request')
-    analytics_Service   = require('../services/Analytics-Service')
-    Jade_Service        = require('../services/Jade-Service')
+    request             = require 'request'
+    analytics_Service   = require '../services/Analytics-Service'
+    Jade_Service        = require '../services/Jade-Service'
+
 
   constructor: (req, res)->
     @.dependencies()
+    @.config            = require '../config'
 
     @.req                = req || {}
     @.res                = res || {}
-    @.webServices        = "#{global.config?.tm_design?.tm_35_Server}#{global.config?.tm_design?.webServices}"
-    @.tm_35_Server       = global.config?.tm_design?.tm_35_Server
     @.analyticsService   = new analytics_Service(@.req, @.res)
     @.jade_Service       = new Jade_Service()
 
@@ -55,9 +55,7 @@ class Login_Controller
       method : 'post',
       body   : { username:username, password:password },
       json   : true,
-      url    : "#{@.webServices}/Login_Response"
-
-    console.log options.url
+      url    : "#{@.url_WebServices()}/Login_Response"
 
     request options, (error, response)=>
       if error
@@ -111,13 +109,19 @@ class Login_Controller
   render_Page: (page, view_Model)=>
     @.res.send @.jade_Service.render_Jade_File page, view_Model
 
+  url_WebServices: ()=>
+    "#{@.config.options.tm_design?.tm_35_Server}#{@.config.options.tm_design?.webServices}"
+
+  url_Tm_35_Server: ()=>
+    @.config.options.tm_design?.tm_35_Server
+
   webServiceResponse: (methodName,Token,callback)->
     options =
       method: 'post',
       body: {},
       json: true,
       headers: {'Cookie':'Session='+Token}
-      url: @.webServices + '/' + methodName
+      url: @.url_WebServices() + '/' + methodName
     request options, (error, response)=>
       if error
         logger?.info ('Could not connect with TM 3.5 server')
@@ -139,7 +143,7 @@ class Login_Controller
     format   = @.req.query.format
 
     if username and token
-      server = @.tm_35_Server
+      server = @.url_Tm_35_Server()
       path   = @.req.route.path.substring(1)
       url    = "#{server}/#{path}?username=#{username}&requestToken=#{token}"
       if (format?)

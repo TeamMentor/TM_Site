@@ -42,6 +42,7 @@ class JadeService
         if compile_Folder.folder_Not_Exists()
           compile_Folder.folder_Create()
         compile_Folder = compile_Folder.real_Path()
+        fileToCompile  = fileToCompile.remove(@.root_Path)
         return compile_Folder.path_Combine(fileToCompile.to_Safe_String() + '.js')
       return null
 
@@ -71,8 +72,7 @@ class JadeService
       exportCode =  'var jade = require(\'jade/lib/runtime.js\'); \n' +
                     'module.exports = ' + js_Code;
 
-      exportCode.save_As(targetFile_Path)
-                .file_Exists()
+      exportCode.save_As(targetFile_Path).file_Exists()
 
     folder_Jade_Files        : -> config.options.tm_design.folder_Jade_Files
     folder_Jade_Compilation  : -> @.folder_Jade_Files()?.path_Combine '../TM_Website/.tmCache/jade-Compilation'

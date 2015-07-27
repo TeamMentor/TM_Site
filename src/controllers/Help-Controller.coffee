@@ -30,6 +30,7 @@ class Help_Controller
     @.jade_No_Image    = 'guest/404.jade'
     @.index_Page_Id    = '1eda3d77-43e0-474b-be99-9ba118408dd3'
     @.jade_Error_Page  = 'guest/404.jade'
+
     @.imagePath        = @.docs_TM_Service.libraryDirectory?.path_Combine '_Images/'
 
   content_Cache_Set: (title, content)=>

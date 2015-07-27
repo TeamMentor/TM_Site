@@ -15,13 +15,8 @@ describe '| poc | Controller-PoC.test |' ,->
       @.folder_PoC_Pages().assert_Folder_Exists()
                           .assert_Contains '__poc'
 
-
-
   it 'check_Auth (anonymous)', (done)->
     res =
-      status: (value)->
-        value.assert_Is 403
-        @
       redirect: (value)->
         value.assert_Is '/guest/404'
         done()
@@ -65,11 +60,11 @@ describe '| poc | Controller-PoC.test |' ,->
     @.timeout 5000
     express_Service =
       session_Service:
-          users_Searches: (callback) -> callback []
           user_Data: (session, callback) -> callback []
     using new PoC_Controller({ express_Service: express_Service}), ->
 
       req = params : page : @.map_Files_As_Pages().last().name
+
       res =
         status: (value)->
           value.assert_Is 200
@@ -77,6 +72,7 @@ describe '| poc | Controller-PoC.test |' ,->
         send: (html)->
           html.assert_Is_String()
           done()
+
       @.show_Page(req,res)
 
   it 'show_Page (bad link) , render_Jade', (done)->
@@ -84,9 +80,6 @@ describe '| poc | Controller-PoC.test |' ,->
 
       req = params : page : 'aaaaabbbb'
       res =
-        status: (value)->
-          log value
-          @
         redirect: (target)->
           target.assert_Is '/guest/404'
           done()
