@@ -1,3 +1,4 @@
+require('coffee-script/register')
 Side_Data = require('../../TM_Shared/src/Site-Data')
 
 site_Data = new Side_Data()

@@ -75,8 +75,6 @@ describe '| routes | routes.test |', ()->
                       '/error'
                       '/poc*'
                       '/poc'
-                      '/poc/filters:page'
-                      '/poc/filters:page/:filters'
                       '/poc/:page'
                       '/json/user/login'
                       '/json/article/:ref'
