@@ -22,6 +22,7 @@ log('----------------------------------------')
 var Express_Service    = require('./src/services/Express-Service');
 var Analytics_Service  = require('./src/services/Analytics-Service');
 var Hubspot_Service    = require('./src/services/Hubspot-Service');
+var Anonymous_Service  = require('./src/services/Anonymous-Service');
 new Express_Service()
       .setup()
       .start();
@@ -29,4 +30,6 @@ new Analytics_Service()
       .setup();
 new Hubspot_Service()
       .setup();
+new Anonymous_Service()
+     .setup()
 

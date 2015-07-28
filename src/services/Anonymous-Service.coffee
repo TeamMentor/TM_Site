@@ -10,18 +10,26 @@ class Anonymous_Service
     @.req               = req
     @.res               = res
     @.crypto            = require 'crypto'
-    @.filename          = @.options.filename || './.tmCache/_anonymousVisits' #"_session_Data"
+    @.filename          = './.tmCache/_anonymousVisits'
     @.db                = new Nedb(@.filename)
     Jade_Service        = require('../services/Jade-Service')
+    @.setup()
 
   setup: (req,res)->
     @.db.loadDatabase =>
       @.db.persistence.setAutocompactionInterval(30 * 1000) # set to 30s
 
   save: (doc)->
+    console.log('Saving ' + doc.toString())
     @.db.insert doc, (err) ->
       if err
         console.log('Error saving data')
+
+  updateAllowedArticles : (currentDoc, newDoc) ->
+    db.update currentDoc, newDoc, {}, (err, numReplaced) ->
+      if (error)
+        console.log('Error updating user')
+      return
 
   findByFingerPrint: (search)->
     @.db.find search , (error, data)->
@@ -50,19 +58,33 @@ class Anonymous_Service
 
     return shasum.digest('hex')
 
+  redirectToLoginPage:() ->
+    @.req.session.redirectUrl = @.req.url
+    @.res.status(403)
+    .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
+
   checkAuth:(next)->
     #Case 1, user already authenticated.
     if @.req?.session?.username
       return next()
-    fingerprint = @.req.cookie['X2ZpbmdlcnByaW50']
-    if (fingerprint)
-      data = @findByFingerPrint(fingerprint)
-      if(!data)
-        data = @findByFingerPrint(@remoteIp())
-        if (!data)
-          #create cookie, create
-    else
 
+    fingerprint = @.req.cookies?['X2ZpbmdlcnByaW50']
+    if(fingerprint)
+      data = @findByFingerPrint({"_fingerprint":fingerprint})
+
+      if(data? && data.articlesAllowed>0)
+        original = data
+        data.articlesAllowed = data.articlesAllowed -1
+        @.updateAllowedArticles(original, data)
+        return next()
+      else
+        return @redirectToLoginPage()
+    else
+      fingerprint = @computeFingerPrint()
+      doc = {'_fingerprint':fingerprint,'remoteIp': @remoteIp(),'articlesAllowed':4}
+      @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
+      @save(doc)
+      return next()
 
     if @.req.url is '/'
       @.res.redirect '/index.html'
