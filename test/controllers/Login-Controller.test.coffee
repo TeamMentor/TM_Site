@@ -3,7 +3,7 @@ bodyParser              = require 'body-parser'
 Login_Controller        = require '../../src/controllers/Login-Controller'
 config                  = require '../../src/config'
 
-describe.only '| controllers | Login-Controller.test |', ->
+describe '| controllers | Login-Controller.test |', ->
 
   #consts
   loginPage                 = 'guest/login-Fail.jade'
