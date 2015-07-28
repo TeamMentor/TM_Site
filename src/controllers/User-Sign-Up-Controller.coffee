@@ -17,7 +17,7 @@ class User_Sign_Up_Controller
     request = require('request')
     Login_Controller     = require('../controllers/Login-Controller')
     Analytics_Service    = require('../services/Analytics-Service')
-    Hubspot_Service      = require('../services/Hubspot-Service.coffee')
+    Hubspot_Service      = require('../services/Hubspot-Service')
     Jade_Service         = require('../services/Jade-Service')
 
   constructor: (req, res, options)->
