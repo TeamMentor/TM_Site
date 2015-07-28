@@ -75,8 +75,8 @@ class JadeService
       exportCode.save_As(targetFile_Path).file_Exists()
 
     folder_Jade_Files        : -> config.options.tm_design.folder_Jade_Files
-    folder_Jade_Compilation  : -> @.folder_Jade_Files()?.path_Combine '../TM_Website/.tmCache/jade-Compilation'
-    folder_Static_Files      : -> @.folder_Jade_Files().path_Combine '../TM_Static'
+    folder_Jade_Compilation  : -> @.calculate_Jade_Path('').path_Combine '../TM_Website/.tmCache/jade-Compilation'
+    folder_Static_Files      : -> @.calculate_Jade_Path('').path_Combine '../TM_Static'
     jade_Compilation_Enabled : -> config.options.tm_design.jade_Compilation_Enabled || false
 
     render_Jade_File: (jadeFile, params)=>
@@ -89,9 +89,7 @@ class JadeService
         params.article_Html = @.apply_Highlight(params.article_Html)
 
       if (@.cache_Enabled() is false)
-        console.log jadeFile
         jadeFile_Path = @.calculate_Jade_Path(jadeFile)
-        console.log jadeFile_Path?.real_Path()
         if jadeFile_Path?.file_Exists()
           return jade.renderFile(jadeFile_Path,params)
         return ""

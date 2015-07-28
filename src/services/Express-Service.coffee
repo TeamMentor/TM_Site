@@ -4,6 +4,7 @@ Logging_Service = null
 bodyParser      = null
 path            = null
 express         = null
+config          = null
 
 class Express_Service
 
@@ -12,24 +13,26 @@ class Express_Service
     Jade_Service     = require '../services/Jade-Service'
     Session_Service  = require '../services/Session-Service'
     Logging_Service  = require '../services/Logging-Service'
+    config           = require '../config'
     bodyParser       = require 'body-parser'
     path             = require "path"
     express          = require 'express'
+
 
   constructor: (options)->
     @.dependencies()
     @.options                 = options || {}
     @.app                     = express()
-    @.app.port                = @.options.port || global.config?.tm_design?.port || process.env.PORT || 1337;
+    @.app.port                = @.options.port || config?.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
     @.jade_Service            = new Jade_Service()
 
-    @.logging_Enabled         = global.config?.logging_Enabled || true
+    @.logging_Enabled         = config?.logging_Enabled || true
     @.path_To_Jade            = @.jade_Service.folder_Jade_Files()
     @.path_To_Static          = @.jade_Service.folder_Static_Files()
 
-    #@.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
+    #@.path_To_Jade            = config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
     #@.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
 
   setup: ()=>
@@ -63,7 +66,7 @@ class Express_Service
     @.app.disable "x-powered-by"
 
   set_Static_Route:()=>
-    @app.use express['static'](@.path_To_Static);
+    @app.use express['static'](@.path_To_Static)
     @
 
   set_Views_Path :()=>

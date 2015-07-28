@@ -59,16 +59,14 @@ class Login_Controller
 
     request options, (error, response)=>
       if error
-        console.log error
+        #console.log error
         logger?.info ('Could not connect with TM 3.5 server')
-        console.log (errorMessage)
+        #console.log (errorMessage)
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''
         userViewModel.password=''
         return @.render_Page @.jade_LoginPage_Unavailable, {viewModel:userViewModel }
       if not (response?.body?.d)
-        console.log options.url
-        console.log response.body
         logger?.info ('Could not connect with TM 3.5 server')
         userViewModel.errorMessage = errorMessage
         userViewModel.username =''

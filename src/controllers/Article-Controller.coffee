@@ -24,7 +24,6 @@ class Article_Controller
 
   article: =>
     send_Article = (view_Model)=>
-      console.log view_Model
       if view_Model
         @res.send @jade_Service.render_Jade_File(@.jade_Article, view_Model)
       else
@@ -68,7 +67,6 @@ class Article_Controller
     @.req.session.recent_Articles.unshift { id: id , title:title}
 
   resolve_Article_Ref: (article_Ref, callback)=>
-    console.log article_Ref
     @.graphService.article article_Ref, (data)=>
       article_Id = data.article_Id
       if article_Id

@@ -3,6 +3,7 @@ express         = require 'express'
 request         = require 'superagent'
 supertest       = require 'supertest'
 cheerio         = require 'cheerio'
+config          = require '../../src/config'
 
 Express_Service = require '../../src/services/Express-Service'
 
@@ -88,28 +89,28 @@ describe '| routes | routes.test |', ()->
       random_Port           = 10000.random().add(10000)
       app_35_Server         = new express().use(bodyParser.json())
       url_Mocked_3_5_Server = "http://localhost:#{random_Port}/webServices"
-      app_35_Server.post '/webServices/SendPasswordReminder', (req,res)->res.status(201).send {}      # status(200) would trigger a redirect
-      app_35_Server.post '/webServices/Login_Response'      ,
-        (req,res)->
-          username = req.body.username
-          logged_In = if req.body.username is 'user' or 'expired' then 0 else 1
-          res.status(200).send { d: { Login_Status : logged_In,Token:'00000000' } }
+      #app_35_Server.post '/webServices/SendPasswordReminder', (req,res)->res.status(201).send {}      # status(200) would trigger a redirect
 
-      app_35_Server.post '/webServices/Current_User'      ,
-        (req,res)->
-          PasswordExpired = if username is 'expired' then true else false
-          res.status(200).send {d:{"UserId":1982362528,"CSRF_Token":"115362661","PasswordExpired":PasswordExpired}}
+      #app_35_Server.post '/webServices/Login_Response'      ,
+      #  (req,res)->
+      #    username = req.body.username
+      #    logged_In = if req.body.username is 'user' or 'expired' then 0 else 1
+      #    res.status(200).send { d: { Login_Status : logged_In,Token:'00000000' } }
 
-      app_35_Server.post '/webServices/GetCurrentUserPasswordExpiryUrl'      ,
-        (req,res)->
-          res.status(200).send {"d":"/passwordReset/user/00000000-0000-0000-0000-000000000000"}
+      #app_35_Server.post '/webServices/Current_User'      ,
+      #  (req,res)->
+      #    PasswordExpired = if username is 'expired' then true else false
+      #    res.status(200).send {d:{"UserId":1982362528,"CSRF_Token":"115362661","PasswordExpired":PasswordExpired}}
 
-      app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
+      #app_35_Server.post '/webServices/GetCurrentUserPasswordExpiryUrl'      ,
+      #  (req,res)->
+      #    res.status(200).send {"d":"/passwordReset/user/00000000-0000-0000-0000-000000000000"}
+
+      #app_35_Server.use (req,res,next)-> log('------' + req.url); res.send null
       app_35_Server.listen(random_Port)
 
-      global_Config = global.config
-      global.config.tm_design.webServices = url_Mocked_3_5_Server
-      global.config.tm_design.jade_Compilation_Enabled = true
+      config.options.tm_design.webServices = url_Mocked_3_5_Server
+      config.options.tm_design.jade_Compilation_Enabled = true
 
       options =
         logging_Enabled : false
@@ -122,8 +123,7 @@ describe '| routes | routes.test |', ()->
 
     after ()->
       app.server.close()
-      global.config = global_Config
-      #express_Service.logging_Service.restore_Console()
+      config.restore()
 
 
     it 'Check expected paths', ()->

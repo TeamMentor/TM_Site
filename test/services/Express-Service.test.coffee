@@ -151,7 +151,7 @@ describe '| services | Express-Service.test', ()->
     it '/assets/{file}.jpg', (done)->
 
       supertest(expressService.app)
-      .get '/assets/clients/logos.jpg'
-      .end (err,res)->
-        res.status.assert_Is 200
-        done()
+        .get '/assets/clients/logos.jpg'
+        .end (err,res)->
+          res.status.assert_Is 200
+          done()
