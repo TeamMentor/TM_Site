@@ -41,7 +41,7 @@ class Login_Controller
 
   loginUser: ()=>
 
-    userViewModel ={username: @.req.body.username,password:'',errorMessage:''}
+    userViewModel = {username: @.req.body.username,password:'',errorMessage:''}
 
     if (@.req.body.username == '' or @.req.body.password == '')
       @.req.session.username      = undefined
