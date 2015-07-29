@@ -3,6 +3,7 @@ Jade_Service      = null
 Graph_Service     = null
 Analytics_Service = null
 Anonymous_Service = require('../services/Anonymous-Service')
+
 class Article_Controller
 
   dependencies: ()->
@@ -27,7 +28,7 @@ class Article_Controller
       if view_Model
         @res.send @jade_Service.render_Jade_File(@.jade_Article, view_Model)
       else
-        @res.send @jade_Service.render_Jade_File(@.jade_No_Article)
+        @res.send @.jade_Service.render_Jade_File(@.jade_No_Article)
 
     @.resolve_Article_Ref @req.params.ref, send_Article
 
@@ -94,11 +95,11 @@ Article_Controller.register_Routes = (app, expressService,graph_Options) ->
             new Article_Controller(req, res, next,graph_Options)[method_Name]()   # creates SearchController object with live
 
   app.get '/a/:ref'               , checkAuth, articleController('article')
-  #app.get '/article/:ref/:guid'   , checkAuth, articleController('check_Guid')
+  app.get '/article/:ref/:guid'   , articleController('check_Guid')
   app.get '/article/:ref/:title'  , checkAuth, articleController('article')
   app.get '/article/:ref'         , checkAuth, articleController('article')
   app.get '/articles'             , checkAuth, articleController('articles')
-  app.get '/teamMentor/open/:guid', checkAuth, articleController('check_Guid')
+  app.get '/teamMentor/open/:guid',  articleController('check_Guid')
   app.get '/json/article/:ref'    , checkAuth, articleController('article_Json')
 
 

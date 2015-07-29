@@ -83,6 +83,7 @@ class Anonymous_Service
     @findByFingerPrint fingerprint,(data)=>
       if (not data)
         @findByRemoteIp @remoteIp(), (data)=>
+          console.log("Fingerprint do not match then finding by remote IP " )
           if (not data)
             doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5}
             @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
@@ -92,7 +93,7 @@ class Anonymous_Service
             if(data? && data.articleCount > 0)
               articlesAllowed = data.articleCount
               articlesAllowed = parseInt(articlesAllowed)-1;
-              @update {"_fingerprint": fingerprint},{$set:{"articleCount": articlesAllowed }}, {}, (callback)->
+              @update {"remoteIp": @remoteIp()},{$set:{"articleCount": articlesAllowed }}, {}, (callback)->
                 console.log("Updated..")
                 return next()
             else
