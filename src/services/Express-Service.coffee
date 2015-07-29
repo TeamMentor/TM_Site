@@ -23,12 +23,12 @@ class Express_Service
     @.dependencies()
     @.options                 = options || {}
     @.app                     = express()
-    @.app.port                = @.options.port || config?.tm_design?.port || process.env.PORT || 1337;
+    @.app.port                = @.options.port || config.options.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
     @.jade_Service            = new Jade_Service()
 
-    @.logging_Enabled         = config?.logging_Enabled || true
+    @.logging_Enabled         = config.options.logging_Enabled || true
     @.path_To_Jade            = @.jade_Service.folder_Jade_Files()
     @.path_To_Static          = @.jade_Service.folder_Static_Files()
 

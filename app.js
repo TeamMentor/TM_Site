@@ -12,8 +12,7 @@ var site_Data = new Side_Data()
 
 //log('[SiteData] loading data from ' + site_Data.siteData_Folder())
 
-global.config = site_Data//.load_Custom_Code()
-                         .load_Options()
+global.config = site_Data.load_Options() //.load_Custom_Code()
 
 log('------------global.config---------------')
 log(global.config);
