@@ -321,7 +321,7 @@ describe '| controllers | Help-Controller.test |', ()->
       .end (err, res)->
         res.status.assert_Is 200
         res.type  .assert_Is 'image/jpeg'
-        res.body.length.assert_Is_Bigger_Than 10000
+        res.body.length.assert_Is_Bigger_Than 1000
         done()
 
     it 'show_Image (image not exists)', (done)->
