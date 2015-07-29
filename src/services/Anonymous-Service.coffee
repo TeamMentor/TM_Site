@@ -17,26 +17,27 @@ class Anonymous_Service
 
   setup: (req,res)->
     @.db.loadDatabase =>
-      @.db.persistence.setAutocompactionInterval(30 * 1000) # set to 30s
+      #@.db.persistence.setAutocompactionInterval(30 * 1000) # set to 30s
 
-  save: (doc)->
+  save: (doc,callback)->
     @.db.loadDatabase =>
       @.db.insert doc, (err,doc) ->
         if err
           console.log('Error saving data')
-        console.log("Doc created " + doc)
+        callback()
 
   updateAllowedArticles : (currentDoc, newDoc) ->
-    @.db.update currentDoc, newDoc, {}, (err, numReplaced) ->
+    @.db.update currentDoc, newDoc, {}, (err, numReplaced)->
       if (err)
         console.log('Error updating user')
       return
 
-  update: (query,update,options) ->
-    @.db.update query,update,options,(error) =>
+  update: (query,update,options,callback) ->
+    @.db.update query,update,options,(error,doc) =>
       if error
-        console.log 'Error updating article count for: ' + query
-      return
+        callback(null)
+      @.db.persistence.compactDatafile()
+      callback(doc)
 
   findByFingerPrint: (fingerprint,callback)->
     @.db.findOne {_fingerprint:fingerprint},(error, document)->
@@ -44,11 +45,11 @@ class Anonymous_Service
         console.log ('Error')
       callback document
 
-  findByRemoteIp: (search)->
-    @.db.find search , (error, data)->
+  findByRemoteIp: (remoteIp,callback)->
+    @.db.findOne {remoteIp:remoteIp},(error, document)->
       if error
         console.log ('Error')
-      return data
+      callback document
 
   remoteIp: () ->
     ipAddr = @.req.headers["x-forwarded-for"]
@@ -71,30 +72,42 @@ class Anonymous_Service
     .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
 
   checkAuth:(next)->
-
     if @.req?.session?.username
       return next()
+
     fingerprint = @.req.cookies?['X2ZpbmdlcnByaW50']
 
-    if(fingerprint)
-      console.log("Searching by Fingerprint")
-      @findByFingerPrint fingerprint,(data)=>
+    if (not fingerprint)
+      fingerprint = @computeFingerPrint()
+
+    @findByFingerPrint fingerprint,(data)=>
+      if (not data)
+        @findByRemoteIp @remoteIp(), (data)=>
+          if (not data)
+            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5}
+            @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
+            @save doc,(callback)->
+              return next()
+          else
+            if(data? && data.articleCount > 0)
+              articlesAllowed = data.articleCount
+              articlesAllowed = parseInt(articlesAllowed)-1;
+              @update {"_fingerprint": fingerprint},{$set:{"articleCount": articlesAllowed }}, {}, (callback)->
+                console.log("Updated..")
+                return next()
+            else
+              return @redirectToLoginPage()
+      else
         if(data? && data.articleCount > 0)
           articlesAllowed = data.articleCount
           articlesAllowed = parseInt(articlesAllowed)-1;
-          console.log("Allowed to "  + articlesAllowed + " articles")
-          @update {"_fingerprint": fingerprint},{$set:{"articleCount": articlesAllowed }}, {upsert:false}
-          return next()
+          console.log("Here")
+          @update {"_fingerprint": fingerprint},{$set:{"articleCount": articlesAllowed }}, {}, (callback)=>
+            console.log("Updated..")
+            return next()
         else
+          console.log("Sorry you are not allowed to see more articles ! " + fingerprint)
           return @redirectToLoginPage()
-    else
-      fingerprint = @computeFingerPrint()
-      doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5}
-      @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
-      @save(doc)
-      return next()
-
-
 
   module.exports =Anonymous_Service
 
