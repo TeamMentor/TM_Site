@@ -28,18 +28,20 @@ add_Routes = (express_Service)->
     #run custom code hook (if available)
     global.custom?.express_Routes?(app, require('express'))
 
-    app.post '/user/login'     , (req, res)-> new Login_Controller(req, res).loginUser()
-    app.post '/json/user/login', (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
-    app.get  '/user/logout'    , (req, res)-> new Login_Controller(req, res).logoutUser()
-    app.post '/user/sign-up'   , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();
+    app.post '/user/login'              , (req, res)-> new Login_Controller(req, res).loginUser()
+    app.post '/json/user/login'         , (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
+    app.post '/json/user/signup'       ,  (req, res)-> new User_Sign_Up_Controller(req, res).json_Mode().userSignUp()
 
-    app.get '/_Customizations/SSO.aspx', (req, res)-> new Login_Controller(req, res).tm_SSO()
-    app.get '/Aspx_Pages/SSO.aspx'     , (req, res)-> new Login_Controller(req, res).tm_SSO()
+    app.get  '/user/logout'             , (req, res)-> new Login_Controller(req, res).logoutUser()
+    app.post '/user/sign-up'            , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();
 
-    app.get '/index.html'      , (req, res)-> res.send jade_Service.render_Jade_File 'guest/default.jade'
-    app.get '/guest/:page.html', (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
-    app.get '/guest/:page'     , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
-    app.get '/teamMentor'      , (req, res)->
+    app.get '/_Customizations/SSO.aspx' , (req, res)-> new Login_Controller(req, res).tm_SSO()
+    app.get '/Aspx_Pages/SSO.aspx'      , (req, res)-> new Login_Controller(req, res).tm_SSO()
+
+    app.get '/index.html'               , (req, res)-> res.send jade_Service.render_Jade_File 'guest/default.jade'
+    app.get '/guest/:page.html'         , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
+    app.get '/guest/:page'              , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
+    app.get '/teamMentor'               , (req, res)->
         if req.session?.username
             res.redirect "/user/main.html"                                                                        # to prevent cached infinite redirects (due to 3.5 redirect of / to /teammentor
         else
