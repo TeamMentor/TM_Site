@@ -4,7 +4,7 @@ Nedb                = null
 
 class Anonymous_Service
   dependencies: ()->
-    Nedb            = require('nedb')
+    Nedb                = require('nedb')
     Jade_Service        = require('../services/Jade-Service')
     @.crypto            = require 'crypto'
 
@@ -13,24 +13,24 @@ class Anonymous_Service
     @.req               = req
     @.res               = res
     @.filename          = './.tmCache/_anonymousVisits'
-    @.db                = new Nedb(@.filename)
+    @.db                = new Nedb({ filename: @.filename, autoload: true })
     @.now               = new Date(Date.now())
-    @setup()
 
   setup: (req,res)->
-    @.db.loadDatabase =>
-      #@.db.persistence.setAutocompactionInterval(30 * 1000) # set to 30s
+    @.db.ensureIndex { fieldName: '_fingerprint', unique: true },(err)->
+      if err
+        console.log "Error building index on _fingerprint field: " + err
 
   save: (doc,callback)->
-    @.db.loadDatabase =>
       @.db.insert doc, (err,doc) ->
         if err
-          console.log('Error saving data')
+          console.log 'Error saving to datastore with the following error: ' + err
         callback()
 
   update: (query,update,options,callback) ->
-    @.db.update query,update,options,(error,doc) =>
-      if error
+    @.db.update query,update,options,(err,doc) =>
+      if err
+        console.log 'Error updating record in datastore: ' + err
         callback(null)
       @.db.persistence.compactDatafile()
       callback(doc)
@@ -38,7 +38,8 @@ class Anonymous_Service
   findOne: (search,callback)->
     @.db.findOne search,(err,doc)->
       if err
-        console.log 'Error trying to find a record.'
+        console.log 'Error trying to find a record for: ' + search
+        console.log 'Error is: ' + err
       callback doc
 
   remoteIp: () ->
@@ -67,19 +68,16 @@ class Anonymous_Service
 
     now = new Date()
     expirationDate = now.setDate(now.getDate() - 30)
-
     @.db.remove { creationDate: { $lt: new Date(expirationDate) } },{ multi: true },(err,numRemoved)->
       if err
-        console.log "\nError removing records older than 30 days."
+        console.log "\nError removing records older than 30 days: " + err
       else
         console.log "\n  -------------------------------------- \n"
         console.log "Number of expired records removed was: " + numRemoved
 
-    fingerprint = @.req.cookies?['X2ZpbmdlcnByaW50']
-
+    fingerprint = @.req.cookies?[cookieName]
     if (not fingerprint)
       fingerprint = @computeFingerPrint()
-
     @findOne {_fingerprint:fingerprint},(data)=>
       if (not data)
         @findOne {remoteIp:@remoteIp()}, (data)=>
