@@ -75,10 +75,12 @@ class Article_Controller
           title      = article_Data?.title
           technology = article_Data?.technology
           type       = article_Data?.type
-          phase       = article_Data?.phase
+          phase      = article_Data?.phase
+          summary    = article_Data?.summary
+          console.log article_Data
           @graphService.article_Html article_Id, (data)=>
             @recentArticles_Add article_Id, title
-            callback { id : article_Id, title: title,  article_Html: data?.html, technology: technology, type: type, phase: phase}
+            callback { id : article_Id, title: title,  summary: summary, article_Html: data?.html, technology: technology, type: type, phase: phase}
       else
         callback null
 
