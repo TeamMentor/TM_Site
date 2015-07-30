@@ -5,14 +5,14 @@ Nedb                = null
 class Anonymous_Service
   dependencies: ()->
     Nedb            = require('nedb')
+    Jade_Service        = require('../services/Jade-Service')
+    @.crypto            = require 'crypto'
 
   constructor:(req, res)->
     @.dependencies()
     @.req               = req
     @.res               = res
-    @.crypto            = require 'crypto'
     @.filename          = './.tmCache/_anonymousVisits'
-    Jade_Service        = require('../services/Jade-Service')
     @.db                = new Nedb(@.filename)
     @.now               = new Date(Date.now())
     @setup()
@@ -27,12 +27,6 @@ class Anonymous_Service
         if err
           console.log('Error saving data')
         callback()
-
-  updateAllowedArticles : (currentDoc, newDoc) ->
-    @.db.update currentDoc, newDoc, {}, (err, numReplaced)->
-      if (err)
-        console.log('Error updating user')
-      return
 
   update: (query,update,options,callback) ->
     @.db.update query,update,options,(error,doc) =>
@@ -52,6 +46,12 @@ class Anonymous_Service
       if error
         console.log ('Error')
       callback document
+
+  findOne: (search,callback)->
+    @.db.findOne {search},(err,doc)->
+      if err
+        console.log 'Error trying to find a record.'
+      callback doc
 
   remoteIp: () ->
     ipAddr = @.req.headers["x-forwarded-for"]
@@ -79,29 +79,14 @@ class Anonymous_Service
 
     now = new Date()
     expirationDate = now.setDate(now.getDate() - 30)
-    console.log "expirationDate is: " + expirationDate
 
-    @.db.find { creationDate: { $lt: expirationDate } },(err,docs)->
-      if err
-        console.log "\nError finding records older than 30 days."
-      else
-        console.log "docs are: \n" + docs
-        console.log "\n --------------------------------------- \n"
-        docs.forEach (element,index)->
-          console.log "\nelement is: " + element
-          console.log "\ndoc is: " + index
-        return docs
-
-    ###
-    @.db.remove { "creationDate:$$date": { $lt: expirationDate } },{ multi: true },(err,numRemoved)->
+    @.db.remove { creationDate: { $lt: new Date(expirationDate) } },{ multi: true },(err,numRemoved)->
       if err
         console.log "\nError removing records older than 30 days."
       else
         console.log "\n  -------------------------------------- \n"
-        console.log "Number removed was: " + numRemoved
-        console.log 1435674695210 > 1432962110000
-        return numRemoved
-    ###
+        console.log "Number of expired records removed was: " + numRemoved
+
     fingerprint = @.req.cookies?['X2ZpbmdlcnByaW50']
 
     if (not fingerprint)
@@ -112,7 +97,7 @@ class Anonymous_Service
         @findByRemoteIp @remoteIp(), (data)=>
           console.log("Fingerprint do not match then finding by remote IP " )
           if (not data)
-            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5,"creationDate":@.now}
+            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5,"creationDate":new Date(@.now)}
             @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
             @save doc,(callback)->
               return next()
