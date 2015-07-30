@@ -31,6 +31,19 @@ class User_Sign_Up_Controller
     @.analyticsService        = new Analytics_Service(@.req, @.res)
     @.hubspotService          = new Hubspot_Service(@.req,@.res)
     @.jade_Service            = new Jade_Service()
+
+  json_Mode: ()=>
+    @.render_Page = (page, data)=>
+      data.page = page
+      @.res.json data
+    @.res.redirect = (page)=>
+      data =
+        page     : page
+        viewModel: {}
+        result   : 'OK'
+      @.res.json data
+    @
+
   userSignUp: ()=>
     userViewModel =
                     {
