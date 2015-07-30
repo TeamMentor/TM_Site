@@ -35,20 +35,8 @@ class Anonymous_Service
       @.db.persistence.compactDatafile()
       callback(doc)
 
-  findByFingerPrint: (fingerprint,callback)->
-    @.db.findOne {_fingerprint:fingerprint},(error, document)->
-      if error
-        console.log ('Error')
-      callback document
-
-  findByRemoteIp: (remoteIp,callback)->
-    @.db.findOne {remoteIp:remoteIp},(error, document)->
-      if error
-        console.log ('Error')
-      callback document
-
   findOne: (search,callback)->
-    @.db.findOne {search},(err,doc)->
+    @.db.findOne search,(err,doc)->
       if err
         console.log 'Error trying to find a record.'
       callback doc
@@ -92,10 +80,9 @@ class Anonymous_Service
     if (not fingerprint)
       fingerprint = @computeFingerPrint()
 
-    @findByFingerPrint fingerprint,(data)=>
+    @findOne {_fingerprint:fingerprint},(data)=>
       if (not data)
-        @findByRemoteIp @remoteIp(), (data)=>
-          console.log("Fingerprint do not match then finding by remote IP " )
+        @findOne {remoteIp:@remoteIp()}, (data)=>
           if (not data)
             doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5,"creationDate":new Date(@.now)}
             @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
@@ -106,7 +93,6 @@ class Anonymous_Service
               articlesAllowed = data.articleCount
               articlesAllowed = parseInt(articlesAllowed)-1;
               @update {"remoteIp": @remoteIp()},{$set:{"articleCount": articlesAllowed }}, {}, (callback)->
-                console.log("Updated..")
                 return next()
             else
               return @redirectToLoginPage()
@@ -114,12 +100,9 @@ class Anonymous_Service
         if(data? && data.articleCount > 0)
           articlesAllowed = data.articleCount
           articlesAllowed = parseInt(articlesAllowed)-1;
-          console.log("Here")
           @update {"_fingerprint": fingerprint},{$set:{"articleCount": articlesAllowed }}, {}, (callback)=>
-            console.log("Updated..")
             return next()
         else
-          console.log("Sorry you are not allowed to see more articles ! " + fingerprint)
           return @redirectToLoginPage()
 
   module.exports =Anonymous_Service
