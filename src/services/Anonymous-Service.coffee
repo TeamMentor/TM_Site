@@ -1,6 +1,7 @@
 cookieName          = 'X2ZpbmdlcnByaW50' #_fingerprint on base 64
 Jade_Service        = null
 Nedb                = null
+
 class Anonymous_Service
   dependencies: ()->
     Nedb            = require('nedb')
@@ -13,6 +14,7 @@ class Anonymous_Service
     @.filename          = './.tmCache/_anonymousVisits'
     Jade_Service        = require('../services/Jade-Service')
     @.db                = new Nedb(@.filename)
+    @.now               = new Date(Date.now())
     @setup()
 
   setup: (req,res)->
@@ -75,6 +77,31 @@ class Anonymous_Service
     if @.req?.session?.username
       return next()
 
+    now = new Date()
+    expirationDate = now.setDate(now.getDate() - 30)
+    console.log "expirationDate is: " + expirationDate
+
+    @.db.find { creationDate: { $lt: expirationDate } },(err,docs)->
+      if err
+        console.log "\nError finding records older than 30 days."
+      else
+        console.log "docs are: \n" + docs
+        console.log "\n --------------------------------------- \n"
+        docs.forEach (element,index)->
+          console.log "\nelement is: " + element
+          console.log "\ndoc is: " + index
+        return docs
+
+    ###
+    @.db.remove { "creationDate:$$date": { $lt: expirationDate } },{ multi: true },(err,numRemoved)->
+      if err
+        console.log "\nError removing records older than 30 days."
+      else
+        console.log "\n  -------------------------------------- \n"
+        console.log "Number removed was: " + numRemoved
+        console.log 1435674695210 > 1432962110000
+        return numRemoved
+    ###
     fingerprint = @.req.cookies?['X2ZpbmdlcnByaW50']
 
     if (not fingerprint)
@@ -85,7 +112,7 @@ class Anonymous_Service
         @findByRemoteIp @remoteIp(), (data)=>
           console.log("Fingerprint do not match then finding by remote IP " )
           if (not data)
-            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5}
+            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5,"creationDate":@.now}
             @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
             @save doc,(callback)->
               return next()

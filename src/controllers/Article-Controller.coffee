@@ -99,7 +99,7 @@ Article_Controller.register_Routes = (app, expressService,graph_Options) ->
   app.get '/article/:ref/:title'  , checkAuth, articleController('article')
   app.get '/article/:ref'         , checkAuth, articleController('article')
   app.get '/articles'             , checkAuth, articleController('articles')
-  app.get '/teamMentor/open/:guid',  articleController('check_Guid')
+  app.get '/teamMentor/open/:guid', articleController('check_Guid')
   app.get '/json/article/:ref'    , checkAuth, articleController('article_Json')
 
 
