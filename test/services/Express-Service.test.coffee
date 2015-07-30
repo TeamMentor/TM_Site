@@ -17,7 +17,7 @@ describe '| services | Express-Service.test', ()->
   it 'setup',->
     using new Express_Service().setup(),->
       @.app.constructor.name.assert_Is 'EventEmitter'
-      @.app.port       .assert_Is 1337
+      @.app.port       .assert_Is 12345
 
       console.log       .assert_Is global.info
       @.logging_Service.assert_Is_Object()
