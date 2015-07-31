@@ -7,7 +7,7 @@ class Anonymous_Service
     Jade_Service        = require '../services/Jade-Service'
     @.crypto            = require 'crypto'
 
-  constructor:(req, res)->
+  constructor: (req, res) ->
     @.dependencies()
     @.req                       = req
     @.res                       = res
@@ -34,14 +34,14 @@ class Anonymous_Service
     @.db.update query,update,options,(err,doc) =>
       if err
         console.log 'Error updating record in datastore: ' + err
-        callback(null)
+        callback null
       @.db.persistence.compactDatafile()
-      callback(doc)
+      callback doc
 
   cleanupExpiredRecords: ()->
     now = new Date()
     expirationDate = now.setDate(now.getDate() - @.anonymousConfig.expirationDays)
-    console.log "Cleaning expired records from _anonymousVisits.."
+    console.log "Cleaning expired records from _anonymousVisits datastore..."
     @.db.remove { creationDate: { $lt: new Date(expirationDate) } },{ multi: true },(err,numRemoved)->
       if err
         console.log "Error removing records older than " + @.anonymousConfig.expirationDays + "days: " + err
@@ -69,18 +69,18 @@ class Anonymous_Service
       shasum.update(@.req.headers[i])
     return shasum.digest('hex')
 
-  createCookie: (fingerprint,callback) ->
+  createCookie: (ipAddr,fingerprint,callback) ->
     counter = parseInt(@.anonymousConfig.allowedArticles)-1
-    record = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":counter,"creationDate":new Date(@.now)}
+    record = { "_fingerprint":fingerprint,"remoteIp":ipAddr,"articleCount":counter,"creationDate":new Date(@.now) }
     @.res.cookie(@.anonymousConfig.cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
     @save record,(doc)=>
       callback()
 
-  updateArticlesAllowed: (data,field,callback) ->
+  updateArticlesAllowed: (field,data,callback) ->
     if(data? && data.articleCount > 0)
       articlesAllowed = data.articleCount
       articlesAllowed = parseInt(articlesAllowed)-1;
-      @update field,{$set:{"articleCount": articlesAllowed }}, {}, (doc)=>
+      @update field,{ $set:{ "articleCount": articlesAllowed }}, {}, (doc)=>
         callback doc
     else
       return @redirectToLoginPage()
@@ -101,16 +101,17 @@ class Anonymous_Service
       fingerprint = @computeFingerPrint()
     @findOne {_fingerprint:fingerprint},(data)=>
       if (not data)
-        @findOne {remoteIp:@remoteIp()}, (data)=>
+        ipAddr = @remoteIp()
+        @findOne { remoteIp:ipAddr }, (data)=>
           if (not data)
-            @createCookie fingerprint,(callback)=>
+            @createCookie ipAddr,fingerprint,(callback)=>
               return next()
           else
-            @updateArticlesAllowed data,{"remoteIp":@remoteIp()},(callback)=>
+            @updateArticlesAllowed { remoteIp:ipAddr },data,(callback)=>
               return next()
       else
-        @updateArticlesAllowed data,{"_fingerprint":fingerprint},(callback)=>
+        @updateArticlesAllowed { _fingerprint:fingerprint },data,(callback)=>
           return next()
 
-  module.exports =Anonymous_Service
+  module.exports = Anonymous_Service
 
