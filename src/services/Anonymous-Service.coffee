@@ -10,16 +10,20 @@ class Anonymous_Service
 
   constructor:(req, res)->
     @.dependencies()
-    @.req               = req
-    @.res               = res
-    @.filename          = './.tmCache/_anonymousVisits'
-    @.db                = new Nedb({ filename: @.filename, autoload: true })
-    @.now               = new Date(Date.now())
+    @.req                       = req
+    @.res                       = res
+    @.filename                  = './.tmCache/_anonymousVisits'
+    @.db                        = new Nedb({ filename: @.filename, autoload: true })
+    @.anonymousArticlesAllowed  = global.config?.tm_design.anonymousArticlesAllowed
+    @.now                       = new Date(Date.now())
 
   setup: (req,res)->
     @.db.ensureIndex { fieldName: '_fingerprint', unique: true },(err)->
       if err
         console.log "Error building index on _fingerprint field: " + err
+    if(not @.anonymousArticlesAllowed)
+      console.log("Error number of anonymous articles is not defined.")
+    @.cleanupExpiredRecords()
 
   save: (doc,callback)->
       @.db.insert doc, (err,doc) ->
@@ -34,6 +38,19 @@ class Anonymous_Service
         callback(null)
       @.db.persistence.compactDatafile()
       callback(doc)
+
+  cleanupExpiredRecords:()->
+    now = new Date()
+    expirationDate = now.setDate(now.getDate() - 30)
+
+    console.log "\nCleaning expired records.."
+
+    @.db.remove { creationDate: { $lt: new Date(expirationDate) } },{ multi: true },(err,numRemoved)->
+      if err
+        console.log "\nError removing records older than 30 days: " + err
+      else
+        console.log "\n  -------------------------------------- \n"
+        console.log "Number of expired records removed was: " + numRemoved
 
   findOne: (search,callback)->
     @.db.findOne search,(err,doc)->
@@ -66,14 +83,10 @@ class Anonymous_Service
     if @.req?.session?.username
       return next()
 
-    now = new Date()
-    expirationDate = now.setDate(now.getDate() - 30)
-    @.db.remove { creationDate: { $lt: new Date(expirationDate) } },{ multi: true },(err,numRemoved)->
-      if err
-        console.log "\nError removing records older than 30 days: " + err
-      else
-        console.log "\n  -------------------------------------- \n"
-        console.log "Number of expired records removed was: " + numRemoved
+    if not @.anonymousArticlesAllowed
+      console.log("No anonymous articles specified.Redirecting to the login page ")
+      return @redirectToLoginPage()
+
 
     fingerprint = @.req.cookies?[cookieName]
     if (not fingerprint)
@@ -82,7 +95,8 @@ class Anonymous_Service
       if (not data)
         @findOne {remoteIp:@remoteIp()}, (data)=>
           if (not data)
-            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":5,"creationDate":new Date(@.now)}
+            counter = parseInt(@.anonymousArticlesAllowed)-1
+            doc = {"_fingerprint":fingerprint,"remoteIp": @remoteIp(),"articleCount":counter,"creationDate":new Date(@.now)}
             @.res.cookie(cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
             @save doc,(callback)->
               return next()
