@@ -79,6 +79,7 @@ describe '| routes | routes.test |', ()->
                       '/json/user/login'
                       '/json/article/:ref'
                       '/json/user/pwd_reset'
+                      '/json/user/signup'
                       '/json/docs/library'
                       '/json/docs/:page'
                       '/*']
@@ -173,7 +174,7 @@ describe '| routes | routes.test |', ()->
       postRequest = ['/user/pwd_reset','/user/sign-up' , '/user/login',
                     '/flare/user/login','/json/user/login'
                      '/json/article/AAAAA'
-                     '/json/user/pwd_reset'
+                     '/json/user/pwd_reset', '/json/user/signup'
                      '/json/docs/AAAAA'                                           ].contains(path)
 
       testName = "[#{expectedStatus}] #{originalPath}" + (if(path != originalPath) then "  (#{path})" else  "")

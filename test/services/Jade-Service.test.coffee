@@ -81,6 +81,28 @@ describe "| services | Jade-Service |", ()->
       assert_Is_Undefined @.folder_Jade_Compilation()
       assert_Is_Null @.calculate_Compile_Path "aaa"
 
+  it.only 'cache_Hashes_File, cache_Hashes_Get, cache_Hashes_Set',->
+    config.options.tm_design.jade_Compilation_Enabled = true
+    using new Jade_Service(), ->
+      @.folder_Jade_Compilation = -> compile_Path
+      @.cache_Hashes_File().assert_File_Deleted()
+      @.cache_Hashes_File().assert_File_Not_Exists()
+      @.cache_Hashes_Get().assert_Is {}
+      @.jade_Compilation_Enabled().assert_Is_True()
+
+      target = jade_Path.path_Combine jade_File
+      @.render_Jade_File(target).assert_Is(@.render_Jade_File target)
+      @.cache_Hashes_File().assert_File_Exists()
+
+      contents_1 = @.cache_Hashes_File().file_Contents()
+      target.file_Contents().replace('in-jade', 'aaaa').save_As(target)
+      @.render_Jade_File(target).assert_Is_Not contents_1
+
+
+
+
+
+
   it 'calculate_Jade_Path',->
       using new Jade_Service(), ->
         using @.calculate_Jade_Path, ->

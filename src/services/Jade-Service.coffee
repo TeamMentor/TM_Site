@@ -5,6 +5,12 @@ cheerio   = null
 config    = null
 Highlight = null
 
+crypto = require 'crypto'
+String::checksum = (algorithm, encoding)->
+  crypto.createHash(algorithm || 'md5')
+        .update(@.toString(), 'utf8')
+        .digest(encoding || 'hex')
+
 class JadeService
 
     dependencies: ()->
@@ -35,6 +41,16 @@ class JadeService
     cache_Enabled: ()=>
       @.jade_Compilation_Enabled()
 
+    cache_Hashes_File: ()=>
+      @.folder_Jade_Compilation().path_Combine('compilation_Hashes.json')
+      
+    cache_Hashes_Get: ()=>
+      @.cache_Hashes_File().load_Json() || {}
+
+    cache_Hashes_Set: (key,value)=>
+      cache_Hashes = @.cache_Hashes_Get()
+      cache_Hashes[key] = value
+      cache_Hashes.save_Json @.cache_Hashes_File()
 
     calculate_Compile_Path: (fileToCompile)=>
       compile_Folder = @.folder_Jade_Compilation()
@@ -96,9 +112,16 @@ class JadeService
 
       targetFile_Path = @.calculate_Compile_Path(jadeFile);
 
+      if targetFile_Path.file_Exists()                                                # check if jadeFile contents has been changed
+        if (@.cache_Hashes_Get()[jadeFile] isnt jadeFile.file_Contents().checksum())
+          "[jade-compilation] detected file change to: #{jadeFile.file_Name()}".log()
+          delete require.cache[targetFile_Path]                                       # invalidate cache
+          targetFile_Path.file_Delete()                                               # delete compiled file
+
       if targetFile_Path.file_Not_Exists() and @.compile_JadeFile_To_Disk(jadeFile) is false
         return "";
 
+      @.cache_Hashes_Set(jadeFile , jadeFile.file_Contents().checksum())              # save hash
       return require(targetFile_Path)(params);
 
     render_Mixin: (file, mixin, params)=>
