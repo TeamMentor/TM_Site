@@ -115,7 +115,7 @@ class Help_Controller
       @.fetch_Article_and_Show @.docs_Library?.Articles[@.page_Id()]?.Title || null
 
   user_Logged_In: ()=>
-    @req.session?.username isnt undefined
+    @.req.session?.username isnt undefined
 
 Help_Controller.register_Routes =  (app)=>
 
