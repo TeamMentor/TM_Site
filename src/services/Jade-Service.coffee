@@ -43,7 +43,7 @@ class JadeService
 
     cache_Hashes_File: ()=>
       @.folder_Jade_Compilation().path_Combine('compilation_Hashes.json')
-      
+
     cache_Hashes_Get: ()=>
       @.cache_Hashes_File().load_Json() || {}
 
@@ -75,12 +75,17 @@ class JadeService
 
 
     compile_JadeFile_To_Disk: (target)=>
+      jade_File = target
 
-      jade_File = @.calculate_Jade_Path(target)
+      if (not jade_File)
+        return false
 
-      if (not jade_File) or jade_File.file_Not_Exists() then return false
+      if jade_File.file_Not_Exists()
+        jade_File = @.calculate_Jade_Path(jade_File)
 
-      targetFile_Path = @.calculate_Compile_Path(target);
+      if jade_File.file_Not_Exists() then return false
+
+      targetFile_Path = @.calculate_Compile_Path(jade_File);
       targetFile_Path.file_Delete()
 
       js_Code = jade.compileClient(jade_File.file_Contents() , { filename:jade_File, compileDebug : false} );
@@ -89,6 +94,7 @@ class JadeService
                     'module.exports = ' + js_Code;
 
       exportCode.save_As(targetFile_Path).file_Exists()
+      return targetFile_Path.file_Exists()
 
     folder_Jade_Files        : -> config.options.tm_design.folder_Jade_Files
     folder_Jade_Compilation  : -> @.calculate_Jade_Path('').path_Combine '../TM_Website/.tmCache/jade-Compilation'
@@ -104,24 +110,28 @@ class JadeService
       if params.article_Html
         params.article_Html = @.apply_Highlight(params.article_Html)
 
+      jadeFile_Path   = @.calculate_Jade_Path(jadeFile)
+      targetFile_Path = @.calculate_Compile_Path(jadeFile_Path);
+
       if (@.cache_Enabled() is false)
-        jadeFile_Path = @.calculate_Jade_Path(jadeFile)
         if jadeFile_Path?.file_Exists()
           return jade.renderFile(jadeFile_Path,params)
         return ""
 
-      targetFile_Path = @.calculate_Compile_Path(jadeFile);
+      jade_File_Contents = jadeFile_Path.file_Contents()
+      if not jade_File_Contents
+        return ""
 
-      if targetFile_Path.file_Exists()                                                # check if jadeFile contents has been changed
-        if (@.cache_Hashes_Get()[jadeFile] isnt jadeFile.file_Contents().checksum())
+      if targetFile_Path?.file_Exists()                                                # check if jadeFile contents has been changed
+        if (@.cache_Hashes_Get()[jadeFile_Path] isnt jade_File_Contents.checksum())
           "[jade-compilation] detected file change to: #{jadeFile.file_Name()}".log()
           delete require.cache[targetFile_Path]                                       # invalidate cache
           targetFile_Path.file_Delete()                                               # delete compiled file
 
-      if targetFile_Path.file_Not_Exists() and @.compile_JadeFile_To_Disk(jadeFile) is false
+      if targetFile_Path.file_Not_Exists() and @.compile_JadeFile_To_Disk(jadeFile_Path) is false
         return "";
 
-      @.cache_Hashes_Set(jadeFile , jadeFile.file_Contents().checksum())              # save hash
+      @.cache_Hashes_Set(jadeFile_Path , jade_File_Contents.checksum())              # save hash
       return require(targetFile_Path)(params);
 
     render_Mixin: (file, mixin, params)=>

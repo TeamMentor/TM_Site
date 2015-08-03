@@ -33,6 +33,7 @@ describe '| controllers | Help-Controller.test |', ()->
         return {html:'<p><strong>Welcome to TEAM Mentor.</strong> <br>\n</p><p>\nTEAM Mentor</p>'}
 
   check_Help_Page_Contents = (html, loggedIn, title, content, next)->
+
     $ = cheerio.load(html)
     # check top nav links
     if loggedIn
@@ -117,7 +118,9 @@ describe '| controllers | Help-Controller.test |', ()->
     using help_Controller,->
       @.res.send = (html)->
         check_Help_Page_Contents html, false, view_Model.title, view_Model.content, done
+
       @.render_Jade_and_Send @.jade_Help_Page, view_Model
+
 
   it 'show_Content', (done)->
     page_Id = 'id'     .add_5_Letters()

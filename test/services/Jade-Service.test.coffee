@@ -81,7 +81,7 @@ describe "| services | Jade-Service |", ()->
       assert_Is_Undefined @.folder_Jade_Compilation()
       assert_Is_Null @.calculate_Compile_Path "aaa"
 
-  it.only 'cache_Hashes_File, cache_Hashes_Get, cache_Hashes_Set',->
+  it 'cache_Hashes_File, cache_Hashes_Get, cache_Hashes_Set',->
     config.options.tm_design.jade_Compilation_Enabled = true
     using new Jade_Service(), ->
       @.folder_Jade_Compilation = -> compile_Path
