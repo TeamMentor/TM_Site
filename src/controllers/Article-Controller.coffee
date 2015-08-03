@@ -86,7 +86,6 @@ class Article_Controller
 
 Article_Controller.register_Routes = (app, expressService,graph_Options) ->
 
-  #checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res, next)
   checkAuth        =  (req,res,next)=>
     using new Anonymous_Service(req,res),->
       @.checkAuth next
