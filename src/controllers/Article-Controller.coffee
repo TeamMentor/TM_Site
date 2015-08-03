@@ -77,7 +77,7 @@ class Article_Controller
           type       = article_Data?.type
           phase      = article_Data?.phase
           summary    = article_Data?.summary
-          console.log article_Data
+          
           @graphService.article_Html article_Id, (data)=>
             @recentArticles_Add article_Id, title
             callback { id : article_Id, title: title,  summary: summary, article_Html: data?.html, technology: technology, type: type, phase: phase}
