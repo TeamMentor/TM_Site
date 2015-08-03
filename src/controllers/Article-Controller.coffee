@@ -26,6 +26,7 @@ class Article_Controller
   article: =>
     send_Article = (view_Model)=>
       if view_Model
+        view_Model.loggedIn= @.req.session?.username isnt undefined
         @res.send @jade_Service.render_Jade_File(@.jade_Article, view_Model)
       else
         @res.send @.jade_Service.render_Jade_File(@.jade_No_Article)
