@@ -12,8 +12,9 @@ class Anonymous_Service
     @.req                       = req
     @.res                       = res
     @.filename                  = './.tmCache/_anonymousVisits'
+    @.config                    = require '../config'
     @.db                        = new Nedb({ filename: @.filename, autoload: true })
-    @.anonymousConfig           = global.config?.anonymousService
+    @.anonymousConfig           = config?.anonymousService
     @.now                       = new Date(Date.now())
 
   setup: ()->
