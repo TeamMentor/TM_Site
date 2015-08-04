@@ -1,5 +1,6 @@
 Jade_Service        = null
 Nedb                = null
+config              = require '../config'
 
 class Anonymous_Service
   dependencies: ()->
@@ -12,9 +13,8 @@ class Anonymous_Service
     @.req                       = req
     @.res                       = res
     @.filename                  = './.tmCache/_anonymousVisits'
-    @.config                    = require '../config'
     @.db                        = new Nedb({ filename: @.filename, autoload: true })
-    @.anonymousConfig           = config?.anonymousService
+    @.anonymousConfig           = config?.options?.anonymousService
     @.now                       = new Date(Date.now())
 
   setup: ()->
