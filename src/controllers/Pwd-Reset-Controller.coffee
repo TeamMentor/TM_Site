@@ -116,8 +116,8 @@ Pwd_Reset_Controller.register_Routes =  (app)=>
 
   app.post '/user/pwd_reset'                  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset()
   app.post '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Token()
-  app.get  '/passwordReset/:username/:token'   , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Page()
+  app.get  '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Page()
 
-  app.post '/json/user/pwd_reset'              , (req, res)-> new Pwd_Reset_Controller(req, res).json_Mode().password_Reset()
+  app.post '/json/user/pwd_reset'             , (req, res)-> new Pwd_Reset_Controller(req, res).json_Mode().password_Reset()
 
 module.exports = Pwd_Reset_Controller

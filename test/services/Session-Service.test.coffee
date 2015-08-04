@@ -8,18 +8,17 @@ describe '| services | Session.test', ()->
   testDb         = './_session_TestDb'
   session_Service = null
 
-  before  ()->
-    session_Service = new Session_Service { filename: testDb}
+  beforeEach  ()->
+    session_Service = new Session_Service { filename: testDb }
     session_Service.setup()
 
-  after ()->
-    testDb.assert_File_Exists()
-    testDb.file_Delete().assert_Is_True()
+  afterEach ()->
+    if testDb.file_Exists()
+      testDb.file_Delete().assert_Is_True()
 
   it 'constructor (no params)',->
     using new Session_Service(),->
       @.filename.assert_Is './.tmCache/_sessionData'
-
 
   it 'get,set',  (done)->
     key          = 'session_key'.add_5_Random_Letters()
@@ -32,7 +31,6 @@ describe '| services | Session.test', ()->
           assert_Is_Null(err);
           data.assert_Is(session_data)
           done();
-
 
   it 'destroy', (done)->
     key          = 'session_key'.add_5_Random_Letters()
@@ -68,7 +66,7 @@ describe '| services | Session.test', ()->
                                       { id :'abc3', title: 'search c' , results:0}]}, =>
         @.users_Searches (result)=>
           result.assert_Size_Is_Bigger_Than 5
-          if result.size() < 10
+          if result.size() is 6
             result.fourth().assert_Is { id :'abc1', title: 'search a' , results:11}
           done()
 

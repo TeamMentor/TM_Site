@@ -8,6 +8,8 @@ supertest          = require 'supertest'
 
 describe '| controllers | Article-Controller.test', ->
 
+  global.config = null
+
   it 'constructor', (done)->
     using new Article_Controller(), ->
       @.jade_Article.assert_Is    'user/article.jade'

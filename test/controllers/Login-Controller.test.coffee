@@ -1,7 +1,7 @@
 express                 = require 'express'
-bodyParser              = require('body-parser')
-Login_Controller        = require('../../src/controllers/Login-Controller')
-
+bodyParser              = require 'body-parser'
+Login_Controller        = require '../../src/controllers/Login-Controller'
+config                  = require '../../src/config'
 
 describe '| controllers | Login-Controller.test |', ->
 
@@ -11,10 +11,10 @@ describe '| controllers | Login-Controller.test |', ->
   mainPage_user             = '/user/main.html'
   mainPage_no_user          = '/guest/default.html'
   blank_credentials_message = 'Invalid Username or Password'
+  random_Port               = 10000.random().add(10000)
 
   #mocked server
   server                   = null
-  url_WebServices          = null
   users                    =  { tm: 'tm' , user: 'a'  }
   on_Login_Response        = null
 
@@ -33,18 +33,23 @@ describe '| controllers | Login-Controller.test |', ->
         res.send { d: { Login_Status: 1, Validation_Results: [{Message: 'Bad user and pwd'} ] } }
 
   before (done)->
-    random_Port     = 10000.random().add(10000)
-    url_WebServices = "http://localhost:#{random_Port}/Aspx_Pages/TM_WebServices.asmx"
     app             = new express().use(bodyParser.json())
     add_TM_WebServices_Routes(app)
     server          = app.listen(random_Port)
 
-    url_WebServices.GET (html)->
+    "http://localhost:#{random_Port}/Aspx_Pages/TM_WebServices.asmx".GET (html)->
       html.assert_Is 'Cannot GET /Aspx_Pages/TM_WebServices.asmx\n'
       done()
 
+  beforeEach ()->
+    config.options.tm_design.tm_35_Server = "http://localhost:#{random_Port}"
+
+  afterEach ->
+    config.restore()
+
   after ->
     server.close()
+
 
   invoke_Method = (method, body, expected_Target, callback)->
     req =
@@ -63,7 +68,6 @@ describe '| controllers | Login-Controller.test |', ->
 
     using new Login_Controller(req, res), ->
       @.render_Page = render_Page
-      @.webServices = url_WebServices
       @[method]()
 
   invoke_LoginUser = (username, password, expected_Target, callback)->
@@ -91,7 +95,7 @@ describe '| controllers | Login-Controller.test |', ->
 
     using new Login_Controller(req, res), ->
       @.render_Page = render_Page
-      @.webServices = 'http://aaaaaabbb.teammentor.net'
+      config.options.tm_design.tm_35_Server = 'http://aaaaaabbb.teammentor.net'
       @.loginUser()
 
   it "loginUser (server ok - null response)", (done)->
@@ -184,7 +188,6 @@ describe '| controllers | Login-Controller.test |', ->
 
     using new Login_Controller(req, res), ->
       @.render_Page = render_Page
-      @.webServices = url_WebServices
       @.loginUser()
 
   it 'login form persist HTML form fields on error (Wrong username)',(done)->
@@ -201,7 +204,6 @@ describe '| controllers | Login-Controller.test |', ->
 
     using new Login_Controller(req, res), ->
       @.render_Page = render_Page
-      @.webServices = url_WebServices
       @.loginUser()
 
   it 'Redirect upon login when URL is correct',(done)->
@@ -217,7 +219,6 @@ describe '| controllers | Login-Controller.test |', ->
     res = redirect: redirect
 
     using new Login_Controller(req, res), ->
-      @.webServices = url_WebServices
       @.loginUser()
 
   it 'Redirect upon login when URL is not a local URL',(done)->
@@ -233,5 +234,4 @@ describe '| controllers | Login-Controller.test |', ->
     res = redirect: redirect
 
     using new Login_Controller(req, res), ->
-      @.webServices = url_WebServices
       @.loginUser()

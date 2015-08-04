@@ -2,6 +2,7 @@ fs             = null
 path           = null
 request        = null
 Cache_Service  = null
+options        = null
 
 class Docs_TM_Service
 
@@ -10,18 +11,18 @@ class Docs_TM_Service
     path           = require('path')
     request        = require('request')
     Cache_Service  = require('teammentor').Cache_Service
+    {options}         = require '../config'
 
   constructor: ->
     @.dependencies()
-
     @._json_Files            = null
-
     @.disableCache           = false
     @._name                  = 'docs'
     @._tmSite                = 'https://docs.teammentor.net'
     @._tmWebServices         = '/Aspx_Pages/TM_WebServices.asmx/'
+    @.root_Path              = __dirname.path_Combine '../../../../'
     @.cache                  = new Cache_Service("docs_cache")
-    @.libraryDirectory       = global.config?.tm_design?.folder_Docs_Json
+    @.libraryDirectory       = @.root_Path.path_Combine options.tm_design?.folder_Docs_Json
 
 
   getFolderStructure_Libraries: (callback)=>

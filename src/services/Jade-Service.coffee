@@ -2,26 +2,29 @@ fs        = null
 path      = null
 jade      = null
 cheerio   = null
+config    = null
 Highlight = null
+
+crypto = require 'crypto'
+String::checksum = (algorithm, encoding)->
+  crypto.createHash(algorithm || 'md5')
+        .update(@.toString(), 'utf8')
+        .digest(encoding || 'hex')
 
 class JadeService
 
     dependencies: ()->
-      fs          = require('fs')
-      path        = require('path')
-      jade        = require('jade')   # 4 ms (with preloading)
-      cheerio     = require('cheerio')
-      {Highlight} = require('highlight')
+      fs          = require 'fs'
+      path        = require 'path'
+      jade        = require 'jade'   # 4 ms (with preloading)
+      cheerio     = require 'cheerio'
+      config      = require '../config'
+      {Highlight} = require 'highlight'
 
-    constructor: ()->
+    constructor: (options)->
       @.dependencies()
-      @.mixin_Extends = "..#{path.sep}_layouts#{path.sep}page_clean"
-
-      @.folder_Jade_Files        = global.config?.tm_design?.folder_Jade_Files
-      @.jade_Compilation_Enabled = global.config?.tm_design?.jade_Compilation_Enabled || false
-      @.folder_Jade_Compilation  = global.config?.tm_design?.folder_Jade_Files?.path_Combine '../TM_Website/.tmCache/jade-Compilation'
-
-      #@.folder_Jade_Compilation  = global.config?.tm_design?.folder_Jade_Compilation           # can't use this due to lack of jade module on the TM root
+      @.root_Path                = __dirname.path_Combine '../../../../'
+      @.mixin_Extends            = "..#{path.sep}_layouts#{path.sep}page_clean"
 
     apply_Highlight: (html)=>
       if html.not_Contains('<pre>')
@@ -36,30 +39,53 @@ class JadeService
       $.html()
 
     cache_Enabled: ()=>
-      @.jade_Compilation_Enabled
+      @.jade_Compilation_Enabled()
 
+    cache_Hashes_File: ()=>
+      @.folder_Jade_Compilation().path_Combine('compilation_Hashes.json')
+
+    cache_Hashes_Get: ()=>
+      @.cache_Hashes_File().load_Json() || {}
+
+    cache_Hashes_Set: (key,value)=>
+      cache_Hashes = @.cache_Hashes_Get()
+      cache_Hashes[key] = value
+      cache_Hashes.save_Json @.cache_Hashes_File()
 
     calculate_Compile_Path: (fileToCompile)=>
-      if compile_Folder = @.folder_Jade_Compilation
+      compile_Folder = @.folder_Jade_Compilation()
+      if compile_Folder
         if compile_Folder.folder_Not_Exists()
           compile_Folder.folder_Create()
         compile_Folder = compile_Folder.real_Path()
+        fileToCompile  = fileToCompile.remove(@.root_Path)
         return compile_Folder.path_Combine(fileToCompile.to_Safe_String() + '.js')
       return null
 
     calculate_Jade_Path: (jade_File)=>
-      if jade_File.file_Exists()           then return jade_File
-      if jade_Folder = @.folder_Jade_Files then return jade_Folder.path_Combine(jade_File)
+      if jade_File.file_Exists()
+        return jade_File
+
+      if @.folder_Jade_Files()
+        if @.folder_Jade_Files?().folder_Exists()
+          return @.folder_Jade_Files().path_Combine(jade_File)
+        return @.root_Path.path_Combine @.folder_Jade_Files()
+                          .path_Combine jade_File
       return null
 
 
     compile_JadeFile_To_Disk: (target)=>
+      jade_File = target
 
-      jade_File = @.calculate_Jade_Path(target)
+      if (not jade_File)
+        return false
 
-      if (not jade_File) or jade_File.file_Not_Exists() then return false
+      if jade_File.file_Not_Exists()
+        jade_File = @.calculate_Jade_Path(jade_File)
 
-      targetFile_Path = @.calculate_Compile_Path(target);
+      if jade_File.file_Not_Exists() then return false
+
+      targetFile_Path = @.calculate_Compile_Path(jade_File);
       targetFile_Path.file_Delete()
 
       js_Code = jade.compileClient(jade_File.file_Contents() , { filename:jade_File, compileDebug : false} );
@@ -67,8 +93,13 @@ class JadeService
       exportCode =  'var jade = require(\'jade/lib/runtime.js\'); \n' +
                     'module.exports = ' + js_Code;
 
-      exportCode.save_As(targetFile_Path)
-                .file_Exists()
+      exportCode.save_As(targetFile_Path).file_Exists()
+      return targetFile_Path.file_Exists()
+
+    folder_Jade_Files        : -> config.options.tm_design.folder_Jade_Files
+    folder_Jade_Compilation  : -> @.calculate_Jade_Path('').path_Combine '../TM_Website/.tmCache/jade-Compilation'
+    folder_Static_Files      : -> @.calculate_Jade_Path('').path_Combine '../TM_Static'
+    jade_Compilation_Enabled : -> config.options.tm_design.jade_Compilation_Enabled || false
 
     render_Jade_File: (jadeFile, params)=>
 
@@ -79,18 +110,28 @@ class JadeService
       if params.article_Html
         params.article_Html = @.apply_Highlight(params.article_Html)
 
-      if (@.cache_Enabled() is false)
-        jadeFile_Path = @.calculate_Jade_Path(jadeFile)
+      jadeFile_Path   = @.calculate_Jade_Path(jadeFile)
+      targetFile_Path = @.calculate_Compile_Path(jadeFile_Path);
 
+      if (@.cache_Enabled() is false)
         if jadeFile_Path?.file_Exists()
           return jade.renderFile(jadeFile_Path,params)
         return ""
 
-      targetFile_Path = @.calculate_Compile_Path(jadeFile);
+      jade_File_Contents = jadeFile_Path.file_Contents()
+      if not jade_File_Contents
+        return ""
 
-      if targetFile_Path.file_Not_Exists() and @.compile_JadeFile_To_Disk(jadeFile) is false
+      if targetFile_Path?.file_Exists()                                                # check if jadeFile contents has been changed
+        if (@.cache_Hashes_Get()[jadeFile_Path] isnt jade_File_Contents.checksum())
+          "[jade-compilation] detected file change to: #{jadeFile.file_Name()}".log()
+          delete require.cache[targetFile_Path]                                       # invalidate cache
+          targetFile_Path.file_Delete()                                               # delete compiled file
+
+      if targetFile_Path.file_Not_Exists() and @.compile_JadeFile_To_Disk(jadeFile_Path) is false
         return "";
 
+      @.cache_Hashes_Set(jadeFile_Path , jade_File_Contents.checksum())              # save hash
       return require(targetFile_Path)(params);
 
     render_Mixin: (file, mixin, params)=>

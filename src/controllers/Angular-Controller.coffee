@@ -2,8 +2,8 @@ Router        = null
 express       = null
 Jade_Service  = null
 
-if process.cwd().contains('.dist')
-  root_Folder = process.cwd().path_Combine '../../../'
+if process.cwd().contains('wallaby')
+  root_Folder = process.cwd()
 else
   root_Folder = process.cwd().path_Combine '../../'
 
@@ -98,13 +98,12 @@ class Angular_Controller
     area    = req.params.area
     section = req.params.section
     path = @.resolve_Jade_file(file, area, section)
-    console.log path
+
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, {}
 
   routes: ()=>
     router = new Router()
-    router.use express['static'](@.path_To_Static);
     router.get '/flare/:file'          , @.get_Static_Html
     router.get '/user/:file*'          , @.get_Static_Html_User
     router.get '/guest/:file'          , @.get_Static_Html_Guest
@@ -117,6 +116,8 @@ class Angular_Controller
     router.get '/jade-html/:file'               , @.get_Rendered_Jade
     router.get '/jade-html/:area/:file'         , @.get_Rendered_Jade
     router.get '/jade-html/:section/:area/:file', @.get_Rendered_Jade
+
+    router.use express['static'](@.path_To_Static);
 
     return router
 

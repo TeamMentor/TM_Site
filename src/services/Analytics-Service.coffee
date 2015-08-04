@@ -1,5 +1,6 @@
 piwikAnalytics   = null
 piwik            = null
+config           = require '../config'
 
 class Analytics_Service
 
@@ -10,10 +11,11 @@ class Analytics_Service
     @.dependencies()
     @.req               = req
     @.res               = res
-    @.analitycsEnabled  = global.config?.piwikAnalytics?.analitycsEnabled
-    @.analitycsSiteId   = global.config?.piwikAnalytics?.analitycsSiteId
-    @.analitycsTrackUrl = global.config?.piwikAnalytics?.analitycsTrackUrl
-    @.apiKey            = global.config?.piwikAnalytics?.secrets?.analyticsApiKey
+    @.analitycsEnabled  = config.piwikAnalytics?.analitycsEnabled
+    @.analitycsSiteId   = config.piwikAnalytics?.analitycsSiteId
+    @.analitycsTrackUrl = config.piwikAnalytics?.analitycsTrackUrl
+    @.apiKey            = config.piwikAnalytics?.secrets?.analyticsApiKey
+
   setup:() =>
     if @.analitycsEnabled
       'Analytics is enabled'.log()
