@@ -72,6 +72,7 @@ class Anonymous_Service
 
   createCookie: (ipAddr,fingerprint,callback) ->
     counter = parseInt(@.anonymousConfig.allowedArticles)-1
+    @.req.session.articlesAllowed = counter
     record = { "_fingerprint":fingerprint,"remoteIp":ipAddr,"articleCount":counter,"creationDate":new Date(@.now) }
     @.res.cookie(@.anonymousConfig.cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
     @save record,(doc)=>
@@ -79,8 +80,9 @@ class Anonymous_Service
 
   updateArticlesAllowed: (field,data,callback) ->
     if(data? && data.articleCount > 0)
-      articlesAllowed = data.articleCount
-      articlesAllowed = parseInt(articlesAllowed)-1;
+      articlesAllowed               = data.articleCount
+      articlesAllowed               = parseInt(articlesAllowed)-1;
+      @.req.session.articlesAllowed = articlesAllowed
       @update field,{ $set:{ "articleCount": articlesAllowed }}, {}, (doc)=>
         callback doc
     else

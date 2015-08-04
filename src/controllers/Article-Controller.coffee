@@ -27,7 +27,7 @@ class Article_Controller
     send_Article = (view_Model)=>
       if view_Model
         view_Model.loggedIn        = @.req.session?.username isnt undefined
-        welcomeMessage             = config?.options?.anonymousService?.welcomeMessage.replace '{# articles}', config?.options?.anonymousService?.allowedArticles
+        welcomeMessage             = config?.options?.anonymousService?.welcomeMessage.replace '{# articles}', @.req.session.articlesAllowed
         view_Model.welcomeMessage  = welcomeMessage
         @res.send @jade_Service.render_Jade_File(@.jade_Article, view_Model)
       else
