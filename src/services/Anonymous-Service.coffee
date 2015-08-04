@@ -86,6 +86,7 @@ class Anonymous_Service
       @update field,{ $set:{ "articleCount": articlesAllowed }}, {}, (doc)=>
         callback doc
     else
+      delete @.req.session.articlesAllowed
       return @redirectToLoginPage()
 
   redirectToLoginPage: () ->
