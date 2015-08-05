@@ -76,6 +76,7 @@ class Login_Controller
       loginResponse   = response.body.d
       success         = loginResponse?.Login_Status
       if (success == loginSuccess)
+        @.internalUser loginResponse.Token
         #If Password was expired,
         @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
           if(redirectUrl)
@@ -134,6 +135,11 @@ class Login_Controller
           callback url
       else
         callback null
+
+  internalUser: (token)->
+    @.webServiceResponse "Current_User",token,(userProfile)=>
+      if(userProfile)
+        @.req.session.internalUser = /@securityinnovation.com\s*$/.test(userProfile.Email)
 
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName
