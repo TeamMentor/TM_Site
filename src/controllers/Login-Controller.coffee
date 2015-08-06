@@ -131,12 +131,22 @@ class Login_Controller
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
       #Setting up internal user
-      @.req.session.internalUser = /@securityinnovation.com\s*$/.test(userProfile.Email)
+      @.verifyInternalUser userProfile.Email
       if(userProfile?.PasswordExpired)
         @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
           callback url
       else
         callback null
+
+  verifyInternalUser: (userEmail)->
+    internalUser                = false
+    allowedEmailDomains         = @.config.options.tm_design.allowedEmailDomains
+    @.req?.session?.githubUrl   = @.config.options.tm_design.githubUrl
+    email                = userEmail
+    allowedEmailDomains.some (domain)->
+      if email.match(domain.toString())
+        internalUser = true
+    @.req?.session?.internalUser = email
 
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName

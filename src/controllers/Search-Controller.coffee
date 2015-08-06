@@ -157,7 +157,8 @@ class SearchController
 
     showMainAppView: =>
         @.express_Service.session_Service.user_Data @.req.session, (user_Data)=>
-          user_Data.internalUser= @.req.session?.internalUser
+          user_Data.internalUser = @.req.session?.internalUser
+          user_Data.githubUrl    = @.req?.session?.githubUrl
           @.render_Page @.jade_Main, user_Data
 
 SearchController.register_Routes = (app, expressService) ->
