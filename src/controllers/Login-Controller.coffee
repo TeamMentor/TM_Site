@@ -146,7 +146,7 @@ class Login_Controller
     allowedEmailDomains.some (domain)->
       if email.match(domain.toString())
         internalUser = true
-    @.req?.session?.internalUser = email
+    @.req?.session?.internalUser = internalUser
 
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName
