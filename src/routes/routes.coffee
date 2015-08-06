@@ -46,7 +46,9 @@ add_Routes = (express_Service)->
             res.redirect "/user/main.html"                                                                        # to prevent cached infinite redirects (due to 3.5 redirect of / to /teammentor
         else
             res.redirect "/index.html"
-
+    app.get '/user/main.html'              , (req, res)->
+        console.log("InternalUser" +req.session?.internalUser)
+        res.send jade_Service.render_Jade_File 'user/main.jade',{internalUser: req.session?.internalUser}
     options = { express_Service: express_Service }
 
     app.use new API_Controller().routes()
