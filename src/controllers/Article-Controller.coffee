@@ -15,6 +15,7 @@ class Article_Controller
     @.dependencies()
     @.req              = req
     @.res              = res
+    @.config           = require '../config'
     @.next             = next
     @.jade_Article     = 'user/article.jade'
     @.jade_Articles    = 'user/articles.jade'
@@ -24,7 +25,13 @@ class Article_Controller
 
   article: =>
     send_Article = (view_Model)=>
+      articleUrl = @.req.protocol + '://' + @.req.get('host') + @.req.originalUrl;
       if view_Model
+        view_Model.internalUser      = @.req.session?.internalUser
+        view_Model.githubUrl         = @.config?.options?.tm_design.githubUrl
+        view_Model.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
+        view_Model.supportEmail      = @.config?.options?.tm_design.supportEmail
+        view_Model.articleUrl        = articleUrl
         @res.send @jade_Service.render_Jade_File(@.jade_Article, view_Model)
       else
         @res.send @.jade_Service.render_Jade_File(@.jade_No_Article)

@@ -139,10 +139,9 @@ class Login_Controller
         callback null
 
   verifyInternalUser: (userEmail)->
-    internalUser                = false
-    allowedEmailDomains         = @.config.options.tm_design.allowedEmailDomains
-    @.req?.session?.githubUrl   = @.config.options.tm_design.githubUrl
-    email                = userEmail
+    internalUser                     = false
+    allowedEmailDomains              = @.config.options.tm_design.allowedEmailDomains
+    email                            = userEmail
     allowedEmailDomains.some (domain)->
       if email.match(domain.toString())
         internalUser = true
