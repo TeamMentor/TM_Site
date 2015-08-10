@@ -140,11 +140,13 @@ class Login_Controller
 
   verifyInternalUser: (userEmail)->
     internalUser                     = false
-    allowedEmailDomains              = @.config.options.tm_design.allowedEmailDomains
+    allowedEmailDomains              = @.config.options.tm_design?.allowedEmailDomains
     email                            = userEmail
-    allowedEmailDomains.some (domain)->
+
+    allowedEmailDomains?.some (domain)->
       if email.match(domain.toString())
         internalUser = true
+        
     @.req?.session?.internalUser = internalUser
 
   tm_SSO: ()=>
