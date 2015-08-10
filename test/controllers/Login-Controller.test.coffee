@@ -8,7 +8,7 @@ describe '| controllers | Login-Controller.test |', ->
   #consts
   loginPage                 = 'guest/login-Fail.jade'
   loginPage_Unavailable     = 'guest/login-cant-connect.jade'
-  mainPage_user             = '/user/main.html'
+  indexPage                 = '/show/'
   mainPage_no_user          = '/guest/default.html'
   blank_credentials_message = 'Invalid Username or Password'
   random_Port               = 10000.random().add(10000)
@@ -116,8 +116,8 @@ describe '| controllers | Login-Controller.test |', ->
                 invoke_LoginUser '','', loginPage,done   # blank credentials
 
   it "loginUser (local-good username, password)", (done)->
-    invoke_LoginUser 'tm','tm', mainPage_user, ->
-      invoke_LoginUser 'user','a', mainPage_user, done
+    invoke_LoginUser 'tm','tm', indexPage, ->
+      invoke_LoginUser 'user','a', indexPage, done
 
   it "loginUser (undefined Login_Status using existential operator)", (done)->
     invoke_LoginUser undefined ,undefined , loginPage, done
@@ -227,7 +227,7 @@ describe '| controllers | Login-Controller.test |', ->
 
     redirect = (jade_Page)->
       jade_Page.assert_Is_Not_Null()
-      jade_Page.assert_Is('/user/main.html')
+      jade_Page.assert_Is(indexPage)
       done()
 
     req = body: {username:newUsername, password:newPassword}, session:{redirectUrl:'https://www.google.com'}

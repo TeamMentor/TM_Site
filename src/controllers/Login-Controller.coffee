@@ -24,7 +24,7 @@ class Login_Controller
     @.jade_LoginPage             = 'guest/login-Fail.jade'
     @.jade_LoginPage_Unavailable = 'guest/login-cant-connect.jade'
     @.jade_GuestPage_403         = 'guest/403.jade'
-    @.page_MainPage_user         = '/user/main.html'
+    @.page_Index                 = '/show/'
     @.page_MainPage_no_user      = '/guest/default.html'
 
   json_Mode: ()=>
@@ -90,7 +90,7 @@ class Login_Controller
               delete @.req.session.redirectUrl
               @.res.redirect(redirectUrl)
             else
-              @.res.redirect(@.page_MainPage_user)
+              @.res.redirect(@.page_Index)
       else
         @.req.session.username = undefined
         @.analyticsService.track('','User Account','Login Failed')
