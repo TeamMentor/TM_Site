@@ -21,6 +21,7 @@ class SearchController
 
         @.req                = req
         @.res                = res
+        @.config             = require '../config'
         @.express_Service    = express_Service
         @.jade_Service       = new Jade_Service()
         @.graph_Service      = new Graph_Service()
@@ -74,9 +75,13 @@ class SearchController
               return @.render_Page @.jade_Search
               #@res.send(@renderPage())
 
-            searchData.filter_container = filters
-            @searchData.breadcrumbs = navigation
-            @searchData.href = target.href
+            searchData.filter_container   = filters
+            @searchData.breadcrumbs       = navigation
+            @searchData.href              = target.href
+            @searchData.internalUser      = @.req.session?.internalUser
+            @searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
+            @searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
+            @searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
 
             if filters
               @graph_Service.resolve_To_Ids filters, (results)=>
@@ -126,8 +131,12 @@ class SearchController
           if not searchData
             return @.render_Page  @.jade_Search_two_columns, { no_Results : true , text: target}
 
-          searchData.text         =  target
-          searchData.href         = "/search?text=#{target?.url_Encode()}&filters="
+          searchData.text              =  target
+          searchData.href              = "/search?text=#{target?.url_Encode()}&filters="
+          searchData.internalUser      = @.req.session?.internalUser
+          searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
+          searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
+          searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
 
           @.req.session.user_Searches ?= []
           if searchData?.id
@@ -156,9 +165,12 @@ class SearchController
         @.showSearchFromGraph()
 
     showMainAppView: =>
-
-        #jadePage  = 'user/main.jade'
         @.express_Service.session_Service.user_Data @.req.session, (user_Data)=>
+          user_Data.internalUser      = @.req.session?.internalUser
+          user_Data.githubUrl         = @.config?.options?.tm_design.githubUrl
+          user_Data.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
+          user_Data.supportEmail      = @.config?.options?.tm_design.supportEmail
+
           @.render_Page @.jade_Main, user_Data
 
 SearchController.register_Routes = (app, expressService) ->
@@ -169,6 +181,7 @@ SearchController.register_Routes = (app, expressService) ->
 
     searchController = (method_Name) ->                                  # pins method_Name value
         return (req, res) ->                                             # returns function for express
+            console.log("Route is " + req.path)
             new SearchController(req, res,expressService)[method_Name]()    # creates SearchController object with live
                                                                          # res,req and invokes method_Name
 
