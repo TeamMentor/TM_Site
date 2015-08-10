@@ -17,6 +17,7 @@ class Help_Controller
     @.pageParams       = {}
     @.req              = req
     @.res              = res
+    @.config           = require '../config'
     @.docs_TM_Service  = new Docs_TM_Service()
 
     @.content          = null
@@ -75,8 +76,11 @@ class Help_Controller
     @.req?.params?.page || null
 
   render_Jade_and_Send: (jade_Page, view_Model)=>
-    view_Model.loggedIn = @.user_Logged_In()
-    view_Model.library  = @.docs_Library
+    view_Model.loggedIn          = @.user_Logged_In()
+    view_Model.library           = @.docs_Library
+    view_Model.internalUser      = @.req.session?.internalUser
+    view_Model.githubUrl         = @.config?.options?.tm_design.githubUrl
+    view_Model.supportEmail      = @.config?.options?.tm_design.supportEmail
     html = new Jade_Service().render_Jade_File(jade_Page, view_Model)
     @.res.status(200)
          .send(html)

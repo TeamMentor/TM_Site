@@ -24,7 +24,7 @@ class Login_Controller
     @.jade_LoginPage             = 'guest/login-Fail.jade'
     @.jade_LoginPage_Unavailable = 'guest/login-cant-connect.jade'
     @.jade_GuestPage_403         = 'guest/403.jade'
-    @.page_MainPage_user         = '/user/main.html'
+    @.page_Index                 = '/show/'
     @.page_MainPage_no_user      = '/guest/default.html'
 
   json_Mode: ()=>
@@ -76,6 +76,7 @@ class Login_Controller
       loginResponse   = response.body.d
       success         = loginResponse?.Login_Status
       if (success == loginSuccess)
+
         #If Password was expired,
         @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
           if(redirectUrl)
@@ -89,7 +90,7 @@ class Login_Controller
               delete @.req.session.redirectUrl
               @.res.redirect(redirectUrl)
             else
-              @.res.redirect(@.page_MainPage_user)
+              @.res.redirect(@.page_Index)
       else
         @.req.session.username = undefined
         @.analyticsService.track('','User Account','Login Failed')
@@ -129,11 +130,24 @@ class Login_Controller
 
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
+      #Setting up internal user
+      @.verifyInternalUser userProfile.Email
       if(userProfile?.PasswordExpired)
         @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
           callback url
       else
         callback null
+
+  verifyInternalUser: (userEmail)->
+    internalUser                     = false
+    allowedEmailDomains              = @.config.options.tm_design?.allowedEmailDomains
+    email                            = userEmail
+
+    allowedEmailDomains?.some (domain)->
+      if email.match(domain.toString())
+        internalUser = true
+        
+    @.req?.session?.internalUser = internalUser
 
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName
