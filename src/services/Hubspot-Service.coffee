@@ -43,8 +43,8 @@ class Hubspot_Service
       options = {
         method: 'post',
         form:{
-          firstname             :@.req.body.firstName,
-          lastname              :@.req.body.lastName,
+          firstname             :@.req.body.firstname,
+          lastname              :@.req.body.lastname,
           email                 :@.req.body.email,
           company               :@.req.body.company,
           title                 :@.req.body.title,
