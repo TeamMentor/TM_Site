@@ -29,6 +29,6 @@ new Analytics_Service()
       .setup();
 new Hubspot_Service()
       .setup();
-new Anonymous_Service()
-      .setup();
+//new Anonymous_Service()
+//      .setup();
 
