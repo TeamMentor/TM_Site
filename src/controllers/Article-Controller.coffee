@@ -29,6 +29,8 @@ class Article_Controller
     send_Article = (view_Model)=>
       articleUrl = @.req.protocol + '://' + @.req.get('host') + @.req.originalUrl;
       if view_Model
+        view_Model.loggedIn          = @.req.session?.username isnt undefined
+        view_Model.welcomeMessage    = @.config?.options?.anonymousService?.welcomeMessage.replace '{# articles}', @.req.session.articlesAllowed
         view_Model.internalUser      = @.req.session?.internalUser
         view_Model.githubUrl         = @.config?.options?.tm_design.githubUrl
         view_Model.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
