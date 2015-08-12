@@ -21,7 +21,7 @@ class Anonymous_Service
     @.db.ensureIndex { fieldName: '_fingerprint', unique: true },(err)->
       if err
         console.log "Error building index on _fingerprint field: " + err
-    if(not @.anonymousConfig.allowAnonymousArticles)
+    if(not @.anonymousConfig?.allowAnonymousArticles)
       console.log("Error number of anonymous articles is not defined.")
     @.cleanupExpiredRecords()
 
