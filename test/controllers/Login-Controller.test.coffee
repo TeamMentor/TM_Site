@@ -32,6 +32,9 @@ describe '| controllers | Login-Controller.test |', ->
       else
         res.send { d: { Login_Status: 1, Validation_Results: [{Message: 'Bad user and pwd'} ] } }
 
+    app.post '/Aspx_Pages/TM_WebServices.asmx/Current_User', (req,res)=>
+      res.json { d: { Email: 'aaaa@bbb.com' } }
+
   before (done)->
     app             = new express().use(bodyParser.json())
     add_TM_WebServices_Routes(app)

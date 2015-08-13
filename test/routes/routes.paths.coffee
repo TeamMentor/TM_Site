@@ -156,6 +156,7 @@ describe '| routes | routes.test |', ()->
                          .replace(':name','aaaaa')
                          .replace(':queryId','AAAA')
                          .replace(':filters','BBBB')
+                         .replace(':guid','63deed1a-6df4-4e04-9f61-898f190e1fe1')
                          .replace('*','aaaaa')
 
 
@@ -167,7 +168,8 @@ describe '| routes | routes.test |', ()->
       expectedStatus = 403 if ['a','article','articles','show'                    ].contains(path.split('/').second().lower())
       expectedStatus = 403 if ['/user/main.html', '/search', '/search/:text'      ].contains(path)
       expectedStatus = 403 if ['/json/article/:ref'                               ].contains(path)
-      expectedStatus = 403 if path is '/teamMentor/open/:guid'
+      expectedStatus = 302 if path is '/article/:ref/63deed1a-6df4-4e04-9f61-898f190e1fe1'
+      expectedStatus = 302 if path is '/teamMentor/open/63deed1a-6df4-4e04-9f61-898f190e1fe1'
       expectedStatus = 404 if ['/aaaaa','/Image/aaaaa'                            ].contains(path)
       expectedStatus = 500 if ['/error'                                           ].contains(path)
 
