@@ -100,9 +100,6 @@ describe "| services | Jade-Service |", ()->
 
 
 
-
-
-
   it 'calculate_Jade_Path',->
       using new Jade_Service(), ->
         using @.calculate_Jade_Path, ->
@@ -127,8 +124,9 @@ describe "| services | Jade-Service |", ()->
   it 'compile_JadeFile_To_Disk', ()->
     using new Jade_Service(), ->
 
-      compiled_File    = @.calculate_Compile_Path(jade_File)
-      @.compile_JadeFile_To_Disk(jade_File).assert_Is_True()
+      #compiled_File    = @.calculate_Compile_Path(jade_File)
+      compiled_File = @.compile_JadeFile_To_Disk(jade_File)
+
       jadeTemplate  = require(compiled_File.real_Path());
       jadeTemplate.assert_Is_Function()
       jadeTemplate().assert_Is_String()

@@ -94,7 +94,7 @@ class JadeService
                     'module.exports = ' + js_Code;
 
       exportCode.save_As(targetFile_Path).file_Exists()
-      return targetFile_Path.file_Exists()
+      return targetFile_Path
 
     folder_Jade_Files        : -> config.options.tm_design.folder_Jade_Files
     folder_Jade_Compilation  : -> @.calculate_Jade_Path('').path_Combine '../TM_Website/.tmCache/jade-Compilation'
