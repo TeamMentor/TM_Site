@@ -37,16 +37,13 @@ class Angular_Controller
       path_Queries  = 'http://localhost:12346/search/query_titles'
       path_Queries.json_GET (data_Queries)=>
         path_Articles.json_GET (data_Articles)=>
-          autoComplete_Data = data_Queries.sort().concat data_Articles
-          #for item in autoComplete_Data
-          #  console.log item
-          #console.log "THERE ARE #{data_Queries.size()} #{data_Articles.size()} #{autoComplete_Data.size()}"
-          #console.log autoComplete_Data
+          if data_Queries.sort
+            autoComplete_Data = data_Queries.sort().concat data_Articles
+          else
+            autoComplete_Data =[]
           @.send_Search_Auto_Complete term, res
 
   get_Static_Html: (req,res)=>
-    #path = "#{@.path_To_Static}/html/index.html";
-    #res.sendFile path
     file = req.params.file
     if file isnt 'guest'
       req.params.file = 'page-user'

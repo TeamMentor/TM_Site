@@ -88,33 +88,33 @@ describe '| services | Session.test', ()->
         data.assert_Is @.DEFAULT_ARTICLES
         done()
 
-  describe 'testing behaviour of express-session', ()->
+describe 'testing behaviour of express-session', ()->
 
-    app           = null
-    testValue     = 'this is a session value';
-    sessionAsJson = '{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}';
+  app           = null
+  testValue     = 'this is a session value';
+  sessionAsJson = '{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}';
 
 
-    before ()->                            # recrete the config used on server.js and add a couple test routes
-      app     = express()
-      options =
-        secret           : '1234567890'
-        saveUninitialized: true
-        resave           : true
+  before ()->                            # recrete the config used on server.js and add a couple test routes
+    app     = express()
+    options =
+      secret           : '1234567890'
+      saveUninitialized: true
+      resave           : true
 
-      app.use session(options)
+    app.use session(options)
 
-      middleware = (req,res,next)->
-        req.session.value = testValue;
-        next()
+    middleware = (req,res,next)->
+      req.session.value = testValue;
+      next()
 
-      app.get '/session_values'     ,              (req,res)->  res.send req.session
-      app.get '/session_get_userId' , middleware,  (req,res)->  res.send req.session.value
+    app.get '/session_values'     ,              (req,res)->  res.send req.session
+    app.get '/session_get_userId' , middleware,  (req,res)->  res.send req.session.value
 
-    it 'Check default session values', (done)->
-      supertest(app).get '/session_values'
-                    .expect 200,sessionAsJson, done
+  it 'Check default session values', (done)->
+    supertest(app).get '/session_values'
+                  .expect 200,sessionAsJson, done
 
-    it 'Check specific session value', (done)->
-      supertest(app).get '/session_get_userId'
-                    .expect 200,testValue, done
+  it 'Check specific session value', (done)->
+    supertest(app).get '/session_get_userId'
+                  .expect 200,testValue, done
