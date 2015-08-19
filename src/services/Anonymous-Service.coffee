@@ -56,24 +56,19 @@ class Anonymous_Service
         console.log 'Error is: ' + err
       callback doc
 
-  remoteIp: () ->
-    ipAddr = @.req.headers["x-forwarded-for"]
-    if (ipAddr)
-      ipAddr = @.req.headers['x-forwarded-for'].split(',')[0]
-    else
-      ipAddr = @.req.connection.remoteAddress
-    return ipAddr
-
   computeFingerPrint: () ->
     shasum = @.crypto.createHash('sha256');
+    console.log "req.headers are: " + @.req.headers
     for i of @.req.headers
-      shasum.update(@.req.headers[i])
+      if i != 'x-forwarded-for' and i != 'Remote_Addr' and i != 'cookie'
+        console.log "This header is: " + i + ':' + @.req.headers[i]
+        shasum.update(@.req.headers[i])
     return shasum.digest('hex')
 
-  createCookie: (ipAddr,fingerprint,callback) ->
+  createCookie: (fingerprint,callback) ->
     counter = parseInt(@.anonymousConfig.allowedArticles)-1
     @.req.session.articlesAllowed = counter
-    record = { "_fingerprint":fingerprint,"remoteIp":ipAddr,"articleCount":counter,"creationDate":new Date(@.now) }
+    record = { "_fingerprint":fingerprint,"articleCount":counter,"creationDate":new Date(@.now) }
     @.res.cookie(@.anonymousConfig.cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
     @save record,(doc)=>
       callback()
@@ -103,16 +98,13 @@ class Anonymous_Service
     fingerprint = @.req.cookies?[@.anonymousConfig.cookieName]
     if (not fingerprint)
       fingerprint = @computeFingerPrint()
+    console.log "fingerprint is: " + fingerprint
     @findOne {_fingerprint:fingerprint},(data)=>
+      console.log "you are here!"
       if (not data)
-        ipAddr = @remoteIp()
-        @findOne { remoteIp:ipAddr }, (data)=>
-          if (not data)
-            @createCookie ipAddr,fingerprint,(callback)=>
-              return next()
-          else
-            @updateArticlesAllowed { remoteIp:ipAddr },data,(callback)=>
-              return next()
+        console.log "creating a new cookie"
+        @createCookie fingerprint,(callback)=>
+          return next()
       else
         @updateArticlesAllowed { _fingerprint:fingerprint },data,(callback)=>
           return next()
