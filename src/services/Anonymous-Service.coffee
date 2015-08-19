@@ -60,7 +60,7 @@ class Anonymous_Service
     shasum = @.crypto.createHash('sha256');
     console.log "req.headers are: " + @.req.headers
     for i of @.req.headers
-      if i != 'x-forwarded-for' and i != 'Remote_Addr' and i != 'cookie'
+      if !('x-forwarded-for' || 'Remote_Addr' || 'cookie')
         console.log "This header is: " + i + ':' + @.req.headers[i]
         shasum.update(@.req.headers[i])
     return shasum.digest('hex')
