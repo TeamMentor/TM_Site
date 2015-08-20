@@ -100,7 +100,6 @@ class Anonymous_Service
       fingerprint = @computeFingerPrint()
     console.log "fingerprint is: " + fingerprint
     @findOne {_fingerprint:fingerprint},(data)=>
-      console.log "you are here!"
       if (not data)
         console.log "creating a new cookie"
         @createCookie fingerprint,(callback)=>
