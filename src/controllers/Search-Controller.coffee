@@ -38,7 +38,7 @@ class SearchController
         @.jade_Search_two_columns = 'user/search-two-columns.jade'
 
 
-    
+
     #renderPage: ()->
     #    @jade_Service.render_Jade_File(@jade_Page, @searchData)
 
@@ -58,7 +58,7 @@ class SearchController
 
         callback navigation
 
-    showSearchFromGraph: ()=>        
+    showSearchFromGraph: ()=>
         queryId = @.req.params.queryId
         filters = @.fix_Filters @req.params.filters
 
@@ -158,6 +158,9 @@ class SearchController
           else
             @.render_Page @.jade_Search_two_columns, searchData
 
+    recent_Search : ()=>
+      @.express_Service.session_Service.top_Searches (data)=>
+        @.res.json data.take(3)
 
     show_Root_Query: ()=>
       @.graph_Service.library_Query (data)=>
@@ -192,5 +195,6 @@ SearchController.register_Routes = (app, expressService) ->
     app.get "/user/main.html"                , checkAuth , searchController('showMainAppView')
     app.get "/search"                        , checkAuth,  searchController('search')
     app.get "/search/:text"                  , checkAuth,  searchController('search_Via_Url')
+    app.get "/json/search/recentsearch"      , checkAuth,  searchController('recent_Search')
 
 module.exports = SearchController
