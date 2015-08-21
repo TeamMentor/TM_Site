@@ -32,6 +32,9 @@ class Article_Controller
         view_Model.loggedIn          = @.req.session?.username isnt undefined
         view_Model.signUpUrl         = @.config?.options?.anonymousService?.signUpUrl
         view_Model.loginUrl          = @.config?.options?.anonymousService?.loginUrl
+        recentArticles = @.recentArticles()
+        console.log "recent articles are: " + recentArticles
+        console.log "Article is: " + articleUrl
         if @.req.session?.articlesAllowed >= 1
           mapWelcomeMsg = {
             articles:         @.req.session?.articlesAllowed,

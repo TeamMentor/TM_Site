@@ -1,12 +1,14 @@
 Jade_Service        = null
 Nedb                = null
 config              = require '../config'
+Article_Controller  = null
 
 class Anonymous_Service
   dependencies: ()->
     Nedb                = require 'nedb'
     Jade_Service        = require '../services/Jade-Service'
     @.crypto            = require 'crypto'
+    Article_Controller  = require '../controllers/Article-Controller'
 
   constructor: (req, res) ->
     @.dependencies()
@@ -74,6 +76,12 @@ class Anonymous_Service
       callback()
 
   updateArticlesAllowed: (field,data,callback) ->
+    if @.req.session?.recent_Articles
+      console.log "recent_Articles are: " + @.req.session.recent_Articles
+      #for i of @.req.session.recent_Articles
+
+      console.log "req.params.ref is: " + @.req.params.ref
+
     if(data? && data.articleCount > 0)
       articlesAllowed               = data.articleCount
       articlesAllowed               = parseInt(articlesAllowed)-1;
