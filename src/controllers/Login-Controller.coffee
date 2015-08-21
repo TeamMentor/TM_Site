@@ -76,7 +76,7 @@ class Login_Controller
       loginResponse   = response.body.d
       success         = loginResponse?.Login_Status
       if (success == loginSuccess)
-
+        @.req?.session?.token = loginResponse.Token
         #If Password was expired,
         @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
           if(redirectUrl)
@@ -103,7 +103,10 @@ class Login_Controller
 
   logoutUser: ()=>
     @.req.session.username = undefined
-    @.res.redirect(@.page_MainPage_no_user)
+    token = @.req?.session?.token
+    @.webServiceResponse "Logout",token,(response)=>
+      console.log("Response " + response.LogoutResult)
+      @.res.redirect(@.page_MainPage_no_user)
 
   render_Page: (page, view_Model)=>
     @.res.send @.jade_Service.render_Jade_File page, view_Model
@@ -148,6 +151,14 @@ class Login_Controller
         internalUser = true
         
     @.req?.session?.internalUser = internalUser
+
+  currentUser : ()->
+    token = @.req?.session?.token
+    if token
+      @.webServiceResponse "Current_User",token,(userProfile)=>
+        @.res.json userProfile
+    else
+      return @.res.json []
 
   tm_SSO: ()=>
     username = @.req.query.username || @.req.query.userName
