@@ -26,7 +26,13 @@ add_Routes = (express_Service)->
       next()
 
     #run custom code hook (if available)
-    global.custom?.express_Routes?(app, require('express'))
+    global.custom?.express_Routes?(app, require('express')) # todo: needs refactoring
+
+    app.use new API_Controller().routes()
+    app.use '/angular',new Angular_Controller().routes()
+
+    app.use '/flare', new Flare_Controller().routes()
+
 
     app.post '/user/login'              , (req, res)-> new Login_Controller(req, res).loginUser()
     app.post '/json/user/login'         , (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
@@ -50,11 +56,6 @@ add_Routes = (express_Service)->
             res.redirect "/index.html"
 
     options = { express_Service: express_Service }
-
-    app.use new API_Controller().routes()
-    app.use '/angular',new Angular_Controller().routes()
-    app.use '/flare', new Flare_Controller().routes()
-
 
     Search_Controller                  .register_Routes(app, express_Service)
     Article_Controller                 .register_Routes(app, express_Service)
