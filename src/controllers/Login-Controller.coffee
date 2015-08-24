@@ -105,7 +105,6 @@ class Login_Controller
     @.req.session.username = undefined
     token = @.req?.session?.token
     @.webServiceResponse "Logout",token,(response)=>
-      console.log("Response " + response.LogoutResult)
       @.res.redirect(@.page_MainPage_no_user)
 
   render_Page: (page, view_Model)=>
