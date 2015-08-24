@@ -36,7 +36,7 @@ add_Routes = (express_Service)->
 
     app.post '/user/login'              , (req, res)-> new Login_Controller(req, res).loginUser()
     app.post '/json/user/login'         , (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
-    app.post  '/json/user/logout'        , (req, res)-> new Login_Controller(req, res).json_Mode().logoutUser()
+    app.post '/json/user/logout'        , (req, res)-> new Login_Controller(req, res).json_Mode().logoutUser()
     app.post '/json/user/signup'        , (req, res)-> new User_Sign_Up_Controller(req, res).json_Mode().userSignUp()
     app.get  '/json/user/currentuser'   , (req, res)-> new Login_Controller(req, res).json_Mode().currentUser()
 
