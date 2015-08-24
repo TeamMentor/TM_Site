@@ -1,14 +1,14 @@
 Jade_Service        = null
 Nedb                = null
 config              = require '../config'
-Article_Controller  = null
+Graph_Service       = null
 
 class Anonymous_Service
   dependencies: ()->
     Nedb                = require 'nedb'
     Jade_Service        = require '../services/Jade-Service'
     @.crypto            = require 'crypto'
-    Article_Controller  = require '../controllers/Article-Controller'
+    Graph_Service       = require '../services/Graph-Service'
 
   constructor: (req, res) ->
     @.dependencies()
@@ -18,6 +18,7 @@ class Anonymous_Service
     @.db                        = new Nedb({ filename: @.filename, autoload: true })
     @.anonymousConfig           = config?.options?.anonymousService
     @.now                       = new Date(Date.now())
+    @.graphService              = new Graph_Service()
 
   setup: ()->
     @.db.ensureIndex { fieldName: '_fingerprint', unique: true },(err)->
@@ -101,21 +102,25 @@ class Anonymous_Service
   checkAuth: (next) ->
     if @.req?.session?.username
       return next()
-    if not @.anonymousConfig.allowAnonymousArticles
-      console.log "No anonymous articles specified. Redirecting to the login page. "
-      return @redirectToLoginPage()
-    fingerprint = @.req.cookies?[@.anonymousConfig.cookieName]
-    if (not fingerprint)
-      fingerprint = @computeFingerPrint()
-    console.log "fingerprint is: " + fingerprint
-    @findOne {_fingerprint:fingerprint},(data)=>
-      if (not data)
-        console.log "creating a new cookie"
-        @createCookie fingerprint,(callback)=>
-          return next()
-      else
-        @updateArticlesAllowed { _fingerprint:fingerprint },data,(callback)=>
-          return next()
+    @.graphService.article @.req?.params?.ref,(data)=>
+      if data.article_Id
+        console.log "data.article_Id is: " + data.article_Id
+        if not @.anonymousConfig.allowAnonymousArticles
+          console.log "No anonymous articles specified. Redirecting to the login page. "
+          return @redirectToLoginPage()
+        fingerprint = @.req.cookies?[@.anonymousConfig.cookieName]
+        if (not fingerprint)
+          fingerprint = @computeFingerPrint()
+        console.log "fingerprint is: " + fingerprint
+        @findOne {_fingerprint:fingerprint},(data)=>
+          if (not data)
+            console.log "creating a new cookie"
+            @createCookie fingerprint,(callback)=>
+              return next()
+          else
+            @updateArticlesAllowed { _fingerprint:fingerprint },data,(callback)=>
+              return next()
+      else return @redirectToLoginPage()
 
   module.exports = Anonymous_Service
 
