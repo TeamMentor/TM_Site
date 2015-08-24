@@ -76,11 +76,12 @@ class Anonymous_Service
       callback()
 
   updateArticlesAllowed: (field,data,callback) ->
+    #checks if the current article is in the recent articles array (i.e if the article was already fetched)
     if @.req.session?.recent_Articles
-      console.log "recent_Articles are: " + @.req.session.recent_Articles
-      #for i of @.req.session.recent_Articles
-
-      console.log "req.params.ref is: " + @.req.params.ref
+      for article in @.req.session.recent_Articles
+        id = article.id.remove("article-")
+        if (@.req.originalUrl.contains(id))
+          return callback null
 
     if(data? && data.articleCount > 0)
       articlesAllowed               = data.articleCount
