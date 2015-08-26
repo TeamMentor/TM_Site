@@ -51,6 +51,11 @@ class Login_Controller
     username = @.req.body.username
     password = @.req.body.password
 
+    if (false)     # bypasses login
+      @.req.session.username = username
+      @.res.redirect(@.page_Index)
+      return
+
     options =
       method : 'post',
       body   : { username:username, password:password },
