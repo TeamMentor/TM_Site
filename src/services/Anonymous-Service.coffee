@@ -21,9 +21,8 @@ class Anonymous_Service
     @.graphService              = new Graph_Service()
 
   setup: ()->
-    @.db.ensureIndex { fieldName: '_fingerprint', unique: true },(err)->
-      if err
-        console.log "Error building index on _fingerprint field: " + err
+    @.db.ensureIndex { fieldName: '_fingerprint', unique: true }
+
     if(not @.anonymousConfig?.allowAnonymousArticles)
       console.log("Error number of anonymous articles is not defined.")
     @.cleanupExpiredRecords()

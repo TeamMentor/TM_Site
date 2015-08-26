@@ -287,7 +287,7 @@ describe "| controllers | Search-Controller.test |", ->
         @.add_Session()
         @.app._router.stack.assert_Size_Is 3
         Search_Controller.register_Routes @.app,@
-        @.app._router.stack.assert_Size_Is 10
+        @.app._router.stack.assert_Size_Is 11
         supertest(@.app)
           .get('/user/main.html')
           .end (err,res)->

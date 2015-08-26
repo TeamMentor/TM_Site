@@ -8,17 +8,22 @@ else
   root_Folder = process.cwd().path_Combine '../../'
 
 autoComplete_Data = null
-
+config            = null
 class Angular_Controller
 
   dependencies: ->
     express       = require 'express'
     {Router}      = require 'express'
     Jade_Service  = require '../services/Jade-Service'
+    config      = require '../config'
 
   constructor: ()->
     @.dependencies()
+    @.port_TM_Graph  = config?.options?.tm_graph?.port
     @.path_To_Static = root_Folder.path_Combine 'code/TM_Angular/build'
+    @.url_TM_Graph   = "http://localhost:#{@.port_TM_Graph}"
+    @.url_Articles   = "#{@.url_TM_Graph}/search/article_titles"
+    @.url_Queries    = "#{@.url_TM_Graph}/search/query_titles"
 
   send_Search_Auto_Complete: (term, res)->
     matches = {}
@@ -33,10 +38,8 @@ class Angular_Controller
     if autoComplete_Data
       @.send_Search_Auto_Complete term, res
     else
-      path_Articles = 'http://localhost:12346/search/article_titles'
-      path_Queries  = 'http://localhost:12346/search/query_titles'
-      path_Queries.json_GET (data_Queries)=>
-        path_Articles.json_GET (data_Articles)=>
+      @.url_Queries.json_GET (data_Queries)=>
+        @.url_Articles.json_GET (data_Articles)=>
           if data_Queries.sort
             autoComplete_Data = data_Queries.sort().concat data_Articles
           else

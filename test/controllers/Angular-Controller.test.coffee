@@ -9,6 +9,10 @@ describe '| controllers | Angular-Controller |', ->
   it 'constructor',->
     using new Angular_Controller(), ->
       @.path_To_Static.assert_Is_String()
+      @.port_TM_Graph.assert_Is 12346
+      @.url_TM_Graph .assert_Is 'http://localhost:12346'
+      @.url_Articles .assert_Is 'http://localhost:12346/search/article_titles'
+      @.url_Queries  .assert_Is 'http://localhost:12346/search/query_titles'
 
   it 'routes', ->
     using new Angular_Controller(), ->

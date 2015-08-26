@@ -22,7 +22,7 @@ class API_Controller
     if req.method is 'GET'                                  # only GET requests are supported
       if req.query['pretty'] is ''                          # if a ?pretty to the request url (show a formatted version of the data)
         url.GET_Json (data)->                               #   make a GET request to the graphDB url
-          res.send "<pre>" + data.json_Pretty() + "</pre>"  #   send the data wrapped in a <pre> tag so that it shows ok in a browser
+          res.send "<pre>" + data?.json_Pretty() + "</pre>"  #   send the data wrapped in a <pre> tag so that it shows ok in a browser
       else
         req.pipe(request(url)).pipe res                     # pipe GET and POST requests between cli
 
