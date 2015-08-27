@@ -36,7 +36,21 @@ class Article_Controller
       articleUrl = @.req.protocol + '://' + @.req.get('host') + @.req.originalUrl;
       if view_Model
         view_Model.loggedIn          = @.req.session?.username isnt undefined
-        view_Model.welcomeMessage    = @.config?.options?.anonymousService?.welcomeMessage.replace '{# articles}', @.req.session.articlesAllowed
+        view_Model.signUpUrl         = @.config?.options?.anonymousService?.signUpUrl
+        view_Model.loginUrl          = @.config?.options?.anonymousService?.loginUrl
+        recentArticles = @.recentArticles()
+        console.log "recent articles are: " + recentArticles
+        console.log "Article is: " + articleUrl
+        if @.req.session?.articlesAllowed >= 1
+          mapWelcomeMsg = {
+            articles:         @.req.session?.articlesAllowed,
+            totalAllowed:     @.config?.options?.anonymousService?.allowedArticles,
+          }
+          re = new RegExp(Object.keys(mapWelcomeMsg).join("|"),"gi")
+          console.log "re is: " + re
+          view_Model.welcomeMessage    = @.config?.options?.anonymousService?.welcomeMessage.replace re, (matched)-> return mapWelcomeMsg[matched]
+        else
+          view_Model.welcomeMessage   = @.config?.options?.anonymousService?.noArticleCredits
         view_Model.internalUser      = @.req.session?.internalUser
         view_Model.githubUrl         = @.config?.options?.tm_design.githubUrl
         view_Model.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl

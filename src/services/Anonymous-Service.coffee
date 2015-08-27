@@ -1,12 +1,14 @@
 Jade_Service        = null
 Nedb                = null
 config              = require '../config'
+Graph_Service       = null
 
 class Anonymous_Service
   dependencies: ()->
     Nedb                = require 'nedb'
     Jade_Service        = require '../services/Jade-Service'
     @.crypto            = require 'crypto'
+    Graph_Service       = require '../services/Graph-Service'
 
   constructor: (req, res) ->
     @.dependencies()
@@ -16,6 +18,7 @@ class Anonymous_Service
     @.db                        = new Nedb({ filename: @.filename, autoload: true })
     @.anonymousConfig           = config?.options?.anonymousService
     @.now                       = new Date(Date.now())
+    @.graphService              = new Graph_Service()
 
   setup: ()->
     @.db.ensureIndex { fieldName: '_fingerprint', unique: true }
@@ -55,29 +58,31 @@ class Anonymous_Service
         console.log 'Error is: ' + err
       callback doc
 
-  remoteIp: () ->
-    ipAddr = @.req.headers["x-forwarded-for"]
-    if (ipAddr)
-      ipAddr = @.req.headers['x-forwarded-for'].split(',')[0]
-    else
-      ipAddr = @.req.connection.remoteAddress
-    return ipAddr
-
   computeFingerPrint: () ->
     shasum = @.crypto.createHash('sha256');
+    console.log "req.headers are: " + @.req.headers
     for i of @.req.headers
-      shasum.update(@.req.headers[i])
+      if i != 'x-forwarded-for' and i != 'Remote_Addr' and i != 'cookie'
+        console.log "This header is: " + i + ':' + @.req.headers[i]
+        shasum.update(@.req.headers[i])
     return shasum.digest('hex')
 
-  createCookie: (ipAddr,fingerprint,callback) ->
+  createCookie: (fingerprint,callback) ->
     counter = parseInt(@.anonymousConfig.allowedArticles)-1
     @.req.session.articlesAllowed = counter
-    record = { "_fingerprint":fingerprint,"remoteIp":ipAddr,"articleCount":counter,"creationDate":new Date(@.now) }
+    record = { "_fingerprint":fingerprint,"articleCount":counter,"creationDate":new Date(@.now) }
     @.res.cookie(@.anonymousConfig.cookieName,fingerprint, { expires: new Date(Date.now() + 900000), httpOnly: true });
     @save record,(doc)=>
       callback()
 
   updateArticlesAllowed: (field,data,callback) ->
+    #checks if the current article is in the recent articles array (i.e if the article was already fetched)
+    if @.req.session?.recent_Articles
+      for article in @.req.session.recent_Articles
+        id = article.id.remove("article-")
+        if (@.req.originalUrl.contains(id))
+          return callback null
+
     if(data? && data.articleCount > 0)
       articlesAllowed               = data.articleCount
       articlesAllowed               = parseInt(articlesAllowed)-1;
@@ -96,25 +101,25 @@ class Anonymous_Service
   checkAuth: (next) ->
     if @.req?.session?.username
       return next()
-    if not @.anonymousConfig.allowAnonymousArticles
-      console.log "No anonymous articles specified. Redirecting to the login page. "
-      return @redirectToLoginPage()
-    fingerprint = @.req.cookies?[@.anonymousConfig.cookieName]
-    if (not fingerprint)
-      fingerprint = @computeFingerPrint()
-    @findOne {_fingerprint:fingerprint},(data)=>
-      if (not data)
-        ipAddr = @remoteIp()
-        @findOne { remoteIp:ipAddr }, (data)=>
+    @.graphService.article @.req?.params?.ref,(data)=>
+      if data.article_Id
+        console.log "data.article_Id is: " + data.article_Id
+        if not @.anonymousConfig.allowAnonymousArticles
+          console.log "No anonymous articles specified. Redirecting to the login page. "
+          return @redirectToLoginPage()
+        fingerprint = @.req.cookies?[@.anonymousConfig.cookieName]
+        if (not fingerprint)
+          fingerprint = @computeFingerPrint()
+        console.log "fingerprint is: " + fingerprint
+        @findOne {_fingerprint:fingerprint},(data)=>
           if (not data)
-            @createCookie ipAddr,fingerprint,(callback)=>
+            console.log "creating a new cookie"
+            @createCookie fingerprint,(callback)=>
               return next()
           else
-            @updateArticlesAllowed { remoteIp:ipAddr },data,(callback)=>
+            @updateArticlesAllowed { _fingerprint:fingerprint },data,(callback)=>
               return next()
-      else
-        @updateArticlesAllowed { _fingerprint:fingerprint },data,(callback)=>
-          return next()
+      else return @redirectToLoginPage()
 
   module.exports = Anonymous_Service
 
