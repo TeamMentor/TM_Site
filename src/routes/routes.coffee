@@ -62,7 +62,7 @@ add_Routes = (express_Service)->
 
     Pwd_Reset_Controller               .register_Routes(app                  )
     Help_Controller                    .register_Routes(app                  )
-    Misc_Controller                    .register_Routes(app                  )
+    Misc_Controller                    .register_Routes(app, express_Service )
     Jade_Controller                    .register_Routes(app                  )
 
     new PoC_Controller(options)        .register_Routes()

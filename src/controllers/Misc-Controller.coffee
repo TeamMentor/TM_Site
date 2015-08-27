@@ -38,9 +38,17 @@ class Misc_Controller
   tmConfig: ()=>
     @.res.json @.config
 
-Misc_Controller.register_Routes =  (app)=>
+Misc_Controller.register_Routes =  (app, expressService) ->
+  checkAuth       =  (req,res,next) ->
+    expressService.checkAuth(req, res, next)
+
+  misController = (method_Name) ->
+    return (req, res,next) ->
+      new Misc_Controller(req, res, next,expressService)[method_Name]()
 
   app.get '/misc/:page'     , (req, res)-> new Misc_Controller(req, res).show_Misc_Page()
-  app.get '/json/tm/config' , (req, res)-> new Misc_Controller(req, res).json_Mode().tmConfig()
+  app.get '/json/tm/config' , checkAuth, misController('tmConfig')
+
+
 
 module.exports = Misc_Controller
