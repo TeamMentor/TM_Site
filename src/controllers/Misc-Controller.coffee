@@ -9,8 +9,21 @@ class Misc_Controller
 
   constructor: (req, res)->
     @.dependencies()
-    @.req = req || {}
-    @.res = res || {}
+    @.req       = req || {}
+    @.res       = res || {}
+    @.config    = require '../config'
+
+  json_Mode: ()=>
+    @.render_Page = (page, data)=>
+      data.page = page
+      @.res.json data
+    @.res.redirect = (page)=>
+      data =
+        page     : page
+        viewModel: {}
+        result   : 'OK'
+      @.res.json data
+    @
 
   show_Misc_Page: ()=>
     jade_Page  = 'misc/' + @.req.params.page + '.jade'
@@ -22,8 +35,20 @@ class Misc_Controller
   user_Logged_In: ()=>
     @req.session?.username isnt undefined
 
-Misc_Controller.register_Routes =  (app)=>
+  tmConfig: ()=>
+    @.res.json @.config
+
+Misc_Controller.register_Routes =  (app, expressService) ->
+  checkAuth       =  (req,res,next) ->
+    expressService.checkAuth(req, res, next)
+
+  misController = (method_Name) ->
+    return (req, res,next) ->
+      new Misc_Controller(req, res, next,expressService)[method_Name]()
 
   app.get '/misc/:page'     , (req, res)-> new Misc_Controller(req, res).show_Misc_Page()
+  app.get '/json/tm/config' , checkAuth, misController('tmConfig')
+
+
 
 module.exports = Misc_Controller
