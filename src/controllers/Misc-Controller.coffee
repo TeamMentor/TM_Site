@@ -36,7 +36,7 @@ class Misc_Controller
     @req.session?.username isnt undefined
 
   tmConfig: ()=>
-    config = {
+    config =  {
                 supportEmail        : @.config.options.tm_design.supportEmail,
                 githubUrl           : @.config.options.tm_design.supportEmail,
                 githubContentUrl    : @.config.options.tm_design.githubContentUrl,
