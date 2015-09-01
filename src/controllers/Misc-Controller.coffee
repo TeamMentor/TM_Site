@@ -36,7 +36,13 @@ class Misc_Controller
     @req.session?.username isnt undefined
 
   tmConfig: ()=>
-    @.res.json @.config
+    config =  {
+                supportEmail        : @.config.options.tm_design.supportEmail,
+                githubUrl           : @.config.options.tm_design.supportEmail,
+                githubContentUrl    : @.config.options.tm_design.githubContentUrl,
+                allowedEmailDomains : @.config.options.tm_design.allowedEmailDomains
+              }
+    @.res.json config
 
 Misc_Controller.register_Routes =  (app, expressService) ->
   checkAuth       =  (req,res,next) ->
