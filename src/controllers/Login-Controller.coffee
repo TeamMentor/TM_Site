@@ -1,15 +1,19 @@
 request                    = null
+Router                     = null
 analytics_Service          = null
 Jade_Service               = null
 blank_credentials_message  = 'Invalid Username or Password'
 loginSuccess               = 0
 errorMessage               = "TEAM Mentor is unavailable, please contact us at "
+User_Sign_Up_Controller    = null
 
 class Login_Controller
   dependencies: ->
+    {Router}            = require 'express'
     request             = require 'request'
     analytics_Service   = require '../services/Analytics-Service'
     Jade_Service        = require '../services/Jade-Service'
+    User_Sign_Up_Controller = require './User-Sign-Up-Controller'
 
 
   constructor: (req, res)->
@@ -24,8 +28,8 @@ class Login_Controller
     @.jade_LoginPage             = 'guest/login-Fail.jade'
     @.jade_LoginPage_Unavailable = 'guest/login-cant-connect.jade'
     @.jade_GuestPage_403         = 'guest/403.jade'
-    @.page_Index                 = '/show/'
-    @.page_MainPage_no_user      = '/guest/default.html'
+    @.page_Index                 = '/jade/show'
+    @.page_MainPage_no_user      = '/jade/guest/default.html'
 
   json_Mode: ()=>
     @.render_Page = (page, data)=>
@@ -194,5 +198,23 @@ class Login_Controller
     else
       @.res.send @.jade_Service.render_Jade_File  @.jade_GuestPage_403
 
+
+  routes_Json: ()=>
+    using new Router(), ->
+      @.post '/json/user/login'         , (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
+      @.post '/json/user/logout'        , (req, res)-> new Login_Controller(req, res).json_Mode().logoutUser()
+      @.get  '/json/user/currentuser'   , (req, res)-> new Login_Controller(req, res).json_Mode().currentUser()
+      @.post '/json/user/signup'        , (req, res)-> new User_Sign_Up_Controller(req, res).json_Mode().userSignUp()
+
+  routes_Jade: ()=>
+    using new Router(), ->
+      @.post '/user/login'              , (req, res)-> new Login_Controller(req, res).loginUser()
+      @.get  '/user/logout'             , (req, res)-> new Login_Controller(req, res).logoutUser()
+      @.post '/user/sign-up'            , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();
+
+  routes_SSO: ()=>
+    using new Router(), ->
+      @.get '/_Customizations/SSO.aspx' , (req, res)-> new Login_Controller(req, res).tm_SSO()
+      @.get '/Aspx_Pages/SSO.aspx'      , (req, res)-> new Login_Controller(req, res).tm_SSO()
 
 module.exports = Login_Controller

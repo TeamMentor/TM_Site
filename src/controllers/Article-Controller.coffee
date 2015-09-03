@@ -1,3 +1,4 @@
+Router            = null
 Express_Service   = null
 Jade_Service      = null
 Graph_Service     = null
@@ -11,6 +12,7 @@ async             = require 'async'
 class Article_Controller
 
   dependencies: ()->
+    {Router}           = require 'express'
     Express_Service    = require('../services/Express-Service')
     Jade_Service       = require('../services/Jade-Service')
     Graph_Service      = require('../services/Graph-Service')
@@ -158,27 +160,29 @@ class Article_Controller
       else
         callback null
 
-Article_Controller.register_Routes = (app, expressService,graph_Options) ->
+  routes: (expressService) ->
 
-  checkAuth_AnonymousUser        =  (req,res,next)=>
-    using new Anonymous_Service(req,res),->
-      @.checkAuth next
+    checkAuth_AnonymousUser        =  (req,res,next)=>
+      using new Anonymous_Service(req,res),->
+        @.checkAuth next
 
-  checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res, next)
-  articleController = (method_Name) ->                                                       # pins method_Name value
-        return (req, res,next) ->                                                            # returns function for express
-            new Article_Controller(req, res, next,expressService,graph_Options)[method_Name]()   # creates SearchController object with live
+    checkAuth       = (req,res,next) -> expressService.checkAuth(req, res, next)
+    graph_Options   = { express_Service: expressService }
 
-  app.get '/a/:ref'               , checkAuth_AnonymousUser, articleController('article')
-  app.get '/article/:ref/:guid'   , articleController('check_Guid')
-  app.get '/article/:ref/:title'  , checkAuth_AnonymousUser, articleController('article')
-  app.get '/article/:ref'         , checkAuth_AnonymousUser, articleController('article')
-  app.get '/articles'             , checkAuth_AnonymousUser, articleController('articles')
-  app.get '/teamMentor/open/:guid', articleController('check_Guid')
-  app.get '/json/article/:ref'    , checkAuth_AnonymousUser, articleController('article_Json')
-  app.get '/json/recentarticles'  , checkAuth, articleController('recentArticlesJson')
-  app.get '/json/toparticles'     , checkAuth, articleController('topArticlesJson')
+    articleController = (method_Name) ->                                                       # pins method_Name value
+      return (req, res,next) ->                                                               # returns function for express
+          new Article_Controller(req, res, next,expressService,graph_Options)[method_Name]()   # creates SearchController object with live
 
+    using new Router(),->
+      @.get '/a/:ref'               , checkAuth_AnonymousUser, articleController('article')
+      @.get '/article/:ref/:guid'   , articleController('check_Guid')
+      @.get '/article/:ref/:title'  , checkAuth_AnonymousUser, articleController('article')
+      @.get '/article/:ref'         , checkAuth_AnonymousUser, articleController('article')
+      @.get '/articles'             , checkAuth_AnonymousUser, articleController('articles')
+      @.get '/teamMentor/open/:guid', articleController('check_Guid')
+      @.get '/json/article/:ref'    , checkAuth_AnonymousUser, articleController('article_Json')
+      @.get '/json/recentarticles'  , checkAuth, articleController('recentArticlesJson')
+      @.get '/json/toparticles'     , checkAuth, articleController('topArticlesJson')
 
 
 module.exports = Article_Controller

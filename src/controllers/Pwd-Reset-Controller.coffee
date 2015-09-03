@@ -1,12 +1,14 @@
 request      = null
+Router       = null
 Config       = null
 Jade_Service = null
 
 class Pwd_Reset_Controller
 
   dependencies: ->
-    request      = require('request')
-    Jade_Service = require('../services/Jade-Service')
+    request      = require 'request'
+    {Router}     = require 'express'
+    Jade_Service = require '../services/Jade-Service'
 
   constructor: (req, res, options)->
     @.dependencies()
@@ -19,8 +21,8 @@ class Pwd_Reset_Controller
     @.jade_loginPage_Unavailable   = 'guest/login-cant-connect.jade'
     @.jade_password_reset_fail     = 'guest/pwd-reset-fail.jade'
     @.jade_password_reset          = 'guest/pwd-reset.jade'
-    @.url_password_reset_ok        = '/guest/login-pwd-reset.html'
-    @.url_password_sent            = '/guest/pwd-sent.html'
+    @.url_password_reset_ok        = '/jade/guest/login-pwd-reset.html'
+    @.url_password_sent            = '/jade/guest/pwd-sent.html'
     @.url_WS_SendPasswordReminder  = @.webServices + '/SendPasswordReminder'
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
@@ -112,12 +114,13 @@ class Pwd_Reset_Controller
   render_Page: (jade_Page,params)=>
     @.res.send @.jade_Service.render_Jade_File jade_Page, params
 
-Pwd_Reset_Controller.register_Routes =  (app)=>
 
-  app.post '/user/pwd_reset'                  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset()
-  app.post '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Token()
-  app.get  '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req, res).password_Reset_Page()
 
-  app.post '/json/user/pwd_reset'             , (req, res)-> new Pwd_Reset_Controller(req, res).json_Mode().password_Reset()
+  routes:  ()=>
+    using new Router(), ->
+      @.post '/user/pwd_reset'                  , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset()
+      @.post '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset_Token()
+      @.get  '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset_Page()
+      @.post '/json/user/pwd_reset'             , (req, res)-> new Pwd_Reset_Controller(req,res).json_Mode().password_Reset()
 
 module.exports = Pwd_Reset_Controller

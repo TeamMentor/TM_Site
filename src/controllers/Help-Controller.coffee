@@ -1,5 +1,6 @@
 fs                 = null
 request            = null
+Router             = null
 Jade_Service       = null
 Docs_TM_Service    = null
 content_cache = {};
@@ -7,10 +8,11 @@ content_cache = {};
 class Help_Controller
 
   dependencies: ->
-    fs                 = require('fs')
-    request            = require('request')
-    Jade_Service       = require('../services/Jade-Service')
-    Docs_TM_Service    = require('../services/Docs-TM-Service');
+    fs                 = require 'fs'
+    request            = require 'request'
+    {Router}           = require 'express'
+    Jade_Service       = require '../services/Jade-Service'
+    Docs_TM_Service    = require '../services/Docs-TM-Service'
 
   constructor: (req, res)->
     @.dependencies()
@@ -122,13 +124,13 @@ class Help_Controller
   user_Logged_In: ()=>
     @.req.session?.username isnt undefined
 
-Help_Controller.register_Routes =  (app)=>
-
-  app.get '/help/index.html'      , (req, res)-> new Help_Controller(req, res).show_Index_Page()
-  app.get '/help/article/:page*'  , (req, res)-> new Help_Controller(req, res).show_Help_Page()
-  app.get '/help/:page*'          , (req, res)-> new Help_Controller(req, res).show_Help_Page()
-  app.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).show_Image()
-  app.get '/json/docs/library'    , (req, res)-> new Help_Controller(req, res).json_Docs_Library()
-  app.get '/json/docs/:page'      , (req, res)-> new Help_Controller(req, res).json_Docs_Page()
+  routes: ()=>
+    using new Router(), ->
+      @.get '/help/index.html'      , (req, res)-> new Help_Controller(req, res).show_Index_Page()
+      @.get '/help/article/:page*'  , (req, res)-> new Help_Controller(req, res).show_Help_Page()
+      @.get '/help/:page*'          , (req, res)-> new Help_Controller(req, res).show_Help_Page()
+      @.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).show_Image()
+      @.get '/json/docs/library'    , (req, res)-> new Help_Controller(req, res).json_Docs_Library()
+      @.get '/json/docs/:page'      , (req, res)-> new Help_Controller(req, res).json_Docs_Page()
 
 module.exports = Help_Controller

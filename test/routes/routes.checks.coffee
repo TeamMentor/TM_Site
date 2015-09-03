@@ -62,7 +62,7 @@ describe '| routes | routes.checks |', ()->
     baseUrl = 'http://localhost:' + app.port
 
     loggedInText = ['<span title="Logout" class="icon-Logout">']
-    loggedOutText = ['<li><a id="nav-login" href="/guest/login.html">Login</a></li>']
+    loggedOutText = ['<li><a id="nav-login" href="/jade/guest/login.html">Login</a></li>']
 
     postData = {username:'user', password:'a'}
     userLogin = (agent, postData, next)-> agent.post(baseUrl + '/user/login').send(postData).end (err,res)->

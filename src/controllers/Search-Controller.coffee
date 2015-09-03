@@ -1,13 +1,12 @@
 fs                 = null
 path               = null
 request            = null
+Router             = null
 Express_Service    = null
 Jade_Service       = null
 Graph_Service      = null
 
-
 recentSearches_Cache = ["Logging","Struts","Administrative Controls"]
-url_Prefix           = 'show'
 
 class SearchController
     constructor: (req, res,express_Service)->
@@ -15,6 +14,7 @@ class SearchController
         fs                 = require('fs')
         path               = require('path')
         request            = require('request')
+        {Router}           = require 'express'
         Express_Service    = require('../services/Express-Service')
         Jade_Service       = require('../services/Jade-Service')
         Graph_Service      = require('../services/Graph-Service')
@@ -29,7 +29,6 @@ class SearchController
         @.defaultRepo        = 'TM_Test_GraphData'
         @.defaultFolder      = '/SearchData/'
         @.defaultDataFile    = 'Data_Validation'
-        @.urlPrefix          = url_Prefix
         @.searchData         = null
 
         @.jade_Main               = 'user/main.jade'
@@ -54,7 +53,7 @@ class SearchController
           item = data[key]
           path = if path then "#{path},#{key}" else "#{key}"
           if item and path
-            navigation.push {href:"/#{@urlPrefix}/#{path}", title: item.title , id: item.id }
+            navigation.push {href:"/jade/show/#{path}", title: item.title , id: item.id }
 
         callback navigation
 
@@ -132,7 +131,7 @@ class SearchController
             return @.render_Page  @.jade_Search_two_columns, { no_Results : true , text: target}
 
           searchData.text              =  target
-          searchData.href              = "/search?text=#{target?.url_Encode()}&filters="
+          searchData.href              = "/jade/search?text=#{target?.url_Encode()}&filters="
           searchData.internalUser      = @.req.session?.internalUser
           searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
           searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
@@ -176,25 +175,23 @@ class SearchController
 
           @.render_Page @.jade_Main, user_Data
 
-SearchController.register_Routes = (app, expressService) ->
+    routes: (expressService) ->
 
-    expressService ?= new Express_Service()
-    checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res,next)
-    urlPrefix       = url_Prefix            # urlPrefix should be moved to a global static class
+      expressService ?= new Express_Service()
+      checkAuth       =  (req,res,next) -> expressService.checkAuth(req, res,next)
 
-    searchController = (method_Name) ->                                  # pins method_Name value
-        return (req, res) ->                                             # returns function for express
-            console.log("Route is " + req.path)
-            new SearchController(req, res,expressService)[method_Name]()    # creates SearchController object with live
-                                                                         # res,req and invokes method_Name
-
-    app.get "/"                              , checkAuth , searchController('showMainAppView')
-    app.get "/#{urlPrefix}"                  , checkAuth , searchController('show_Root_Query')
-    app.get "/#{urlPrefix}/:queryId"         , checkAuth , searchController('showSearchFromGraph')
-    app.get "/#{urlPrefix}/:queryId/:filters", checkAuth , searchController('showSearchFromGraph')
-    app.get "/user/main.html"                , checkAuth , searchController('showMainAppView')
-    app.get "/search"                        , checkAuth,  searchController('search')
-    app.get "/search/:text"                  , checkAuth,  searchController('search_Via_Url')
-    app.get "/json/search/recentsearch"      , checkAuth,  searchController('recent_Search')
+      searchController = (method_Name) ->                                  # pins method_Name value
+          return (req, res) ->                                             # returns function for express
+              new SearchController(req, res,expressService)[method_Name]()    # creates SearchController object with live
+                                                                           # res,req and invokes method_Name
+      using new Router(),->
+        @.get "/"                              , checkAuth , searchController('showMainAppView')
+        @.get "/show"                          , checkAuth , searchController('show_Root_Query')
+        @.get "/show/:queryId"                 , checkAuth , searchController('showSearchFromGraph')
+        @.get "/show/:queryId/:filters"        , checkAuth , searchController('showSearchFromGraph')
+        @.get "/user/main.html"                , checkAuth , searchController('showMainAppView')
+        @.get "/search"                        , checkAuth,  searchController('search')
+        @.get "/search/:text"                  , checkAuth,  searchController('search_Via_Url')
+        @.get "/json/search/recentsearch"      , checkAuth,  searchController('recent_Search')
 
 module.exports = SearchController

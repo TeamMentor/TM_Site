@@ -93,7 +93,7 @@ class Express_Service
       return next()
 
     if req.url is '/'
-      res.redirect '/index.html'
+      res.redirect '/jade/index.html'
     else
       req.session.redirectUrl = req.url
       res.status(403)

@@ -4,6 +4,7 @@ jade      = null
 cheerio   = null
 config    = null
 Highlight = null
+Router    = null
 
 crypto = require 'crypto'
 String::checksum = (algorithm, encoding)->
@@ -20,6 +21,7 @@ class JadeService
       cheerio     = require 'cheerio'
       config      = require '../config'
       {Highlight} = require 'highlight'
+      {Router}    = require 'express'
 
     constructor: (options)->
       @.dependencies()
@@ -144,5 +146,11 @@ class JadeService
              "  +#{safeMixin}                 "                               # mixin to render
       return jade.compile(code, {filename: dummyJade })(params)
 
+    routes: ()=>
+      jade_Service = @
+      using new Router(), ->
+        @.get '/index.html'               , (req, res)-> res.send jade_Service.render_Jade_File 'guest/default.jade'
+        @.get '/guest/:page.html'         , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
+        @.get '/guest/:page'              , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
 
 module.exports = JadeService

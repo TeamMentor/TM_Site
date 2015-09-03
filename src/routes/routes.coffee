@@ -29,42 +29,35 @@ add_Routes = (express_Service)->
     global.custom?.express_Routes?(app, require('express')) # todo: needs refactoring
 
     app.use new API_Controller().routes()
+
     app.use '/angular',new Angular_Controller().routes()
 
     app.use '/flare', new Flare_Controller().routes()
 
+    app.use '/'     , new Login_Controller().routes_Json()
+    app.use '/'     , new Login_Controller().routes_SSO()
 
-    app.post '/user/login'              , (req, res)-> new Login_Controller(req, res).loginUser()
-    app.post '/json/user/login'         , (req, res)-> new Login_Controller(req, res).json_Mode().loginUser()
-    app.post '/json/user/logout'        , (req, res)-> new Login_Controller(req, res).json_Mode().logoutUser()
-    app.post '/json/user/signup'        , (req, res)-> new User_Sign_Up_Controller(req, res).json_Mode().userSignUp()
-    app.get  '/json/user/currentuser'   , (req, res)-> new Login_Controller(req, res).json_Mode().currentUser()
+    app.use '/jade', new Login_Controller(    ).routes_Jade()
+    app.use '/jade', new Jade_Service(        ).routes()
+    app.use '/jade', new Help_Controller(     ).routes()
+    app.use '/jade', new Pwd_Reset_Controller().routes()
+    app.use '/jade', new Article_Controller(  ).routes(express_Service)
+    app.use '/jade', new Search_Controller(   ).routes(express_Service)
 
-    app.get  '/user/logout'             , (req, res)-> new Login_Controller(req, res).logoutUser()
-    app.post '/user/sign-up'            , (req, res)-> new User_Sign_Up_Controller(req, res).userSignUp();
 
-    app.get '/_Customizations/SSO.aspx' , (req, res)-> new Login_Controller(req, res).tm_SSO()
-    app.get '/Aspx_Pages/SSO.aspx'      , (req, res)-> new Login_Controller(req, res).tm_SSO()
-
-    app.get '/index.html'               , (req, res)-> res.send jade_Service.render_Jade_File 'guest/default.jade'
-    app.get '/guest/:page.html'         , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
-    app.get '/guest/:page'              , (req, res)-> res.send jade_Service.render_Jade_File 'guest/' + req.params.page + '.jade'
     app.get '/teamMentor'               , (req, res)->
         if req.session?.username
-            res.redirect "/user/main.html"                                                                        # to prevent cached infinite redirects (due to 3.5 redirect of / to /teammentor
+            res.redirect "/jade/user/main.html"                                                                        # to prevent cached infinite redirects (due to 3.5 redirect of / to /teammentor
         else
-            res.redirect "/index.html"
+            res.redirect "/jade/index.html"
 
-    options = { express_Service: express_Service }
+    app.get '/', (req,res)-> res.redirect '/jade/index.html'
 
-    Search_Controller                  .register_Routes(app, express_Service)
-    Article_Controller                 .register_Routes(app, express_Service)
-
-    Pwd_Reset_Controller               .register_Routes(app                  )
-    Help_Controller                    .register_Routes(app                  )
+    #Help_Controller                    .register_Routes(app                  )
     Misc_Controller                    .register_Routes(app, express_Service )
     Jade_Controller                    .register_Routes(app                  )
 
+    options = { express_Service: express_Service }
     new PoC_Controller(options)        .register_Routes()
 
     #errors 404 and 500
