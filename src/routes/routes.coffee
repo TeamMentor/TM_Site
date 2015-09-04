@@ -69,7 +69,7 @@ add_Routes = (express_Service)->
 
     #errors 404 and 500
     app.get '/error', (req,res)-> res.status(500).send  jade_Service.render_Jade_File 'guest/500.jade',{ loggedIn:req.session?.username isnt undefined }
-    app.get '/*'    , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined }
+    #app.get '/*'    , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined }
 
     app.use (err, req, res, next)->
       #console.error(err.stack)
