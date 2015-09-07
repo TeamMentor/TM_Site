@@ -5,6 +5,7 @@ add_Routes = (express_Service)->
     Angular_Controller      = require '../controllers/Angular-Controller'
     API_Controller          = require '../controllers/API-Controller'
     Article_Controller      = require '../controllers/Article-Controller'
+    Browser_Controller      = require '../controllers/Browser-Controller'
     Flare_Controller        = require '../controllers/Flare-Controller'
     Help_Controller         = require '../controllers/Help-Controller'
     Jade_Controller         = require '../controllers/Jade-Controller'
@@ -44,12 +45,14 @@ add_Routes = (express_Service)->
     app.use '/jade', new Article_Controller(  ).routes(express_Service)
     app.use '/jade', new Search_Controller(   ).routes(express_Service)
 
+    app.use '/'    , new Browser_Controller().routes()
 
     app.get '/teamMentor'               , (req, res)->
-        if req.session?.username
-            res.redirect "/jade/user/main.html"                                                                        # to prevent cached infinite redirects (due to 3.5 redirect of / to /teammentor
-        else
-            res.redirect "/jade/index.html"
+      res.redirect "/browser-detect"
+#        if req.session?.username
+#            res.redirect "/jade/user/main.html"                                                                        # to prevent cached infinite redirects (due to 3.5 redirect of / to /teammentor
+#        else
+#            res.redirect "/jade/index.html"
 
     app.get '/', (req,res)-> res.redirect '/jade/index.html'
 
