@@ -114,6 +114,14 @@ class SearchController
           filters = filters.substring(0, filters.length-1)
         filters = filters.replace(',,',',')
 
+    show_Gateways : =>
+      query_Id = 'query-da0f0babaad8'
+      @graph_Service.graphDataFromGraphDB query_Id, '',  (searchData)=>
+        searchData.internalUser      = @.req.session?.internalUser
+        searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
+        searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
+        searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
+        @.res.json searchData
 
     search: =>
       target  = @.req.query?.text
@@ -193,5 +201,6 @@ class SearchController
         @.get "/search"                        , checkAuth,  searchController('search')
         @.get "/search/:text"                  , checkAuth,  searchController('search_Via_Url')
         @.get "/json/search/recentsearch"      , checkAuth,  searchController('recent_Search')
+        @.get "/json/search/gateways"          , checkAuth,  searchController('show_Gateways')
 
 module.exports = SearchController
