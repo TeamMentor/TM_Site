@@ -8,6 +8,7 @@ add_Routes = (express_Service)->
     Browser_Controller      = require '../controllers/Browser-Controller'
     Flare_Controller        = require '../controllers/Flare-Controller'
     Help_Controller         = require '../controllers/Help-Controller'
+    Gateways_Controller     = require '../controllers/Gateways-Controller'
     Jade_Controller         = require '../controllers/Jade-Controller'
     Login_Controller        = require '../controllers/Login-Controller'
     Misc_Controller         = require '../controllers/Misc-Controller'
@@ -41,6 +42,7 @@ add_Routes = (express_Service)->
     app.use '/jade', new Login_Controller(    ).routes_Jade()
     app.use '/jade', new Jade_Service(        ).routes()
     app.use '/jade', new Help_Controller(     ).routes()
+    app.use '/jade', new Gateways_Controller( ).routes()
     app.use '/jade', new Pwd_Reset_Controller().routes()
     app.use '/jade', new Article_Controller(  ).routes(express_Service)
     app.use '/jade', new Search_Controller(   ).routes(express_Service)
