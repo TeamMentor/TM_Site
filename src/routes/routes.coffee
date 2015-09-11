@@ -42,7 +42,7 @@ add_Routes = (express_Service)->
     app.use '/jade', new Login_Controller(    ).routes_Jade()
     app.use '/jade', new Jade_Service(        ).routes()
     app.use '/jade', new Help_Controller(     ).routes()
-    app.use '/jade', new Gateways_Controller( ).routes()
+    app.use '/jade', new Gateways_Controller( ).routes(express_Service)
     app.use '/jade', new Pwd_Reset_Controller().routes()
     app.use '/jade', new Article_Controller(  ).routes(express_Service)
     app.use '/jade', new Search_Controller(   ).routes(express_Service)

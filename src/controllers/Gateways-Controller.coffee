@@ -27,9 +27,14 @@ class Gateways_Controller
       @.getGatewaysStructure (callback)=>
         @.res.json callback
 
-  routes: ()=>
+  routes: (expressService)=>
+    checkAuth       = (req,res,next) -> expressService.checkAuth(req, res, next)
+
+    gatewaysController = (method_Name) ->                                                    # pins method_Name value
+      return (req, res,next) ->                                                              # returns function for express
+        new Gateways_Controller(req, res, next)[method_Name]()                               # Methodname
+
     using new Router(), ->
-      @.get '/json/gateways/library'    , (req, res)-> new Gateways_Controller(req, res).json_Gateways_Library()
-      @.get '/json/gateways/:article'   , (req, res)-> new Gateways_Controller(req, res).json_Docs_Page()
+      @.get '/json/gateways/library'    ,checkAuth,gatewaysController("json_Gateways_Library")
 
 module.exports = Gateways_Controller
