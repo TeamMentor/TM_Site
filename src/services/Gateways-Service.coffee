@@ -29,17 +29,19 @@ class Gateways_Service
       @.show_Gateways (data)->
         Library.title = data.title
         Library.Views = []
-        for row in data.containers
-          view = {}
-          view.id       = row.id
-          view.title    = row.title
-          view.Articles = []
-          for articleId in row.articles
-            for result in data.results
-              if (result.id == articleId)
-                article = {id: result.id, guid: result.guid, title: result.title,summary: result.summary}
-                view.Articles.push(article)
-                break
+        if data.containers
+          for row in data.containers
+            view = {}
+            view.id       = row.id
+            view.title    = row.title
+            view.Articles = []
+            if row.articles
+              for articleId in row.articles
+                for result in data.results
+                  if (result.id == articleId)
+                    article = {id: result.id, guid: result.guid, title: result.title,summary: result.summary}
+                    view.Articles.push(article)
+                    break
           Library.Views.push(view)
         callback Library
 
