@@ -42,7 +42,7 @@ class Gateways_Service
                     article = {id: result.id, guid: result.guid, title: result.title,summary: result.summary}
                     view.Articles.push(article)
                     break
-          Library.Views.push(view)
+            Library.Views.push(view)
         callback Library
 
 
