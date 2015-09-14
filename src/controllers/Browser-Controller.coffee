@@ -45,14 +45,21 @@ class Browser_Controller
     else
       res.redirect '/jade'  +req.url
 
+  redirect_Search: (req, res)=>
+    if @.use_Flare(req)
+      res.redirect '/angular/user/index?text=' +req.query.text
+    else
+      res.redirect '/jade'  +req.url
+
   routes: =>
     browser_Controler = @
     using new Router(),->
-      @.get '/browser'         , (req, res) -> browser_Controler.detect(req, res)
-      #@.get '/use_Flare'       , (req, res) -> res.send browser_Controler.use_Flare(req)
-      @.get '/'                , (req, res) -> browser_Controler.redirect_Root(req, res)
-      @.get '/browser-detect'  , (req, res) -> browser_Controler.redirect_Root(req, res)
-      @.get '/article/*'       , (req, res) -> browser_Controler.redirect_Article(req, res)
+      @.get '/browser'            , (req, res) -> browser_Controler.detect(req, res)
+      #@.get '/use_Flare'         , (req, res) -> res.send browser_Controler.use_Flare(req)
+      @.get '/'                   , (req, res) -> browser_Controler.redirect_Root(req, res)
+      @.get '/browser-detect'     , (req, res) -> browser_Controler.redirect_Root(req, res)
+      @.get '/article/*'          , (req, res) -> browser_Controler.redirect_Article(req, res)
+      @.get '/search'             , (req, res) -> browser_Controler.redirect_Search(req,res)
 
 
 module.exports = Browser_Controller
