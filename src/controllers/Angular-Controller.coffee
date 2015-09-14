@@ -107,7 +107,7 @@ class Angular_Controller
     if req?.session?.username
       return next()
     else
-      return res.redirect('/angular/guest/home')
+      return res.redirect(@.redirectPage)
 
   routes: ()=>
     router = new Router()
