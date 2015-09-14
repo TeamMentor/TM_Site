@@ -24,6 +24,7 @@ class Angular_Controller
     @.url_TM_Graph   = "http://localhost:#{@.port_TM_Graph}"
     @.url_Articles   = "#{@.url_TM_Graph}/search/article_titles"
     @.url_Queries    = "#{@.url_TM_Graph}/search/query_titles"
+    @.redirectPage   = '/angular/guest/home'
 
   send_Search_Auto_Complete: (term, res)->
     matches = {}
@@ -102,20 +103,26 @@ class Angular_Controller
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, {}
 
+  check_Auth: (req,res,next)=>
+    if req?.session?.username
+      return next()
+    else
+      return res.redirect('/angular/guest/home')
+
   routes: ()=>
     router = new Router()
-    router.get '/flare/:file'          , @.get_Static_Html
-    router.get '/user/:file*'          , @.get_Static_Html_User
-    router.get '/guest/:file'          , @.get_Static_Html_Guest
-    router.get '/component/:file'      , @.get_Static_Html_Component
-    router.get '/api/auto-complete'    , @.get_Search_Auto_Complete
+    router.get '/flare/:file'                         , @.get_Static_Html
+    router.get '/user/:file*'          ,@.check_Auth  , @.get_Static_Html_User
+    router.get '/guest/:file'                         , @.get_Static_Html_Guest
+    router.get '/component/:file'                     , @.get_Static_Html_Component
+    router.get '/api/auto-complete'                   , @.get_Search_Auto_Complete
 
-    router.get '/jade/:file'                    , @.get_Compiled_Jade
-    router.get '/jade/:area/:file'              , @.get_Compiled_Jade
-    router.get '/jade/:section/:area/:file'     , @.get_Compiled_Jade
-    router.get '/jade-html/:file'               , @.get_Rendered_Jade
-    router.get '/jade-html/:area/:file'         , @.get_Rendered_Jade
-    router.get '/jade-html/:section/:area/:file', @.get_Rendered_Jade
+    router.get '/jade/:file'                          , @.get_Compiled_Jade
+    router.get '/jade/:area/:file'                    , @.get_Compiled_Jade
+    router.get '/jade/:section/:area/:file'           , @.get_Compiled_Jade
+    router.get '/jade-html/:file'                     , @.get_Rendered_Jade
+    router.get '/jade-html/:area/:file'               , @.get_Rendered_Jade
+    router.get '/jade-html/:section/:area/:file'      , @.get_Rendered_Jade
 
     router.use express['static'](@.path_To_Static);
 
