@@ -7,6 +7,7 @@
 # chrome on osx: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36
 # safari on osx: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12
 
+# main source: http://www.useragentstring.com/pages/Browserlist/
 
 class Browser_Controller
   constructor: ->
@@ -20,6 +21,9 @@ class Browser_Controller
   is_Chrome: (req)=>
     return req.headers?['user-agent']?.contains('Chrome') || false
 
+  is_IE_11: (req)=>
+    return req.headers?['user-agent']?.contains('MSIE 11') || false
+
   is_Firefox: (req)=>
     return req.headers?['user-agent']?.contains('Firefox') || false
 
@@ -27,9 +31,10 @@ class Browser_Controller
     return (req.headers?['user-agent']?.contains('Safari') and not req.headers?['user-agent']?.contains('Chrome') ) || false
 
   use_Flare: (req, res)=>
-    return true if @.is_Chrome(req) and @.is_5_0(req)
-
-    return true if @.is_Safari(req) and @.is_5_0(req)
+    return true if @.is_Chrome(req ) and @.is_5_0(req)
+    return true if @.is_IE_11(req  ) and @.is_5_0(req)
+    return true if @.is_Firefox(req) and @.is_5_0(req)
+    return true if @.is_Safari(req ) and @.is_5_0(req)
 
     return false
 
