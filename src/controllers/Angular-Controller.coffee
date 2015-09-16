@@ -24,6 +24,8 @@ class Angular_Controller
     @.url_TM_Graph   = "http://localhost:#{@.port_TM_Graph}"
     @.url_Articles   = "#{@.url_TM_Graph}/search/article_titles"
     @.url_Queries    = "#{@.url_TM_Graph}/search/query_titles"
+    @.url_Words      = "#{@.url_TM_Graph}/search/all_words"
+
     @.redirectPage   = '/angular/guest/home'
 
   send_Search_Auto_Complete: (term, res)->
@@ -41,11 +43,17 @@ class Angular_Controller
     else
       @.url_Queries.json_GET (data_Queries)=>
         @.url_Articles.json_GET (data_Articles)=>
-          if data_Queries.sort
-            autoComplete_Data = data_Queries.sort().concat data_Articles
-          else
-            autoComplete_Data =[]
-          @.send_Search_Auto_Complete term, res
+          @.url_Words.json_GET (data_Words)=>
+            if data_Queries.sort
+              autoComplete_Data = data_Queries.concat(data_Articles)
+            else
+              autoComplete_Data =[]
+            if data_Words.sort
+              for word in data_Words
+                autoComplete_Data.push { title: word, id: "word-#{word}" }
+
+            autoComplete_Data.sort()
+            @.send_Search_Auto_Complete term, res
 
   get_Static_Html: (req,res)=>
     file = req.params.file
