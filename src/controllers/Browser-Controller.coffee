@@ -22,7 +22,7 @@ class Browser_Controller
     return req.headers?['user-agent']?.contains('Chrome') || false
 
   is_IE_11: (req)=>
-    return req.headers?['user-agent']?.contains('MSIE 11') || false
+    return req.headers?['user-agent']?.contains('MSIE 11') || req.headers?['user-agent']?.contains('IE 11') || false
 
   is_Firefox: (req)=>
     return req.headers?['user-agent']?.contains('Firefox') || false
