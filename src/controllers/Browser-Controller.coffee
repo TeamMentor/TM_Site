@@ -56,6 +56,9 @@ class Browser_Controller
     else
       res.redirect '/jade'  +req.url
 
+  redirect_Pwd_Reset: (req, res)=>
+    res.redirect '/jade'  +req.url
+
   routes: =>
     browser_Controler = @
     using new Router(),->
@@ -65,6 +68,7 @@ class Browser_Controller
       @.get '/browser-detect'     , (req, res) -> browser_Controler.redirect_Root(req, res)
       @.get '/article/*'          , (req, res) -> browser_Controler.redirect_Article(req, res)
       @.get '/search'             , (req, res) -> browser_Controler.redirect_Search(req,res)
+      @.get '/passwordReset/*'    , (req, res) -> browser_Controler.redirect_Pwd_Reset(req, res)
 
 
 module.exports = Browser_Controller
