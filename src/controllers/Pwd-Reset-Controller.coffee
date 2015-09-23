@@ -74,25 +74,31 @@ class Pwd_Reset_Controller
 
     #Validating token
     if (token == null or username == null or username is '' or token is '')
+      @.errorMessage = 'Token is invalid'
       return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Token is invalid'}
 
     #Password not provided
     if (@.req.body?.password?.length is 0)
+      @.errorMessage = 'Password must not be empty'
       return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Password must not be empty'}
 
     #Confirmation password not provided
     if (@.req.body?['confirm-password']?.length is 0)
+      @.errorMessage = 'Confirmation Password must not be empty'
       return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Confirmation Password must not be empty'}
 
     #Passwords must match
     if (@.req.body?.password != @.req.body?['confirm-password'])
+      @.errorMessage ='Passwords don\'t match'
       return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Passwords don\'t match'}
     #length check
     if (@.req.body?.password?.length < 8 || @.req.body?.password?.length > 256 )
+      @.errorMessage ='Password must be 8 to 256 character long'
       return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Password must be 8 to 256 character long'}
 
     #Complexity
     if (!@.req.body?.password?.match(passwordStrengthRegularExpression))
+      @.errorMessage ='Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character'
       return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Your password should be at least 8 characters long. It should have one uppercase and one lowercase letter, a number and a special character'}
 
     #request options
@@ -105,10 +111,13 @@ class Pwd_Reset_Controller
     request options, (error, response)=>
       if (not error) and response.statusCode is 200
         if response?.body?.d
+          @.okMessage = 'Password has been reset'
           @res.redirect(@.url_password_reset_ok )
         else
+          @.errorMessage ='Invalid token, perhaps it has expired'
           @.render_Page @.jade_password_reset_fail,{errorMessage: 'Invalid token, perhaps it has expired'}
       else
+        @.errorMessage= "TEAM Mentor is unavailable"
         @res.redirect(@.url_error_page)
 
   render_Page: (jade_Page,params)=>
@@ -118,9 +127,10 @@ class Pwd_Reset_Controller
 
   routes:  ()=>
     using new Router(), ->
-      @.post '/user/pwd_reset'                  , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset()
-      @.post '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset_Token()
-      @.get  '/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset_Page()
-      @.post '/json/user/pwd_reset'             , (req, res)-> new Pwd_Reset_Controller(req,res).json_Mode().password_Reset()
+      @.post '/user/pwd_reset'                       , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset()
+      @.post '/passwordReset/:username/:token'       , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset_Token()
+      @.get  '/passwordReset/:username/:token'       , (req, res)-> new Pwd_Reset_Controller(req,res).password_Reset_Page()
+      @.post '/json/passwordReset/:username/:token'  , (req, res)-> new Pwd_Reset_Controller(req,res).json_Mode().password_Reset_Token()
+      @.post '/json/user/pwd_reset'                  , (req, res)-> new Pwd_Reset_Controller(req,res).json_Mode().password_Reset()
 
 module.exports = Pwd_Reset_Controller
