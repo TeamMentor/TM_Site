@@ -107,7 +107,6 @@ class Angular_Controller
     area    = req.params.area
     section = req.params.section
     path = @.resolve_Jade_file(file, area, section)
-
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, {}
 
@@ -122,6 +121,7 @@ class Angular_Controller
     router.get '/flare/:file'                         , @.get_Static_Html
     router.get '/user/:file*'          ,@.check_Auth  , @.get_Static_Html_User
     router.get '/guest/:file'                         , @.get_Static_Html_Guest
+    router.get '/guest/pwd_reset/:username/:password' , @.get_Static_Html_Guest
     router.get '/component/:file'                     , @.get_Static_Html_Component
     router.get '/api/auto-complete'                   , @.get_Search_Auto_Complete
 

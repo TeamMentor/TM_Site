@@ -57,7 +57,19 @@ class Browser_Controller
       res.redirect '/jade'  +req.url
 
   redirect_Pwd_Reset: (req, res)=>
-    res.redirect '/jade'  +req.url
+    if @.use_Flare(req)
+      url = req.url
+      if (url? && url.size() > 3)
+        username = url.split('/')?[2]
+        token    = url.split('/')?[3]
+        if (username? && token?)
+          return res.redirect('/angular/guest/pwd_reset/'+ username + "/" + token)
+        else
+          return res.redirect '/angular/guest/home'
+      else
+        return res.redirect '/angular/guest/home'
+    else
+      return res.redirect '/jade'  +req.url
 
   routes: =>
     browser_Controler = @
