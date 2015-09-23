@@ -107,7 +107,6 @@ class Angular_Controller
     area    = req.params.area
     section = req.params.section
     path = @.resolve_Jade_file(file, area, section)
-    console.log (file + " " + area + " " + section + path)
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, {}
 
