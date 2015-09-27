@@ -26,7 +26,6 @@ describe "| controllers | Search-Controller.test |", ->
         @.defaultRepo            .assert_Is 'TM_Test_GraphData'
         @.defaultFolder          .assert_Is '/SearchData/'
         @.defaultDataFile        .assert_Is 'Data_Validation'
-        @.urlPrefix              .assert_Is 'show'
 
         @.jade_Main              .assert_Is 'user/main.jade'
         @.jade_Search            .assert_Is 'user/search.jade'
@@ -50,7 +49,7 @@ describe "| controllers | Search-Controller.test |", ->
       @.graph_Service.resolve_To_Ids = (query_Id,callback)->
         callback { query_Id : { id: 'id-123', title: 'title-123'}}
       @.get_Navigation 'query-id-123', (data)->
-        data.assert_Is [ { href: '/show/query_Id', title: 'title-123', id: 'id-123' } ]
+        data.assert_Is [ { href: '/jade/show/query_Id', title: 'title-123', id: 'id-123' } ]
         done()
 
 
@@ -172,7 +171,7 @@ describe "| controllers | Search-Controller.test |", ->
           $('#results'     ).html().contains('Showing 1 articles')
           $('#articles #list-view-article').html().assert_Is_String()
           $('#list-view-article #result-id-1 h4').html().assert_Is 'result-title-1'
-          $('#activeFilter').html().assert_Is 'title-123<span class="close"><a href="/show/query_Id/abc">x</a></span>'
+          $('#activeFilter').html().assert_Is 'title-123<span class="close"><a href="/jade/show/query_Id/abc">x</a></span>'
           done()
 
       using new Search_Controller(req, res),->
@@ -237,7 +236,7 @@ describe "| controllers | Search-Controller.test |", ->
         send: (html)->
           html.assert_Contains 'results'
           $ = cheerio.load html
-          $('#articles #list-view-article #result-id').attr().assert_Is { href: '/article/result-id/title-id', id: 'result-id' }
+          $('#articles #list-view-article #result-id').attr().assert_Is { href: '/jade/article/result-id/title-id', id: 'result-id' }
           $('#list-view-article h4').html().assert_Is 'title-id'
           $('#activeFilter').text().assert_Is ''
           done()
@@ -252,7 +251,7 @@ describe "| controllers | Search-Controller.test |", ->
         send: (html)->
           html.assert_Contains 'results'
           $ = cheerio.load html
-          $('#articles #list-view-article #result-id').attr().assert_Is { href: '/article/result-id/title-id', id: 'result-id' }
+          $('#articles #list-view-article #result-id').attr().assert_Is { href: '/jade/article/result-id/title-id', id: 'result-id' }
           $('#list-view-article h4').html().assert_Is 'title-id'
           $('#activeFilter').text().assert_Is 'title-123x' + 'title-123x'
           done()
@@ -267,13 +266,28 @@ describe "| controllers | Search-Controller.test |", ->
         send: (html)->
           html.assert_Contains 'results'
           $ = cheerio.load html
-          $('#articles #list-view-article #result-id').attr().assert_Is { href: '/article/result-id/title-id', id: 'result-id' }
+          $('#articles #list-view-article #result-id').attr().assert_Is { href: '/jade/article/result-id/title-id', id: 'result-id' }
           done()
 
       using new Search_Controller(req, res),->
         @.graph_Service = graph_Service (()-> '') , (()-> { id:'search-id', results: [{id:'result-id', title:'title-id'}]} )
         @.search_Via_Url()
 
+  it 'routes', ->
+    using new Search_Controller(), ->
+      @.routes().stack.size().assert_Is 9
+      paths = for item in @.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/',
+                        '/show',
+                        '/show/:queryId',
+                        '/show/:queryId/:filters',
+                        '/user/main.html',
+                        '/search',
+                        '/search/:text',
+                        '/json/search/recentsearch',
+                        '/json/search/gateways' ]
 
   describe 'using Express_Service | ',->
 
@@ -286,26 +300,32 @@ describe "| controllers | Search-Controller.test |", ->
       using new Express_Service(),->
         @.add_Session()
         @.app._router.stack.assert_Size_Is 3
-        Search_Controller.register_Routes @.app,@
-        @.app._router.stack.assert_Size_Is 11
+        @.app.use new Search_Controller().routes()
+        @.app._router.stack.assert_Size_Is 4
+
+
+
         supertest(@.app)
           .get('/user/main.html')
           .end (err,res)->
-            res.text.assert_Contains('<li><a id="nav-about" href="/guest/about.html">About</a></li>')
+            res.text.assert_Contains('<li><a id="nav-about" href="/jade/guest/about.html">About</a></li>')
             done()
 
     it '/user/main.html', (done)->
       using new Express_Service(),->
         @.add_Session(tmpSessionFile)
         @.set_Views_Path()
+
         @.app.use '*', (req,res,next)->
           req.session.username = 'qa-test'
           next()
 
-        Search_Controller.register_Routes @.app, @
+        #Search_Controller.register_Routes @.app, @
+        @.app.use new Search_Controller().routes(@)
 
         supertest(@.app).get("/user/main.html")
                         .end (err,res)=>
+
                           assert_Is_Null err
                           res.text.contains 'Top Articles'
                           done()

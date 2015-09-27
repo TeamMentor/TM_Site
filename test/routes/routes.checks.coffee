@@ -7,6 +7,7 @@ config          = require '../../src/config'
 
 Express_Service = require '../../src/services/Express-Service'
 
+
 describe '| routes | routes.checks |', ()->
 
   app             = null
@@ -52,6 +53,7 @@ describe '| routes | routes.checks |', ()->
     express_Service  = new Express_Service(express_Options).setup().start()
     app              = express_Service.app
 
+
     tm_Server = supertest(app)
 
   afterEach ->
@@ -65,10 +67,10 @@ describe '| routes | routes.checks |', ()->
     loggedOutText = ['<li><a id="nav-login" href="/jade/guest/login.html">Login</a></li>']
 
     postData = {username:'user', password:'a'}
-    userLogin = (agent, postData, next)-> agent.post(baseUrl + '/user/login').send(postData).end (err,res)->
+    userLogin = (agent, postData, next)-> agent.post(baseUrl + '/jade/user/login').send(postData).end (err,res)->
       assert_Is_Null(err)
       next()
-    userLogout = (next)-> agent.get(baseUrl + '/user/logout').end (err,res)->
+    userLogout = (next)-> agent.get(baseUrl + '/jade/user/logout').end (err,res)->
       res.status.assert_Is(200)
       next()
 
@@ -94,13 +96,13 @@ describe '| routes | routes.checks |', ()->
     baseUrl = 'http://localhost:' + app.port
 
     postData = {username:'expired', password:'a'}
-    userLogin = (agent, postData, next)-> agent.post(baseUrl + '/user/login').send(postData).end (err,res)->
+    userLogin = (agent, postData, next)-> agent.post(baseUrl + '/jade/user/login').send(postData).end (err,res)->
       $ = cheerio.load(res.text)
       $('h4').html().assert_Is 'Reset your password'
       $('p') .html().assert_Is 'Your password should be at least 8 characters long. It should have at least one of each of the following: uppercase and lowercase letters, number and special character.'
       next()
 
-    userLogout = (next)-> agent.get(baseUrl + '/user/logout').end (err,res)->
+    userLogout = (next)-> agent.get(baseUrl + '/jade/user/logout').end (err,res)->
       res.status.assert_Is(200)
       next()
     userLogin agent,postData, ->

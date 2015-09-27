@@ -68,7 +68,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
       @.req = { body : email: email}
       @.res =
         redirect: (target)->
-          target.assert_Is '/guest/pwd-sent.html'
+          target.assert_Is '/jade/guest/pwd-sent.html'
           ws_Called.assert_True()
           done()
 
@@ -240,11 +240,12 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
   describe 'routes',->
     it 'register_Routes',->
-      routes = {}
-      app    =
-        post: (url, target)-> routes['post:'+ url] = target
-        get:  (url, target)-> routes['get:' + url] = target
 
-      Pwd_Reset_Controller.register_Routes app
-      routes.keys().assert_Is [ 'post:/user/pwd_reset', 'post:/passwordReset/:username/:token','get:/passwordReset/:username/:token'
-                                'post:/json/user/pwd_reset']
+      paths = for item in pwd_Reset_Controller.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/user/pwd_reset',
+                        '/passwordReset/:username/:token',
+                        '/passwordReset/:username/:token',
+                        '/json/passwordReset/:username/:token',
+                        '/json/user/pwd_reset' ]

@@ -8,8 +8,8 @@ describe '| controllers | Login-Controller.test |', ->
   #consts
   loginPage                 = 'guest/login-Fail.jade'
   loginPage_Unavailable     = 'guest/login-cant-connect.jade'
-  indexPage                 = '/show/'
-  mainPage_no_user          = '/guest/default.html'
+  indexPage                 = '/jade/show'
+  mainPage_no_user          = '/jade/guest/default.html'
   blank_credentials_message = 'Invalid Username or Password'
   random_Port               = 10000.random().add(10000)
 

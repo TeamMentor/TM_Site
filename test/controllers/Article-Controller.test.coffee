@@ -93,7 +93,7 @@ describe '| controllers | Article-Controller.test', ->
         $ = cheerio.load(data)
         $('#articles').html()
         $('#articles').html().assert_Contains 'list-view-article'
-        $('#articles #list-view-article a').attr().assert_Is { href: '/article/12345/this-is-an-title', id: 'article-12345' }
+        $('#articles #list-view-article a').attr().assert_Is { href: '/jade/article/12345/this-is-an-title', id: 'article-12345' }
         $('#articles #list-view-article a h4').html().assert_Is 'this is an title'
         $('#articles #list-view-article p').html().assert_Is 'html summary is here...'
         done()
@@ -179,21 +179,18 @@ describe '| controllers | Article-Controller.test', ->
 
       @article()
 
-
-  describe 'routes |',->
-
-    it 'register_Routes',->
-
-      routes = {}
-      app    =
-        get: (url, checkAuth,target)->
-          checkAuth.assert_Is_Function()
-          routes[url] = target
-
-
-      Article_Controller.register_Routes app
-      console.log routes.keys()
-      routes.keys().assert_Is [ '/a/:ref','/article/:ref/:guid', '/article/:ref/:title','/article/:ref', '/articles',
-                                '/teamMentor/open/:guid','/json/article/:ref',
-                                '/json/recentarticles',
-                                '/json/toparticles']
+  it 'routes', ->
+    using new Article_Controller(), ->
+      @.routes().stack.size().assert_Is 9
+      paths = for item in @.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/a/:ref',
+                        '/article/:ref/:guid',
+                        '/article/:ref/:title',
+                        '/article/:ref',
+                        '/articles',
+                        '/teamMentor/open/:guid',
+                        '/json/article/:ref',
+                        '/json/recentarticles',
+                        '/json/toparticles' ]

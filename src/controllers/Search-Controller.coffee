@@ -175,13 +175,13 @@ class SearchController
         @.showSearchFromGraph()
 
     showMainAppView: =>
-        @.express_Service.session_Service.user_Data @.req.session, (user_Data)=>
-          user_Data.internalUser      = @.req.session?.internalUser
-          user_Data.githubUrl         = @.config?.options?.tm_design.githubUrl
-          user_Data.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
-          user_Data.supportEmail      = @.config?.options?.tm_design.supportEmail
+      @.express_Service.session_Service.user_Data @.req.session, (user_Data)=>
+        user_Data.internalUser      = @.req.session?.internalUser
+        user_Data.githubUrl         = @.config?.options?.tm_design.githubUrl
+        user_Data.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
+        user_Data.supportEmail      = @.config?.options?.tm_design.supportEmail
 
-          @.render_Page @.jade_Main, user_Data
+        @.render_Page @.jade_Main, user_Data
 
     routes: (expressService) ->
 

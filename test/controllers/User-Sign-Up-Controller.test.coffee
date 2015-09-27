@@ -9,7 +9,7 @@ describe '| controllers | User-Sign-Up-Controller', ->
   signUp_fail                     = "guest/sign-up-Fail.jade"
   signUpPage_Unavailable          = 'guest/sign-up-cant-connect.jade'
   #signUp_Ok                       = '/guest/sign-up-OK.html'
-  mainPage_user                   = '/show/'
+  mainPage_user                   = '/jade/show'
   text_Short_Pwd                  = 'Password must be 8 to 256 character long'
   #text_Bad_Pwd                    = 'Password must contain a non-letter and a non-number character'
   text_password_NoMatch           =  'Passwords don\'t match'

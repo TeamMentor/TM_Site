@@ -16,7 +16,25 @@ describe '| controllers | Angular-Controller |', ->
 
   it 'routes', ->
     using new Angular_Controller(), ->
-      @.routes().stack.size().assert_Is 12
+      @.routes().stack.size().assert_Is 13
+      paths = for item in @.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/flare/:file',
+                        '/user/:file*',
+                        '/guest/:file',
+                        '/guest/pwd_reset/:username/:password',
+                        '/component/:file',
+                        '/api/auto-complete',
+                        '/jade/:file',
+                        '/jade/:area/:file',
+                        '/jade/:section/:area/:file',
+                        '/jade-html/:file',
+                        '/jade-html/:area/:file',
+                        '/jade-html/:section/:area/:file',
+                        undefined ]
+      using @.routes().stack[12], ->
+        @.name.assert_Is 'serveStatic'
 
   describe '| Using express',->
 

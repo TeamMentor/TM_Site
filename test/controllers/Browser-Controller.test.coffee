@@ -13,7 +13,15 @@ describe '| controllers | Browser-Controller', ->
 
   it 'routes', ->
     using new Browser_Controller(), ->
-      @.routes().stack.size().assert_Is 1
+      paths = for item in @.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/browser',
+                        '/',
+                        '/browser-detect',
+                        '/article/*',
+                        '/search',
+                        '/passwordReset/*' ]
 
   it 'detect', (done)->
     using new Browser_Controller(), ->
