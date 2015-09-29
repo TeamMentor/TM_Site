@@ -40,7 +40,7 @@ class Article_Controller
         view_Model.loggedIn          = @.req.session?.username isnt undefined
         view_Model.signUpUrl         = @.config?.options?.anonymousService?.signUpUrl
         view_Model.loginUrl          = @.config?.options?.anonymousService?.loginUrl
-        recentArticles = @.recentArticles()
+        #recentArticles = @.recentArticles()
         #console.log "recent articles are: " + recentArticles
         #console.log "Article is: " + articleUrl
         if @.req.session?.articlesAllowed >= 1
@@ -84,26 +84,66 @@ class Article_Controller
                                                                                       # if not
     @.next()                                                                          #   continue with the next express route
 
-  recentArticles: =>
-    @.req.session ?= {}
-    @.req.session.recent_Articles ?= []
-    recentArticles = []
-    for recentArticle in @.req.session.recent_Articles.take(3)
-        recentArticles.push({href : "/article/#{recentArticle.id}" , title:recentArticle.title})
-    recentArticles
+  my_Articles: =>
+    results = {}
+    size = @.req.params?.size
+
+    for item in @.req.session.recent_Articles
+      #results[item.id] ?= { href: "/article/#{item.id}", title: item.title, weight: 0}
+      #if item.technology
+      results[item.id] ?= { id: item.id, title: item.title, technology: item.technology, phase: item.phase, type:item.type, weight: 0}
+      results[item.id].weight++
+
+    results = (results[key] for key in results.keys())
+
+    results = results.sort (a,b)-> a.weight - b.weight
+    results.reverse()
+
+    size = parseInt(size,10)
+
+    if is_Number(size)
+      results = results.take(size)
+
+    if @.req.query['pretty'] is ''                              # if a ?pretty to the request url (show a formatted version of the data)
+      @.res.send "<pre>" + results?.json_Pretty() + "</pre>"     #   send the data wrapped in a <pre> tag so that it shows ok in a browser
+    else
+      @.res.json results
+
+#  recentArticles: =>
+#    @.req.session ?= {}
+#    @.req.session.recent_Articles ?= []
+#    recentArticles = []
+#    for recentArticle in @.req.session.recent_Articles.take(3)
+#        recentArticles.push({href : "/article/#{recentArticle.id}" , title:recentArticle.title})
+#    recentArticles
 
   recentArticlesJson: =>
-    articles = @.req.session?.recent_Articles?.take(3)
-    recentArticles = []
-    return @.res.json {} if not articles
+    size = parseInt(@.req.params?.size, 10)
+    if is_Number(size)
+      articles = {}
+      for article in @.req.session.recent_Articles
+        if article.when
+          articles[article.id] = article
 
-    async.forEach articles, ((article, callback) =>
-      id = article.id.remove('article-')
-      @.find_Article_ByRef id, (data)->
-        recentArticles.push(data)
-        callback()
-    ),(done)=>
-      return @.res.json recentArticles
+      results = (value for key,value of articles)
+      #results = results.sort (a,b)-> a.when - b.when
+      results = results.take(size)
+
+      if @.req.query['pretty'] is ''                               # if a ?pretty to the request url (show a formatted version of the data)
+        @.res.send "<pre>" + results?.json_Pretty() + "</pre>"     #   send the data wrapped in a <pre> tag so that it shows ok in a browser
+      else
+        @.res.json results
+    else
+      @.res.json []
+
+#
+#    async.forEach articles, ((article, callback) =>
+#      id = article.id.remove('article-')
+#      @.find_Article_ByRef id, (data)->
+#        recentArticles.push(data)
+#        callback()
+#    ),(done)=>
+#      return @.res.json recentArticles
 
   topArticlesJson: =>
     topArticles = []
@@ -119,12 +159,17 @@ class Article_Controller
       else
         return []
 
-  recentArticles_Add: (id, title)=>
-
+  recentArticles_Add: (id, title, technology , type, phase )=>
     logger?.info {user: @.req.session?.username, action:'view-article', id: id  , title: title}
-
     @.req.session.recent_Articles ?= []
-    @.req.session.recent_Articles.unshift { id: id , title:title}
+    log_Data =
+      id         : id
+      title      : title
+      technology : technology
+      type       : type
+      phase      : phase
+      when       : (new Date()).getTime()
+    @.req.session.recent_Articles.unshift log_Data
 
   find_Article_ByRef: (article_Ref, callback)=>
     @.graphService.article article_Ref, (data)=>
@@ -155,7 +200,7 @@ class Article_Controller
           summary    = article_Data?.summary
 
           @graphService.article_Html article_Id, (data)=>
-            @recentArticles_Add article_Id, title
+            @recentArticles_Add article_Id, title, technology , type, phase
             callback { id : article_Id, title: title,  summary: summary, article_Html: data?.html, technology: technology, type: type, phase: phase}
       else
         callback null
@@ -174,15 +219,16 @@ class Article_Controller
           new Article_Controller(req, res, next,expressService,graph_Options)[method_Name]()   # creates SearchController object with live
 
     using new Router(),->
-      @.get '/a/:ref'               , checkAuth_AnonymousUser, articleController('article')
-      @.get '/article/:ref/:guid'   , articleController('check_Guid')
-      @.get '/article/:ref/:title'  , checkAuth_AnonymousUser, articleController('article')
-      @.get '/article/:ref'         , checkAuth_AnonymousUser, articleController('article')
-      @.get '/articles'             , checkAuth_AnonymousUser, articleController('articles')
-      @.get '/teamMentor/open/:guid', articleController('check_Guid')
-      @.get '/json/article/:ref'    , checkAuth_AnonymousUser, articleController('article_Json')
-      @.get '/json/recentarticles'  , checkAuth, articleController('recentArticlesJson')
-      @.get '/json/toparticles'     , checkAuth, articleController('topArticlesJson')
+      @.get '/a/:ref'                    , checkAuth_AnonymousUser, articleController('article')
+      @.get '/article/:ref/:guid'        , articleController('check_Guid')
+      @.get '/article/:ref/:title'       , checkAuth_AnonymousUser, articleController('article')
+      @.get '/article/:ref'              , checkAuth_AnonymousUser, articleController('article')
+      @.get '/articles'                  , checkAuth_AnonymousUser, articleController('articles')
+      @.get '/teamMentor/open/:guid'     , articleController('check_Guid')
+      @.get '/json/article/:ref'         , checkAuth_AnonymousUser, articleController('article_Json')
+      @.get '/json/recentarticles/:size' , checkAuth, articleController('recentArticlesJson')
+      @.get '/json/toparticles'          , checkAuth, articleController('topArticlesJson')
+      @.get '/json/my-articles/:size'    , checkAuth, articleController('my_Articles')
 
 
 module.exports = Article_Controller

@@ -177,11 +177,37 @@ describe '| controllers | Article-Controller.test', ->
 
         done()
 
-      @article()
+      @.article()
+
+  it 'my-articles', ()->
+    req =
+      query  : {}
+      session: recent_Articles: [ { title:'title-1', id:'id-1'}, { title:'title-1', id:'id-1'},
+                                  { title:'title-2', id:'id-2'}
+                                  { title:'title-1', id:'id-3'} ]
+    res =
+      json: (data)->
+        data.assert_Is [{ href: '/article/id-1', title: 'title-1', weight: 2 },
+                        { href: '/article/id-3', title: 'title-1', weight: 1 }
+                        { href: '/article/id-2', title: 'title-2', weight: 1 }]
+
+
+    new Article_Controller(req,res).my_Articles()
+
+    req.params  = size : 'aaaa'
+
+    new Article_Controller(req,res).my_Articles()
+
+    req.params  = size : '1'
+    res =
+      json: (data)->
+        data.assert_Is [{ href: '/article/id-1', title: 'title-1', weight: 2 }]
+
+    new Article_Controller(req,res).my_Articles()
 
   it 'routes', ->
     using new Article_Controller(), ->
-      @.routes().stack.size().assert_Is 9
+      @.routes().stack.size().assert_Is 10
       paths = for item in @.routes().stack
         if item.route
           item.route.path
@@ -193,4 +219,5 @@ describe '| controllers | Article-Controller.test', ->
                         '/teamMentor/open/:guid',
                         '/json/article/:ref',
                         '/json/recentarticles',
-                        '/json/toparticles' ]
+                        '/json/toparticles',
+                        '/json/my-articles/:size']
