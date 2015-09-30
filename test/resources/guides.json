@@ -1,0 +1,370 @@
+{
+  "id": "query-da0f0babaad8",
+  "title": "Guides",
+  "size": 34,
+  "containers": [
+    {
+      "id": "query-a909881a2adb",
+      "title": "Introduction",
+      "size": 5,
+      "articles": [
+        "article-20d72f7c1650",
+        "article-3ba87749c921",
+        "article-6eb42f9b93e6",
+        "article-7a72e359eb7b",
+        "article-d90da0846a0a"
+      ]
+    },
+    {
+      "id": "query-81610e3861d0",
+      "title": "Platform-specific Guidance",
+      "size": 4,
+      "articles": [
+        "article-0a47af09d657",
+        "article-4825a8fb2b99",
+        "article-a40696cc2084",
+        "article-d585442ddb12"
+      ]
+    },
+    {
+      "id": "query-d8c496c2e228",
+      "title": "Programming Best Practices",
+      "size": 16,
+      "articles": [
+        "article-0899cfd472a6",
+        "article-0a48dfca5309",
+        "article-11e816022d03",
+        "article-23aec03297e2",
+        "article-2b9a2ab3e3a7",
+        "article-331aa351a577",
+        "article-3dc77c4c949d",
+        "article-50cb570207e8",
+        "article-739333bc0d58",
+        "article-76824246fdb2",
+        "article-950d5958c078",
+        "article-96ed26609a02",
+        "article-a3a84bc30248",
+        "article-a7ec12294c8e",
+        "article-cd0d5c12d5fe",
+        "article-f5efb6424412"
+      ]
+    },
+    {
+      "id": "query-f2b30063ffde",
+      "title": "Standards",
+      "size": 1,
+      "articles": [
+        "article-13386901a023"
+      ]
+    },
+    {
+      "id": "query-4888f19640f1",
+      "title": "Vulnerabilities",
+      "size": 8,
+      "articles": [
+        "article-1b6b29924d6d",
+        "article-2c7f5f66ba4b",
+        "article-389d40bb12b9",
+        "article-40e003407146",
+        "article-8b29fc089855",
+        "article-921eacfc9e44",
+        "article-d34b81475a5b",
+        "article-dacfbb55d6f1"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "tags": "",
+      "is": "Article",
+      "summary": "The Web Application Security Consortium (WASC) Threat Classification is project that aims to classify common security threats as either attacks or weaknesses, to help programmers and security testers ",
+      "title": "WASC Threat Classification",
+      "guid": "c1f4c3d6-c334-440f-a5f8-1b6b29924d6d",
+      "id": "article-1b6b29924d6d"
+    },
+    {
+      "guid": "95e5c97e-4ee6-4c27-8986-2c7f5f66ba4b",
+      "tags": "",
+      "is": "Article",
+      "summary": "C and C++ have become some of the most widely used languages for everything from simple software to large-scale deployments. C/C++ allow for relatively low level memory management, and therefore can a",
+      "title": "Common C/C++ Vulnerabilities",
+      "id": "article-2c7f5f66ba4b"
+    },
+    {
+      "guid": "655e852d-2acb-44f3-8865-389d40bb12b9",
+      "tags": "",
+      "is": "Article",
+      "title": "Common Java Vulnerabilities",
+      "summary": "Java has become one of the most widely used languages due to its “write once, run anywhere” philosophy. Because of its large install base, it has been widely targeted for attacks by both researchers a",
+      "id": "article-389d40bb12b9"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "Most Exploited Vulnerabilities",
+      "summary": "Not all vulnerability types are equal - attackers favor vulnerabilities that are easy to exploit and grant a lot of abilities. Exploits for some vulnerability types can be easily automated to quickly ",
+      "guid": "e3d00fdc-baf6-49d5-97a9-40e003407146",
+      "id": "article-40e003407146"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "OWASP Top 10",
+      "summary": "The Open Web Application Security Project (OWASP) publishes the “OWASP Top 10” list of the top 10 critical web application security flaws most likely to impact companies. The latest version was publis",
+      "guid": "c53dd5e7-6823-423f-b280-8b29fc089855",
+      "id": "article-8b29fc089855"
+    },
+    {
+      "guid": "2f4a6a39-0932-4c76-88fd-921eacfc9e44",
+      "tags": "",
+      "is": "Article",
+      "title": "Common PHP Vulnerabilities",
+      "summary": "PHP is a widely used server side scripting language commonly found in conjunction with HTML. Because PHP is located on the server side, users may not even know they are interacting with PHP generated ",
+      "id": "article-921eacfc9e44"
+    },
+    {
+      "guid": "754da6c4-f305-4112-b3e2-d34b81475a5b",
+      "tags": "",
+      "is": "Article",
+      "summary": "Taxonomies help organize and classify vulnerabilities based on risk and availability to attackers. Many groups and organizations have compiled lists to help companies manage the vulnerabilities that a",
+      "title": "Vulnerability Taxonomies",
+      "id": "article-d34b81475a5b"
+    },
+    {
+      "tags": "",
+      "summary": "ASP.NET is a service side web application framework developed by Microsoft. This framework allows developers to build dynamic content and web applications for both PC and Mobile devices. The following",
+      "is": "Article",
+      "title": "Common ASP.NET Vulnerabilities",
+      "guid": "eea7e1d6-e603-4d72-8c9a-dacfbb55d6f1",
+      "id": "article-dacfbb55d6f1"
+    },
+    {
+      "guid": "47b5a0ef-63f2-4048-816b-0a47af09d657",
+      "tags": "",
+      "title": "ASP.NET Security",
+      "is": "Article",
+      "summary": "These are the most effective security guidelines for ASP.NET coding. Following these guidelines will help programmers prevent well known vulnerabilities from reaching a production environment. While n",
+      "id": "article-0a47af09d657"
+    },
+    {
+      "guid": "83e4a444-7c23-4ef2-8686-4825a8fb2b99",
+      "tags": "",
+      "is": "Article",
+      "title": "PHP Security",
+      "summary": "These are the most effective PHP security guidelines. Some vulnerability types threaten not just the application but even the server that the application is running on. PHP Applications suffer the mos",
+      "id": "article-4825a8fb2b99"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "C/C++ Security",
+      "summary": "C/C++ allows developers relatively low level access to system functions compared to other languages, and security is crucial when developing any public facing deployment. Because of the timeframe in w",
+      "guid": "cc74632e-540e-4b71-b340-a40696cc2084",
+      "id": "article-a40696cc2084"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "Java Web Application Security",
+      "summary": "Java web applications are most commonly affected by SQL Injection, Command Injection, Cross-Site Scripting and Cross-Site Request Forgery vulnerabilities. The following best practices help prevent the",
+      "guid": "fde8dc81-a0fa-4c99-8261-d585442ddb12",
+      "id": "article-d585442ddb12"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "summary": "For the most widely used languages and software, industry leaders and individual users alike have created programming best practices. These best practices exist to help minimize the chance of vulnerab",
+      "title": "Platform-specific Guidance",
+      "guid": "b9c18634-7d10-4edf-b7ef-20d72f7c1650",
+      "id": "article-20d72f7c1650"
+    },
+    {
+      "guid": "5ad388f4-ed2d-4f44-a7d1-3ba87749c921",
+      "tags": "",
+      "is": "Article",
+      "summary": "Welcome to  TEAM Mentor Security Guides following areas are available:\n\n   [[1c4d0f72-c62f-40f4-9db5-d90da0846a0a|Standards]] - Information security guidelines have been combined together to form sta",
+      "title": "Welcome to Team Academy",
+      "id": "article-3ba87749c921"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "summary": "For the most widely used languages and software, industry leaders and individual users alike have created programming best practices. These best practices exist to help minimize the chance of vulnerab",
+      "title": "Programming Best Practices",
+      "guid": "bcbbe5c7-95c3-468d-9371-6eb42f9b93e6",
+      "id": "article-6eb42f9b93e6"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "summary": "As software grows more complex, tracking down problematic code that creates security vulnerabilities can become increasingly difficult. This can lead to production software being shipped with vulnerab",
+      "title": "Vulnerabilities",
+      "guid": "e2f97ef0-6ced-4f3d-bdce-7a72e359eb7b",
+      "id": "article-7a72e359eb7b"
+    },
+    {
+      "guid": "1c4d0f72-c62f-40f4-9db5-d90da0846a0a",
+      "tags": "",
+      "is": "Article",
+      "summary": "Security Standards were created to help keep both data and users safe, and are always evolving to keep up with the latest in technology and malicious exploits. View some of the topics below to better ",
+      "title": "Standards",
+      "id": "article-d90da0846a0a"
+    },
+    {
+      "guid": "929510fc-e85d-4134-9c10-0899cfd472a6",
+      "tags": "",
+      "title": "Administrative Controls",
+      "is": "Article",
+      "summary": "Most software needs to be managed from a centralized and easy to use administrative panel. Whether this is done through a web interface or local piece of software, these tools are often the heart of a",
+      "id": "article-0899cfd472a6"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "summary": "Computers are never likely to be devoted to one application at a time, and often hundreds or even thousands of processes may be running at a given point. Concurrency involves ensuring that your applic",
+      "title": "Concurrency",
+      "guid": "cb206b88-472f-4bed-b7ee-0a48dfca5309",
+      "id": "article-0a48dfca5309"
+    },
+    {
+      "guid": "3c3400a0-73e2-41ea-9b18-11e816022d03",
+      "tags": "",
+      "is": "Article",
+      "title": "Filesystem Operations",
+      "summary": "When reading or writing files, care should be taken to protect the application from malicious files or path manipulation. If processing information that lives within a file, this must be considered da",
+      "id": "article-11e816022d03"
+    },
+    {
+      "guid": "60e358de-01d1-480a-8693-23aec03297e2",
+      "tags": "",
+      "is": "Article",
+      "summary": "Attention is often paid to data when it is in transit, but the safety and sustainability should also be ensured when it is at rest. Storing data with a proper form of encryption provides an extra laye",
+      "title": "Cryptographic Storage",
+      "id": "article-23aec03297e2"
+    },
+    {
+      "guid": "160e0f9c-5371-4c76-98b6-2b9a2ab3e3a7",
+      "tags": "",
+      "is": "Article",
+      "summary": "Logging is the process where detailed logs are kept of both user and application activity across an entire server or deployment. By implementing a proper logging process you can ensure that problems w",
+      "title": "Logging",
+      "id": "article-2b9a2ab3e3a7"
+    },
+    {
+      "guid": "1bbc222d-0440-4fcf-b67f-331aa351a577",
+      "tags": "",
+      "is": "Article",
+      "title": "Security Engineering",
+      "summary": "There is no better time to plan a system’s security measures and practices than when it is first being designed. By building a secure system from the bottom up, you greatly increase the chance of the ",
+      "id": "article-331aa351a577"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "Session Management",
+      "summary": "Session management is a crucial process and can impact both the end user experience and security of an application if done incorrectly. When implementing a session management process, it is important ",
+      "guid": "d28d359d-1073-4270-b205-3dc77c4c949d",
+      "id": "article-3dc77c4c949d"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "Memory Management",
+      "summary": "When creating software in a language that has low-level access to memory, memory management is crucial step to securing it from potential attacks. Buffer overflows are one of the most prevalent exploi",
+      "guid": "f0c423ae-50e5-4138-bd6a-50cb570207e8",
+      "id": "article-50cb570207e8"
+    },
+    {
+      "guid": "02074aaf-37b9-4b87-bd1d-739333bc0d58",
+      "tags": "",
+      "is": "Article",
+      "title": "Error Handling",
+      "summary": "While modern security and functionality testing allows for applications to ship with a minimal amount of bugs, it is not possible to consider a deployment completely issue free. Issues may be caused t",
+      "id": "article-739333bc0d58"
+    },
+    {
+      "guid": "3790f471-84c4-415d-9f8d-76824246fdb2",
+      "tags": "",
+      "is": "Article",
+      "summary": "Once an application has been created, it should be run through an extensive system hardening process to reduce the attack surface. This should include cleaning up unused code or modules and removing a",
+      "title": "System Hardening",
+      "id": "article-76824246fdb2"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "summary": "Authentication is often the first line of defense, ensuring that users are only able to access the content intended for them. Strong authentication policies protect both the application itself and the",
+      "title": "Authentication",
+      "guid": "d28806ca-ca1f-4772-99cb-950d5958c078",
+      "id": "article-950d5958c078"
+    },
+    {
+      "guid": "63e9a3a8-cf0e-477b-bbae-96ed26609a02",
+      "tags": "",
+      "is": "Article",
+      "summary": "Authentication focuses on identifying users and making sure they are allowed to access a given system. Once authenticated, authorization focuses on what information they can view and which areas they ",
+      "title": "Authorization",
+      "id": "article-96ed26609a02"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "Communication Security",
+      "summary": "When sending sensitive information to users or between applications, the security of the communication method should be taken into consideration. Whenever a user enters important information, it shoul",
+      "guid": "eaaa07bd-ba2a-4376-8afa-a3a84bc30248",
+      "id": "article-a3a84bc30248"
+    },
+    {
+      "guid": "152b5333-9ed8-4853-a3d6-a7ec12294c8e",
+      "tags": "",
+      "is": "Article",
+      "summary": "Data can be an organization’s most valuable asset, but it can also lead to some of the most common attack vectors. Improperly implemented code can leave applications vulnerable to attacks when the sof",
+      "title": "Separation of Data and Control",
+      "id": "article-a7ec12294c8e"
+    },
+    {
+      "guid": "32021e8d-4ab3-4b60-9213-cd0d5c12d5fe",
+      "tags": "",
+      "is": "Article",
+      "title": "Code Integrity",
+      "summary": "Code integrity is the process of ensuring your code’s quality and protecting it from potential attackers once it has been shipped. Using tools and processes that help obscure your code and protect it ",
+      "id": "article-cd0d5c12d5fe"
+    },
+    {
+      "tags": "",
+      "is": "Article",
+      "title": "Data Validation",
+      "summary": "Data validation is one of the most important steps in securing any application that receives or transmits data from an external source. By creating software that receives outside input beyond your con",
+      "guid": "bf53d602-1d86-489c-858d-f5efb6424412",
+      "id": "article-f5efb6424412"
+    },
+    {
+      "guid": "98305944-1914-48fa-84e8-13386901a023",
+      "tags": "",
+      "is": "Article",
+      "title": "PCI DSS",
+      "summary": "The Payment Card Industry Data Security Standard (PCI DSS) was created by a consortium of payment card companies and is overseen by the Payment Card Industry Security Standards Council. The latest PCI",
+      "id": "article-13386901a023"
+    }
+  ],
+  "filters": [
+    {
+      "title": "Technology",
+      "results": [
+
+      ]
+    },
+    {
+      "title": "Phase",
+      "results": [
+
+      ]
+    },
+    {
+      "title": "Type",
+      "results": [
+
+      ]
+    }
+  ]
+}

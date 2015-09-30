@@ -35,6 +35,7 @@ class SearchController
         @.jade_Search             = 'user/search.jade'
         @.jade_Error_Page         = 'guest/404.jade'
         @.jade_Search_two_columns = 'user/search-two-columns.jade'
+        @.root_Path               = __dirname.path_Combine '../../../../'
 
 
 
@@ -115,12 +116,45 @@ class SearchController
         filters = filters.replace(',,',',')
 
     show_Gateways: (callback)=>
-      query_Id = 'query-da0f0babaad8'
+      query_Id      = 'query-da0f0babaad8'
+      jsonPath      = 'data/Lib_UNO-json/Library/UNO.json'
+      indexFile     = @.root_Path.path_Combine jsonPath
+      library       = indexFile.load_Json().guidanceExplorer?.library?.first()
+
+      for view in library?.libraryStructure?.first()?.folder
+        if (view?.$?.caption == 'Guides')
+          guides = view
+          break
       @graph_Service.graphDataFromGraphDB query_Id, '',  (searchData)=>
         searchData.internalUser      = @.req.session?.internalUser
         searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
         searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
         searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
+        views  = guides?.view
+
+        #Step 1 :Sorting the views
+        temp   = []
+        for view in views
+          for folder in searchData.containers
+            if view.$.caption == folder.title
+              temp.push (folder)
+              break
+        searchData.containers = temp
+
+        #Step 2 : Sorting articles
+        index  =0
+        data   = searchData.containers
+
+        while index < data.length
+          originalArticles = guides?.view[index]?.items?.first()?.item
+          counter          = 0
+          while counter < originalArticles?.length
+            article = 'article-' + originalArticles[counter]?.split('-')?[4] #Formatting article Id
+            data[index]?.articles[counter] = article                         #Assigning the id
+            counter++
+          index++
+
+        searchData.containers = data
         callback searchData
 
     search: =>

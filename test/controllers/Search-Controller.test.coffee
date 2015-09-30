@@ -289,6 +289,50 @@ describe "| controllers | Search-Controller.test |", ->
                         '/json/search/recentsearch',
                         '/json/search/gateways' ]
 
+  it 'Gateways',(done)->
+
+    test_Query_Id = 'query-da0f0babaad8'
+    test_Title    = 'query-title'.add_5_Letters()
+    req    = { params: queryId : 'query-id'}
+    res    =
+      send: (html)->
+        html.assert_Contains ('An error occurred')
+        done()
+
+    using new Search_Controller(req,res),->
+      guides = __dirname.path_Combine('../resources/guides.json').load_Json()
+
+      @.graph_Service =
+        library_Query: (callback)->
+          callback  { queryId  : test_Query_Id}
+        resolve_To_Ids: (query_Id,callback)->
+          query_Id.assert_Is test_Query_Id
+          callback { query_Id : { id: test_Query_Id, title: test_Title }}
+        graphDataFromGraphDB: (query_Id, filters, callback)->
+          query_Id.assert_Is test_Query_Id
+          callback guides
+
+      @show_Gateways (guides)=>
+        guides.title.assert_Is('Guides')
+        guides.size.assert_Is(34)
+        guides.containers.size()      .assert_Is(5)
+        guides.containers[0].size     .assert_Is(5)
+        guides.containers[0].articles .size().assert_Is(5)
+        guides.containers[0].title    .assert_Is('Introduction')
+        guides.containers[1].size     .assert_Is(1)
+        guides.containers[1].articles .size().assert_Is(1)
+        guides.containers[1].title    .assert_Is('Standards')
+        guides.containers[2].size     .assert_Is(16)
+        guides.containers[2].articles .size().assert_Is(16)
+        guides.containers[2].title    .assert_Is('Programming Best Practices')
+        guides.containers[3].size     .assert_Is(4)
+        guides.containers[3].articles .size().assert_Is(4)
+        guides.containers[3].title    .assert_Is('Platform-specific Guidance')
+        guides.containers[4].size     .assert_Is(8)
+        guides.containers[4].articles .size().assert_Is(8)
+        guides.containers[4].title    .assert_Is('Vulnerabilities')
+        done()
+
   describe 'using Express_Service | ',->
 
     tmpSessionFile = './_tmp_Session'
