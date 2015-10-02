@@ -3,12 +3,14 @@ request            = null
 Router             = null
 Jade_Service       = null
 Docs_TM_Service    = null
+cheerio            = null
 content_cache = {};
 
 class Help_Controller
 
   dependencies: ->
     fs                 = require 'fs'
+    cheerio            = require 'cheerio'
     request            = require 'request'
     {Router}           = require 'express'
     Jade_Service       = require '../services/Jade-Service'
@@ -63,6 +65,21 @@ class Help_Controller
 
   json_Docs_Page: =>
     article_Data = @.docs_TM_Service.article_Data @.page_Id()
+    $            = cheerio.load(article_Data?.html)
+    links        = $('a')
+
+    $(links).each (i, link)->
+      href          = $(link).attr('href')
+      originalHtml  = $.html($(link))
+      if (href.contains("/article/"))
+        href = href.replace("/article/",'')
+      if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(href))
+        #articleId = href.split('-').last()
+        articleId = href
+        $(link).attr('href', 'guides/' + articleId )
+        $(link).attr('ng-click',"load_Doc($event,'#{articleId}')")
+        article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+
     @res.json { html: article_Data?.html}
 
   map_Docs_Library: (next)=>
