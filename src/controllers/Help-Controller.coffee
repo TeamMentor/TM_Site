@@ -71,8 +71,8 @@ class Help_Controller
     $(links).each (i, link)->
       href          = $(link).attr('href')
       originalHtml  = $.html($(link))
-      if (href.contains("/article/"))
-        href = href.replace("/article/",'')
+      if (href.contains("article/"))
+        href = href.replace("article/",'')
       if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(href))
         #articleId = href.split('-').last()
         articleId = href
