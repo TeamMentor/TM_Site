@@ -71,14 +71,19 @@ class Help_Controller
     $(links).each (i, link)->
       href          = $(link).attr('href')
       originalHtml  = $.html($(link))
-      if (href.contains("article/"))
-        href = href.replace("article/",'')
+      if (href.contains("/"))
+        href = href.split('/').last()
       if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(href))
         #articleId = href.split('-').last()
         articleId = href
         $(link).attr('href', 'guides/' + articleId )
         $(link).attr('ng-click',"load_Doc($event,'#{articleId}')")
         article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+      else
+        if ($(link).attr('href').starts_With('http')) #Adding blank attribute to absolute URLs
+          $(link).attr("target","_blank")
+          article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+
 
     @res.json { html: article_Data?.html}
 
