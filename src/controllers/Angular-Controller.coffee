@@ -89,6 +89,8 @@ class Angular_Controller
     else
       root_Folder.path_Combine "/code/TM_Flare/#{file}.jade"
 
+  get_Index_Page : (req,res)=>               #Route /user/home should not exist,so we redirect to index if any user hits this pattern.
+    res.redirect '/angular/user/index'
 
   get_Compiled_Jade: (req,res)=>
     jade    = require('jade');
@@ -119,6 +121,7 @@ class Angular_Controller
   routes: ()=>
     router = new Router()
     router.get '/flare/:file'                         , @.get_Static_Html
+    router.get '/user/home'            ,@.check_Auth  , @.get_Index_Page
     router.get '/user/:file*'          ,@.check_Auth  , @.get_Static_Html_User
     router.get '/guest/:file'                         , @.get_Static_Html_Guest
     router.get '/guest/pwd_reset/:username/:password' , @.get_Static_Html_Guest
