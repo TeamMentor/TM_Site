@@ -46,6 +46,7 @@ add_Routes = (express_Service)->
     app.use '/jade', new Pwd_Reset_Controller().routes()
     app.use '/jade', new Article_Controller(  ).routes(express_Service)
     app.use '/jade', new Search_Controller(   ).routes(express_Service)
+    app.use '/jade', new Misc_Controller(     ).routes(express_Service)
 
     app.use '/'    , new Browser_Controller().routes()
 
@@ -59,7 +60,7 @@ add_Routes = (express_Service)->
     app.get '/', (req,res)-> res.redirect '/jade/index.html'
 
     #Help_Controller                    .register_Routes(app                  )
-    Misc_Controller                    .register_Routes(app, express_Service )
+    #Misc_Controller                    .register_Routes(app, express_Service )
     Jade_Controller                    .register_Routes(app                  )
 
     options = { express_Service: express_Service }
