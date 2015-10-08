@@ -50,7 +50,6 @@ class Browser_Controller
     else
       res.redirect '/jade' + req.url
 
-
   redirect_Article: (req, res)=>
     if @.use_Flare(req)
       res.redirect '/angular/user' +req.url
@@ -62,6 +61,13 @@ class Browser_Controller
       res.redirect '/angular/user/index?text=' +req.query.text
     else
       res.redirect '/jade'  +req.url
+
+  redirect_TeamMentor_Open: (req, res)=>
+    if @.use_Flare(req)
+      guid = req.params.guid
+      return res.redirect '/angular/user/article/'+ guid
+    else
+      res.redirect '/jade'     +req.url
 
   redirect_Pwd_Reset: (req, res)=>
     if @.use_Flare(req)
@@ -81,13 +87,14 @@ class Browser_Controller
   routes: =>
     browser_Controler = @
     using new Router(),->
-      @.get '/browser'                  , (req, res) -> browser_Controler.detect(req, res)
-      #@.get '/use_Flare'               , (req, res) -> res.send browser_Controler.use_Flare(req)
-      @.get '/'                         , (req, res) -> browser_Controler.redirect_Root(req, res)
-      @.get '/browser-detect'           , (req, res) -> browser_Controler.redirect_Root(req, res)
-      @.get '/article/*'                , (req, res) -> browser_Controler.redirect_Article(req, res)
-      @.get '/search'                   , (req, res) -> browser_Controler.redirect_Search(req,res)
-      @.get '/passwordReset/*'          , (req, res) -> browser_Controler.redirect_Pwd_Reset(req, res)
+      @.get '/browser'                   , (req, res) -> browser_Controler.detect(req, res)
+      #@.get '/use_Flare'                , (req, res) -> res.send browser_Controler.use_Flare(req)
+      @.get '/'                          , (req, res) -> browser_Controler.redirect_Root(req, res)
+      @.get '/browser-detect'            , (req, res) -> browser_Controler.redirect_Root(req, res)
+      @.get '/article/*'                 , (req, res) -> browser_Controler.redirect_Article(req, res)
+      @.get '/search'                    , (req, res) -> browser_Controler.redirect_Search(req,res)
+      @.get '/passwordReset/*'           , (req, res) -> browser_Controler.redirect_Pwd_Reset(req, res)
+      @.get '/teammentor/open/:guid'     , (req, res) -> browser_Controler.redirect_TeamMentor_Open(req, res)
       @.get '*/misc/terms-and-conditions', (req, res) -> browser_Controler.redirect_TermsAndConditions(req, res)
 
 
