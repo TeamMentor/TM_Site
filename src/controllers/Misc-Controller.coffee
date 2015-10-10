@@ -1,11 +1,12 @@
-Jade_Service = null
-
+Jade_Service  = null
+Router        = null
 content_cache = {};
 
 class Misc_Controller
 
   dependencies: ->
     Jade_Service = require('../services/Jade-Service')
+    {Router}     = require 'express'
 
   constructor: (req, res)->
     @.dependencies()
@@ -44,16 +45,17 @@ class Misc_Controller
               }
     @.res.json config
 
-Misc_Controller.register_Routes =  (app, expressService) ->
-  checkAuth       =  (req,res,next) ->
-    expressService.checkAuth(req, res, next)
+  routes: (expressService) ->
+    checkAuth       = (req,res,next) -> expressService.checkAuth(req, res, next)
 
-  misController = (method_Name) ->
-    return (req, res,next) ->
-      new Misc_Controller(req, res, next,expressService)[method_Name]()
+    misController = (method_Name) ->
+      return (req, res,next) ->
+        new Misc_Controller(req, res, next,expressService)[method_Name]()
 
-  app.get '/misc/:page'     , (req, res)-> new Misc_Controller(req, res).show_Misc_Page()
-  app.get '/json/tm/config' , checkAuth, misController('tmConfig')
+    using new Router(),->
+      @.get '/misc/:page'                    , misController('show_Misc_Page')
+      @.get '/json/tm/config'                , checkAuth, misController('tmConfig')
+
 
 
 
