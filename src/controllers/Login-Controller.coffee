@@ -6,6 +6,7 @@ blank_credentials_message  = 'Invalid Username or Password'
 loginSuccess               = 0
 errorMessage               = "TEAM Mentor is unavailable, please contact us at "
 User_Sign_Up_Controller    = null
+user_data_cache            = {};
 
 class Login_Controller
   dependencies: ->
@@ -164,7 +165,9 @@ class Login_Controller
   currentUser : ()->
     token = @.req?.session?.token
     if token
+      return @.res.json user_data_cache[token] if  user_data_cache[token]?
       @.webServiceResponse "Current_User",token,(userProfile)=>
+        user_data_cache[token] = userProfile
         @.res.json userProfile
     else
       return @.res.json []
