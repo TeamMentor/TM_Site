@@ -39,7 +39,7 @@ class Misc_Controller
   tmConfig: ()=>
     config =  {
                 supportEmail        : @.config.options.tm_design.supportEmail,
-                githubUrl           : @.config.options.tm_design.supportEmail,
+                githubUrl           : @.config.options.tm_design.githubUrl,
                 githubContentUrl    : @.config.options.tm_design.githubContentUrl,
                 allowedEmailDomains : @.config.options.tm_design.allowedEmailDomains
               }
