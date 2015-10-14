@@ -56,6 +56,15 @@ class Browser_Controller
     else
       res.redirect '/jade'  +req.url
 
+  redirect_Error: (req, res)=>
+    if @.use_Flare(req)
+      if req.session?.username
+        res.redirect '/angular/user/error'
+      else
+        res.redirect '/angular/guest/error'
+    else
+      res.redirect '/jade/error'
+
   redirect_Search: (req, res)=>
     if @.use_Flare(req)
       res.redirect '/angular/user/index?text=' +req.query.text
@@ -92,6 +101,7 @@ class Browser_Controller
       @.get '/'                          , (req, res) -> browser_Controler.redirect_Root(req, res)
       @.get '/browser-detect'            , (req, res) -> browser_Controler.redirect_Root(req, res)
       @.get '/article/*'                 , (req, res) -> browser_Controler.redirect_Article(req, res)
+      @.get '/error'                     , (req, res) -> browser_Controler.redirect_Error(req, res)
       @.get '/search'                    , (req, res) -> browser_Controler.redirect_Search(req,res)
       @.get '/passwordReset/*'           , (req, res) -> browser_Controler.redirect_Pwd_Reset(req, res)
       @.get '/teammentor/open/:guid'     , (req, res) -> browser_Controler.redirect_TeamMentor_Open(req, res)
