@@ -24,8 +24,9 @@ add_Routes = (express_Service)->
     app.use (req,res,next)->
       logger?.info {url: req.url , ip: req.connection.remoteAddress,  agent: req.headers.agent }
       using new Ga_Service(req,res),->
-        @.track()
-      next()
+        if (req.url.starts_With('jade') || req.url.match '/angular/guest/')
+            @.track()
+        next()
 
     #run custom code hook (if available)
     global.custom?.express_Routes?(app, require('express')) # todo: needs refactoring
