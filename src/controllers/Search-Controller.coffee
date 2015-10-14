@@ -181,7 +181,6 @@ class SearchController
           searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
           searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
           searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
-          new Analytics_Service(@.req, @.res).track(target,"Search ","Text Search :" + target + " URL " + searchData.href    )
           @.req.session.user_Searches ?= []
           if searchData?.id
             user_Search = { id: searchData.id, title: searchData.title, results: searchData.results.size(), username: @.req.session.username }
