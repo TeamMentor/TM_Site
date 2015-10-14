@@ -5,6 +5,7 @@ Router             = null
 Express_Service    = null
 Jade_Service       = null
 Graph_Service      = null
+Analytics_Service  = null
 
 recentSearches_Cache = ["Logging","Struts","Administrative Controls"]
 
@@ -18,6 +19,7 @@ class SearchController
         Express_Service    = require('../services/Express-Service')
         Jade_Service       = require('../services/Jade-Service')
         Graph_Service      = require('../services/Graph-Service')
+        Analytics_Service  = require('../services/Analytics-Service')
 
         @.req                = req
         @.res                = res
@@ -162,6 +164,7 @@ class SearchController
       filters = @.fix_Filters @.req.query?.filters?.substring(1)
 
       logger?.info {user: @.req.session?.username, action:'search', target: target, filters:filters}
+      new Analytics_Service(@.req, @.res).track(target,"Search ","Text Search :" + target + " Filters " + filters)
 
       #jade_Page = 'user/search-two-columns.jade'
 
@@ -178,7 +181,7 @@ class SearchController
           searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
           searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
           searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
-
+          new Analytics_Service(@.req, @.res).track(target,"Search ","Text Search :" + target + " URL " + searchData.href    )
           @.req.session.user_Searches ?= []
           if searchData?.id
             user_Search = { id: searchData.id, title: searchData.title, results: searchData.results.size(), username: @.req.session.username }

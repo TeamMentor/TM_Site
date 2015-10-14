@@ -192,7 +192,7 @@ class Article_Controller
       article_Id = data.article_Id
       if article_Id
         @graphService.node_Data article_Id, (article_Data)=>
-          new Analytics_Service(@.req, @.res).track(article_Data?.title,article_Id)
+          new Analytics_Service(@.req, @.res).track(article_Data?.title,"View Article","Title :" + article_Data?.title + " Id : " +article_Id)
           title      = article_Data?.title
           technology = article_Data?.technology
           type       = article_Data?.type
