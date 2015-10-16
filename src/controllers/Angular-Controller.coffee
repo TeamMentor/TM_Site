@@ -15,7 +15,7 @@ class Angular_Controller
     express       = require 'express'
     {Router}      = require 'express'
     Jade_Service  = require '../services/Jade-Service'
-    config      = require '../config'
+    config        = require '../config'
 
   constructor: ()->
     @.dependencies()
@@ -25,6 +25,7 @@ class Angular_Controller
     @.url_Articles   = "#{@.url_TM_Graph}/search/article_titles"
     @.url_Queries    = "#{@.url_TM_Graph}/search/query_titles"
     @.url_Words      = "#{@.url_TM_Graph}/search/all_words"
+    @.guest_Whitelist  = ["home","about","features","docs","sign_up","login","error","logout","terms-and-conditions"]
 
     @.redirectPage   = '/angular/guest/home'
 
@@ -72,9 +73,20 @@ class Angular_Controller
     @.get_Rendered_Jade req,res
 
   get_Static_Html_Guest: (req,res)=>
-    req.params.file = 'page-guest'
-    req.params.area = '_layouts'
-    @.get_Rendered_Jade req,res
+    #picking the route which should match with the whitelist
+    view       = req.url?.split('/')?.last()
+
+    if view? && view in @.guest_Whitelist || req.url.contains 'guest/pwd_reset'
+      req.params.file = 'page-guest'
+      req.params.area = '_layouts'
+
+      @.get_Rendered_Jade req,res
+    else
+      if req?.session?.username
+        return res.redirect '/angular/user/error'
+      else
+        return res.redirect '/angular/guest/error'
+
 
   get_Static_Html_Component:  (req,res)=>
     req.params.file = 'page-component'
