@@ -25,7 +25,7 @@ class Angular_Controller
     @.url_Articles   = "#{@.url_TM_Graph}/search/article_titles"
     @.url_Queries    = "#{@.url_TM_Graph}/search/query_titles"
     @.url_Words      = "#{@.url_TM_Graph}/search/all_words"
-    @.guest_Whitelist  = ["home","about","features","docs","sign_up","login","error"]
+    @.guest_Whitelist  = ["home","about","features","docs","sign_up","login","error","logout","terms-and-conditions"]
 
     @.redirectPage   = '/angular/guest/home'
 
@@ -76,9 +76,10 @@ class Angular_Controller
     #picking the route which should match with the whitelist
     view       = req.url?.split('/')?.last()
 
-    if view? && view in @.guest_Whitelist
+    if view? && view in @.guest_Whitelist || req.url.contains 'guest/pwd_reset'
       req.params.file = 'page-guest'
       req.params.area = '_layouts'
+
       @.get_Rendered_Jade req,res
     else
       if req?.session?.username
