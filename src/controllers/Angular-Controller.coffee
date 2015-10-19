@@ -28,6 +28,7 @@ class Angular_Controller
     @.guest_Whitelist  = ["home","about","features","docs","sign_up","login","error","logout","terms-and-conditions"]
 
     @.redirectPage   = '/angular/guest/home'
+    @.loginPage      = '/angular/guest/login'
 
   send_Search_Auto_Complete: (term, res)->
     matches = {}
@@ -126,9 +127,18 @@ class Angular_Controller
 
   check_Auth: (req,res,next)=>
     if req?.session?.username
-      return next()
+      redirectUrl = req?.session?.angularRedirectUrl    #Pulling session data
+      if (redirectUrl? && redirectUrl.is_Local_Url())   #avoiding open redirects
+        delete req?.session?.angularRedirectUrl         #deleting value from session
+        return res?.redirect(redirectUrl)               #redirecting
+      else
+       return next()
     else
-      return res.redirect(@.redirectPage)
+      if (req?.url?.starts_With('/user/'))
+        req?.session?.angularRedirectUrl = "/angular" +req.url  #Setting up redirect URL
+        return res?.redirect(@.loginPage)
+      else
+        return res?.redirect(@.redirectPage)
 
   routes: ()=>
     router = new Router()
