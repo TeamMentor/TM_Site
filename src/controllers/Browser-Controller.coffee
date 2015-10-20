@@ -40,7 +40,10 @@ class Browser_Controller
 
   redirect_Root: (req, res)=>
     if @.use_Flare(req)
-      res.redirect '/angular/user/index'
+      if req.session?.username
+        return res.redirect '/angular/user/index'
+      else
+        return res.redirect '/angular/guest/home'
     else
       res.redirect '/jade'
 
