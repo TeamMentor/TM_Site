@@ -27,7 +27,7 @@ class Pwd_Reset_Controller
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
-    @.okMessage                    = "If you entered a valid address, then a password reset link has been sent to your email address."
+    @.okMessage                    = "Your password has been reset successfully."
     @.jade_Service                 = new Jade_Service()
     @.guid_regex                   = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i
 
