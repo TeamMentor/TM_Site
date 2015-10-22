@@ -10,10 +10,10 @@ user_data_cache            = {};
 
 class Login_Controller
   dependencies: ->
-    {Router}            = require 'express'
-    request             = require 'request'
-    analytics_Service   = require '../services/Analytics-Service'
-    Jade_Service        = require '../services/Jade-Service'
+    {Router}                = require 'express'
+    request                 = require 'request'
+    analytics_Service       = require '../services/Analytics-Service'
+    Jade_Service            = require '../services/Jade-Service'
     User_Sign_Up_Controller = require './User-Sign-Up-Controller'
 
 
@@ -31,6 +31,7 @@ class Login_Controller
     @.jade_GuestPage_403         = 'guest/403.jade'
     @.page_Index                 = '/jade/show'
     @.page_MainPage_no_user      = '/jade/guest/default.html'
+    @.url                        = ''
 
   json_Mode: ()=>
     @.render_Page = (page, data)=>
@@ -39,13 +40,13 @@ class Login_Controller
     @.res.redirect = (page)=>
       data =
         page     : page
-        viewModel: {}
+        viewModel: {redirectUrl:@.url}
         result   : 'OK'
       @.res.json data
     @
 
   loginUser: ()=>
-
+    @.url         =''
     userViewModel = {username: @.req.body.username,password:'',errorMessage:''}
 
     if (@.req.body.username == '' or @.req.body.password == '')
@@ -98,8 +99,10 @@ class Login_Controller
 
             if(redirectUrl?.is_Local_Url())
               delete @.req.session.redirectUrl
+              @.url =redirectUrl
               @.res.redirect(redirectUrl)
             else
+              @.url ='' #cleaning up variable
               @.res.redirect(@.page_Index)
       else
         @.req.session.username = undefined

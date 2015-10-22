@@ -28,6 +28,7 @@ class Angular_Controller
     @.guest_Whitelist  = ["home","about","features","docs","sign_up","login","error","logout","terms-and-conditions"]
 
     @.redirectPage   = '/angular/guest/home'
+    @.loginPage      = '/angular/guest/login'
 
   send_Search_Auto_Complete: (term, res)->
     matches = {}
@@ -124,11 +125,15 @@ class Angular_Controller
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, {}
 
+
   check_Auth: (req,res,next)=>
-    if req?.session?.username
-      return next()
+    return next() if req?.session?.username
+
+    if (req?.url?.starts_With('/user/'))
+      req?.session?.redirectUrl = "/angular" +req.url
+      return res?.redirect('/browser-detect-login')
     else
-      return res.redirect(@.redirectPage)
+      return res?.redirect(@.redirectPage)
 
   routes: ()=>
     router = new Router()

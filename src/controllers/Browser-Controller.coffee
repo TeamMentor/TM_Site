@@ -40,9 +40,18 @@ class Browser_Controller
 
   redirect_Root: (req, res)=>
     if @.use_Flare(req)
-      res.redirect '/angular/user/index'
+      if req.session?.username
+        return res.redirect '/angular/user/index'
+      else
+        return res.redirect '/angular/guest/home'
     else
       res.redirect '/jade'
+
+  redirect_ToLogin :(req,res)=>
+    if @.use_Flare(req)
+      return res.redirect '/angular/guest/login'
+    else
+      return res.redirect '/jade/guest/login.html'
 
   redirect_TermsAndConditions: (req, res)=>
     if @.use_Flare(req)
@@ -100,6 +109,7 @@ class Browser_Controller
       #@.get '/use_Flare'                , (req, res) -> res.send browser_Controler.use_Flare(req)
       @.get '/'                          , (req, res) -> browser_Controler.redirect_Root(req, res)
       @.get '/browser-detect'            , (req, res) -> browser_Controler.redirect_Root(req, res)
+      @.get '/browser-detect-login'      , (req, res) -> browser_Controler.redirect_ToLogin(req,res)
       @.get '/article/*'                 , (req, res) -> browser_Controler.redirect_Article(req, res)
       @.get '/error'                     , (req, res) -> browser_Controler.redirect_Error(req, res)
       @.get '/search'                    , (req, res) -> browser_Controler.redirect_Search(req,res)
