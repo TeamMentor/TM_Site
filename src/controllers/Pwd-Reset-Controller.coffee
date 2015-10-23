@@ -27,8 +27,9 @@ class Pwd_Reset_Controller
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
-    @.okMessage                    = "If you entered a valid address, then a password reset link has been sent to your email address."
+    @.okMessage                    = "Your password has been reset successfully."
     @.jade_Service                 = new Jade_Service()
+    @.guid_regex                   = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i
 
   json_Mode: =>
     @.res.redirect = => @.res.json { message: @.okMessage    , status: 'Ok'    }
@@ -75,7 +76,11 @@ class Pwd_Reset_Controller
     #Validating token
     if (token == null or username == null or username is '' or token is '')
       @.errorMessage = 'Token is invalid'
-      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Token is invalid'}
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Token is invalid, please verify'}
+
+    if not @.guid_regex.test(token.upper())
+      @.errorMessage = 'Token is invalid'
+      return @.render_Page @.jade_password_reset_fail, {errorMessage: 'Token is invalid, please verify'}
 
     #Password not provided
     if (@.req.body?.password?.length is 0)
