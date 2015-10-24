@@ -27,18 +27,20 @@ class Pwd_Reset_Controller
     @.url_WS_PasswordReset         = @.webServices + '/PasswordReset'
     @.url_error_page               = '/error'
     @.errorMessage                 = "TEAM Mentor is unavailable, please contact us at "
-    @.okMessage                    = "Your password has been reset successfully."
+    @.resetPwdOkMessage            = "Your password has been reset successfully."
+    @.chagePwdokMessage            = "If you entered a valid address, then a password reset link has been sent to your email address."
     @.jade_Service                 = new Jade_Service()
     @.guid_regex                   = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i
 
+
   json_Mode: =>
-    @.res.redirect = => @.res.json { message: @.okMessage    , status: 'Ok'    }
+    message = if @.req.url =='/json/user/pwd_reset' then  @.chagePwdokMessage else @.resetPwdOkMessage
+    @.res.redirect = => @.res.json { message: message    , status: 'Ok'    }
     @.render_Page  = => @.res.json { message: @.errorMessage , status: 'Failed'}
     @
 
 
   password_Reset: ()=>
-
     email = @.req?.body?.email
 
     options = {
@@ -60,9 +62,8 @@ class Pwd_Reset_Controller
     @.render_Page @.jade_password_reset
 
   password_Reset_Token : ()=>
-
-    username = @.req.params?.username
-    token    = @.req.params?.token
+    username                = @.req.params?.username
+    token                   = @.req.params?.token
 
     passwordStrengthRegularExpression =///(
         (?=.*\d)            # at least 1 digit
@@ -116,7 +117,7 @@ class Pwd_Reset_Controller
     request options, (error, response)=>
       if (not error) and response.statusCode is 200
         if response?.body?.d
-          @.okMessage = 'Password has been reset'
+          @.resetPwdOkMessage  = 'Your password has been reset successfully.'
           @res.redirect(@.url_password_reset_ok )
         else
           @.errorMessage ='Invalid token, perhaps it has expired'
