@@ -121,7 +121,8 @@ class SearchController
       query_Id      = 'query-da0f0babaad8'
       jsonPath      = 'data/Lib_UNO-json/Library/UNO.json'
       indexFile     = @.root_Path.path_Combine jsonPath
-      library       = indexFile.load_Json().guidanceExplorer?.library?.first()
+      library       = indexFile.load_Json()?.guidanceExplorer?.library?.first()
+      return callback null if not library?
 
       for view in library?.libraryStructure?.first()?.folder
         if (view?.$?.caption == 'Guides')
@@ -147,7 +148,7 @@ class SearchController
         index  =0
         data   = searchData.containers
 
-        while index < data.length
+        while index < data?.length
           originalArticles = guides?.view[index]?.items?.first()?.item
           counter          = 0
           while counter < originalArticles?.length

@@ -27,6 +27,7 @@ class Gateways_Service
     Library = {}
     using new search_Controller(@.req,@.res),->
       @.show_Gateways (data)->
+        return callback null if not data
         Library.title = data.title
         Library.Views = []
         if data.containers
