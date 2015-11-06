@@ -4,6 +4,7 @@ Jade_Service      = null
 Graph_Service     = null
 Analytics_Service = null
 Session_Service   = null
+Browser_Controller=null
 
 Anonymous_Service = require('../services/Anonymous-Service')
 config            = require('../config')
@@ -18,20 +19,24 @@ class Article_Controller
     Graph_Service      = require('../services/Graph-Service')
     Analytics_Service  = require('../services/Analytics-Service')
     Session_Service    = require('../services/Session-Service')
+    Browser_Controller = require('../controllers/Browser-Controller.coffee')
 
   constructor: (req, res, next,expressService,graph_Options)->
     @.dependencies()
-    @.req              = req
-    @.res              = res
-    @.config           = require '../config'
-    @.next             = next
-    @.jade_Article     = 'user/article.jade'
-    @.jade_Articles    = 'user/articles.jade'
-    @.jade_No_Article  = 'user/no-article.jade'
-    @.jade_Service     = new Jade_Service();
-    @.graphService     = new Graph_Service(graph_Options)
-    @.sessionservice   = new Session_Service()
-    @.express_Service  =  expressService
+    @.req                    = req
+    @.res                    = res
+    @.config                 = require '../config'
+    @.next                   = next
+    @.jade_Article           = 'user/article.jade'
+    @.jade_Articles          = 'user/articles.jade'
+    @.jade_No_Article        = 'user/no-article.jade'
+    @.jade_Service           = new Jade_Service();
+    @.graphService           = new Graph_Service(graph_Options)
+    @.browserController      = new Browser_Controller()
+    @.sessionservice         = new Session_Service()
+    @.express_Service        =  expressService
+    @.virtualArticlesEnabled = global.config?.virtualArticles?.AutoRedirectIfGuidNotFound
+    @.virtualArticlesTarget  = global.config?.virtualArticles?.AutoRedirectTarget
 
   article: =>
     send_Article = (view_Model)=>
@@ -203,7 +208,14 @@ class Article_Controller
             @recentArticles_Add article_Id, title, technology , type, phase
             callback { id : article_Id, title: title,  summary: summary, article_Html: data?.html, technology: technology, type: type, phase: phase}
       else
-        callback null
+        if (@.virtualArticlesEnabled && @.virtualArticlesTarget?.length >0)
+            use_Flare = @.browserController.use_Flare(@.req, @.res)
+            if use_Flare
+              callback {redirectUrl: @.virtualArticlesTarget + '/article/' + article_Ref}
+            else
+             @.res.redirect @.virtualArticlesTarget + '/article/' + article_Ref
+        else
+          callback null
 
   routes: (expressService) ->
 
@@ -215,7 +227,7 @@ class Article_Controller
     graph_Options   = { express_Service: expressService }
 
     articleController = (method_Name) ->                                                       # pins method_Name value
-      return (req, res,next) ->                                                               # returns function for express
+      return (req, res,next) ->                                                                # returns function for express
           new Article_Controller(req, res, next,expressService,graph_Options)[method_Name]()   # creates SearchController object with live
 
     using new Router(),->

@@ -27,7 +27,7 @@ class Docs_TM_Service
 
   getFolderStructure_Libraries: (callback)=>
     @.library_File  = @.libraryDirectory.path_Combine '/Library/TM Documentation.json'
-    json_Library    = @.library_File?.load_Json().guidanceExplorer?.library?.first()
+    json_Library    = @.library_File?.load_Json()?.guidanceExplorer?.library?.first()
     callback json_Library
 
   getArticlesMetadata: (callback)=>
