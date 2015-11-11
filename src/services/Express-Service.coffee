@@ -2,8 +2,10 @@ Jade_Service    = null
 Session_Service = null
 Logging_Service = null
 bodyParser      = null
+cookieParser    = null
 path            = null
 express         = null
+config          = null
 
 class Express_Service
 
@@ -12,26 +14,34 @@ class Express_Service
     Jade_Service     = require '../services/Jade-Service'
     Session_Service  = require '../services/Session-Service'
     Logging_Service  = require '../services/Logging-Service'
+    config           = require '../config'
     bodyParser       = require 'body-parser'
+    cookieParser     = require 'cookie-parser'
     path             = require "path"
     express          = require 'express'
+
 
   constructor: (options)->
     @.dependencies()
     @.options                 = options || {}
     @.app                     = express()
-    @.app.port                = @.options.port || global.config?.tm_design?.port || process.env.PORT || 1337;
+    @.app.port                = @.options.port || config.options.tm_design?.port || process.env.PORT || 1337;
     @.session_Service         = null
     @.logging_Service         = null
+    @.jade_Service            = new Jade_Service()
 
-    @.logging_Enabled         = global.config?.logging_Enabled || true
-    @.path_To_Jade            = global.config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
-    @.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
+    @.logging_Enabled         = config.options.logging_Enabled || true
+    @.path_To_Jade            = @.jade_Service.folder_Jade_Files()
+    @.path_To_Static          = @.jade_Service.folder_Static_Files()
+
+    #@.path_To_Jade            = config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
+    #@.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
 
   setup: ()=>
     if @.logging_Enabled
       @.set_Logging()
     @.set_BodyParser()
+    @.set_CookieParser()
     @.remove_Unwanted_Headers()
     @.set_Static_Route()
     @.add_Session()      # for now not using the async version of add_Session
@@ -55,11 +65,15 @@ class Express_Service
     @.app.use(bodyParser.json({limit:'1kb'})                       );     # to support JSON-encoded bodies
     @.app.use(bodyParser.urlencoded({limit:'1kb', extended: true }));     # to support URL-encoded bodies
 
+  set_CookieParser: ()=>
+    @.app.use(cookieParser()                                       );     # to support JSON-encoded bodies
+
+
   remove_Unwanted_Headers : () ->
     @.app.disable "x-powered-by"
 
   set_Static_Route:()=>
-    @app.use express['static'](@.path_To_Static);
+    @app.use express['static'](@.path_To_Static)
     @
 
   set_Views_Path :()=>
@@ -79,11 +93,11 @@ class Express_Service
       return next()
 
     if req.url is '/'
-      res.redirect '/index.html'
+      res.redirect '/jade/index.html'
     else
       req.session.redirectUrl = req.url
       res.status(403)
-         .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
+         .send(@.jade_Service.render_Jade_File('guest/login-required.jade'))
 
 
 

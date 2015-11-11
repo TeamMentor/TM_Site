@@ -1,5 +1,6 @@
 piwikAnalytics   = null
 piwik            = null
+config           = require '../config'
 
 class Analytics_Service
 
@@ -8,12 +9,14 @@ class Analytics_Service
 
   constructor:(req, res)->
     @.dependencies()
-    @.req               = req
-    @.res               = res
-    @.analitycsEnabled  = global.config?.piwikAnalytics?.analitycsEnabled
-    @.analitycsSiteId   = global.config?.piwikAnalytics?.analitycsSiteId
-    @.analitycsTrackUrl = global.config?.piwikAnalytics?.analitycsTrackUrl
-    @.apiKey            = global.config?.piwikAnalytics?.secrets?.analyticsApiKey
+    @.req                   = req
+    @.res                   = res
+    @.analitycsEnabled      = global.config?.piwikAnalytics?.analitycsEnabled
+    @.analitycsSiteId       = global.config?.piwikAnalytics?.analitycsSiteId
+    @.analitycsTrackingSite = global.config?.piwikAnalytics?.analitycsTrackingSite
+    @.analitycsTrackUrl     = global.config?.piwikAnalytics?.analitycsTrackUrl
+    @.apiKey                = global.config?.piwikAnalytics?.secrets?.analyticsApiKey
+
   setup:() =>
     if @.analitycsEnabled
       'Analytics is enabled'.log()
@@ -51,6 +54,7 @@ class Analytics_Service
       _id            :@.req.sessionID,
       rand           :''.add_5_Random_Letters(),                          #random value to avoid caching
       apiv           :1,                                                  #Api version always set to 1
+      uid            :@.req.username,
       ua             :@.req.header?("User-Agent"),
       lang           :@.req.header?("Accept-Language"),
       token_auth     :@.apiKey,
@@ -58,7 +62,7 @@ class Analytics_Service
       urlref         :@.req.headers?["referer"],                         #referer HTTP header
       e_c            :eventCategory,                                     #Event category
       e_a            :@.req.url,                                         #Event action
-      e_n            :eventName?,                                        #Event name
+      e_n            :eventName,                                        #Event name
       e_v            :1,                                                 #Event value
       cvar: JSON.stringify({                                             #Extra variableS
         '1': ['API version', 'v1'],

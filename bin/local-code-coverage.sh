@@ -12,21 +12,24 @@ echo 'Removing cache files'
 rm -R ./.tmCache
 mkdir ./.tmCache
 
-echo 'Creating instrumented node files (for CoffeeScript)'
-rm -R ./node-cov
-coffeeCoverage --path relative ./src ./node-cov/src
-coffeeCoverage --path relative ./test ./node-cov/test
+export NODE_COV_DIR=../_tm_website-node-cov
+echo "Creating instrumented node files (for CoffeeScript) in $NODE_COV_DIR"
 
-echo '    deleting node-cov *.coffee files'
-find . -path "./node-cov/**/*.coffee" -delete
+
+coffeeCoverage --path relative ./src $NODE_COV_DIR/src
+coffeeCoverage --path relative ./test $NODE_COV_DIR/test
+cp -R node_modules $NODE_COV_DIR/node_modules
+
+#echo '    deleting node-cov *.coffee files'
+#find . -path ".$NODE_COV_DIR/**/*.coffee" -delete
 
 echo 'Running Tests locally with (html-file-cov)'
-mocha -R html-file-cov node-cov/test  --recursive
+mocha -R html-file-cov $NODE_COV_DIR/test  --recursive
 
-#echo 'Removing instrumented node files'
-#rm -R node-cov
+echo 'Removing instrumented node files'
+rm -R $NODE_COV_DIR
+
 mv coverage.html .tmCache/coverage.html
-
 echo 'Opening browser with coverage.html'
 
 open .tmCache/coverage.html

@@ -31,10 +31,9 @@ describe '| controllers | Help-Controller.test |', ()->
     article_Data : (articleId) ->
       if (articleId=='1eda3d77-43e0-474b-be99-9ba118408dd3')
         return {html:'<p><strong>Welcome to TEAM Mentor.</strong> <br>\n</p><p>\nTEAM Mentor</p>'}
-      else
-        return {html:'<h1>Test</h1>'}
 
   check_Help_Page_Contents = (html, loggedIn, title, content, next)->
+
     $ = cheerio.load(html)
     # check top nav links
     if loggedIn
@@ -43,7 +42,7 @@ describe '| controllers | Help-Controller.test |', ()->
       $('#nav-login'              ).text().assert_Is 'Login'
     # check right nav links
     $('#help-nav h4'     ).html().assert_Is 'an view title'
-    $('#help-nav tr td a').attr().assert_Is { href: '/help/an article id' }
+    $('#help-nav tr td a').attr().assert_Is { href: '/jade/help/an article id' }
     $('#help-nav tr td a').html().assert_Is 'an article title'
     # check content
     if (title or content)
@@ -119,7 +118,9 @@ describe '| controllers | Help-Controller.test |', ()->
     using help_Controller,->
       @.res.send = (html)->
         check_Help_Page_Contents html, false, view_Model.title, view_Model.content, done
+
       @.render_Jade_and_Send @.jade_Help_Page, view_Model
+
 
   it 'show_Content', (done)->
     page_Id = 'id'     .add_5_Letters()
@@ -198,6 +199,23 @@ describe '| controllers | Help-Controller.test |', ()->
       @.req = session: username: 'a'
       @.user_Logged_In().assert_True()
       done()
+
+  it 'routes', ()->
+    app               = new express()
+    app.use new Help_Controller().routes()
+    paths = []
+    for item in app._router.stack
+      if item.handle.stack
+        for subitem in item.handle.stack
+          if subitem.route
+            paths.push subitem.route.path
+
+    paths.assert_Is [ '/help/index.html',
+                      '/help/article/:page*',
+                      '/help/:page*',
+                      '/Image/:name',
+                      '/json/docs/library',
+                      '/json/docs/:page' ]
 
   describe 'using mocked docs tm server |', ->
 
@@ -311,7 +329,7 @@ describe '| controllers | Help-Controller.test |', ()->
       random_Port       = 10000.random().add(10000)
       url_Mocked_Server = "http://localhost:#{random_Port}"
       app               = new express()
-      Help_Controller.register_Routes(app)
+      app.use new Help_Controller().routes()
       server            = app.listen(random_Port)
 
     after ->
@@ -319,12 +337,12 @@ describe '| controllers | Help-Controller.test |', ()->
 
     it 'show_Image (image exists)', (done)->
       supertest(app)
-      .get('/Image/index01.png')
-      .end (err, res)->
-        res.status.assert_Is 200
-        res.type  .assert_Is 'image/png'
-        res.body.length.assert_Is_Bigger_Than 100000
-        done()
+        .get('/Image/editingoverview-img2.jpg')
+        .end (err, res)->
+          res.status.assert_Is 200
+          res.type  .assert_Is 'image/jpeg'
+          res.body.length.assert_Is_Bigger_Than 1000
+          done()
 
     it 'show_Image (image not exists)', (done)->
       supertest(app)
@@ -333,19 +351,3 @@ describe '| controllers | Help-Controller.test |', ()->
           res.status.assert_Is 404
           res.text.assert_Contains 'a HTTP 404 error'
           done()
-
-
-  describe 'routes |',->
-    it 'register_Routes',->
-      routes = {}
-      app    =
-        get: (url, target)->
-          routes[url] = target
-
-      Help_Controller.register_Routes app
-      routes.keys().assert_Is [ '/help/index.html', '/help/article/:page*', '/help/:page*', '/Image/:name' ,
-                                '/json/docs/library', '/json/docs/:page']
-      routes['/help/index.html'     ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Index_Page();'
-      routes['/help/article/:page*' ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
-      routes['/help/:page*'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Help_Page();'
-      routes['/Image/:name'         ].source_Code().assert_Contains 'return new Help_Controller(req, res).show_Image();'
