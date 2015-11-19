@@ -8,9 +8,12 @@
 # safari on osx: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12
 
 # main source: http://www.useragentstring.com/pages/Browserlist/
-
+Ga_Service = null
 class Browser_Controller
+  dependencies: ->
+    Ga_Service  = require '../services/Analytics-Service'
   constructor: ->
+    @.dependencies()
 
   detect: (req, res)=>
     res.send req.headers?['user-agent'];
@@ -81,6 +84,13 @@ class Browser_Controller
       res.redirect '/jade'  +req.url
 
   redirect_TeamMentor_Open: (req, res)=>
+    #Adding analytics tracking, since this action was triggered from TP.
+    using new Ga_Service(req,res),->
+      actionName = 'Direct Access to TEAM Mentor'
+      category   = 'Visits from TEAM Professor'
+      eventName  = 'Direct TM access from TP'
+      @.track(actionName,category, eventName)
+
     if @.use_Flare(req)
       guid = req.params.guid
       return res.redirect '/angular/user/article/'+ guid

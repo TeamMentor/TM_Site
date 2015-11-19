@@ -134,7 +134,7 @@ class User_Sign_Up_Controller
 
       message = ''
       if (signUpResponse.Signup_Status is 0)
-        @.analyticsService.track('','User Account',"Signup Success #{@.req.body.username}")
+        @.analyticsService.track('Signup','User Account',"Signup Success #{@.req.body.username}")
         @.hubspotService.submitHubspotForm()
         return @.login.loginUser()
       if (signUpResponse.Validation_Results.empty())
@@ -142,7 +142,7 @@ class User_Sign_Up_Controller
       else
         message = signUpResponse.Validation_Results.first().Message
       userViewModel.errorMessage = message
-      @.analyticsService.track('','User Account',"Signup Failed #{@.req.body.username}")
+      @.analyticsService.track('Signup','User Account',"Signup Failed #{@.req.body.username}")
       @.render_Page signUp_fail, {viewModel:userViewModel}
 
   render_Page: (jade_Page,params)=>
