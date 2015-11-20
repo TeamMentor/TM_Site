@@ -25,7 +25,7 @@ class P3P_Policy_Controller
 
   routes:  ()=>
     using new Router(), ->
-      @.get  '/w3c/p3p.xml' ,    (req, res)=> new P3PPolicy_Controller(req, res).renderPolicy_File()
-      @.get  '/public.xml'   ,   (req, res)=> new P3PPolicy_Controller(req, res).renderPublicPolicy_File()
+      @.get  '/w3c/p3p.xml' ,    (req, res)=> new P3P_Policy_Controller(req, res).renderPolicy_File()
+      @.get  '/public.xml'   ,   (req, res)=> new P3P_Policy_Controller(req, res).renderPublicPolicy_File()
 
 module.exports = P3P_Policy_Controller
