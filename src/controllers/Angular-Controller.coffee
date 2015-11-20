@@ -77,7 +77,7 @@ class Angular_Controller
     #picking the route which should match with the whitelist
     view       = req.url?.split('/')?.last()
 
-    if view? && view in @.guest_Whitelist || req.url.contains 'guest/pwd_reset'
+    if (view? && view in @.guest_Whitelist) || req.url.contains('guest/pwd_reset') || req.url.contains('guest/docs')
       req.params.file = 'page-guest'
       req.params.area = '_layouts'
 
@@ -142,6 +142,7 @@ class Angular_Controller
     router.get '/user/:file*'          ,@.check_Auth  , @.get_Static_Html_User
     router.get '/guest/:file'                         , @.get_Static_Html_Guest
     router.get '/guest/pwd_reset/:username/:password' , @.get_Static_Html_Guest
+    router.get '/guest/docs/:guid'                    , @.get_Static_Html_Guest
     router.get '/component/:file'                     , @.get_Static_Html_Component
     router.get '/api/auto-complete'                   , @.get_Search_Auto_Complete
 
