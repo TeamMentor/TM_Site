@@ -93,7 +93,7 @@ class Login_Controller
           if(redirectUrl)
             @.res.redirect(redirectUrl)
           else
-            @.analyticsService.track('','User Account','Login Success')
+            @.analyticsService.track('Login','User Account','Login Success')
             @.req.session.username = username
             redirectUrl            = @.req.session.redirectUrl
 
@@ -106,7 +106,7 @@ class Login_Controller
               @.res.redirect(@.page_Index)
       else
         @.req.session.username = undefined
-        @.analyticsService.track('','User Account','Login Failed')
+        @.analyticsService.track('Login','User Account','Login Failed')
         if (loginResponse?.Validation_Results?.not_Empty())
           userViewModel.errorMessage  = loginResponse.Validation_Results.first().Message
         else
@@ -118,6 +118,7 @@ class Login_Controller
     @.req.session.username = undefined
     token = @.req?.session?.token
     @.webServiceResponse "Logout",token,(response)=>
+      @.analyticsService.track('Logout','User Account',"Logout")
       @.req?.session?.token = undefined
       @.res.redirect(@.page_MainPage_no_user)
 
@@ -164,6 +165,7 @@ class Login_Controller
         internalUser = true
         
     @.req?.session?.internalUser = internalUser
+    @.req?.session?.userEmail    = userEmail
 
   currentUser : ()->
     token = @.req?.session?.token
@@ -176,6 +178,10 @@ class Login_Controller
       return @.res.json []
 
   tm_SSO: ()=>
+    #Analytics, tracking SSO URl
+    url = @.req.protocol + '://' + @.req.get('host') + @.req.originalUrl;
+    @.analyticsService.trackUrl(url)
+
     username = @.req.query.username || @.req.query.userName
     token    = @.req.query.requestToken
     format   = @.req.query.format
@@ -191,18 +197,23 @@ class Login_Controller
         followRedirect: false
 
       request options,(error, response)=>
+        @.analyticsService.track('SSO Login','User Account','Login Success')
         if response.headers?.location is '/teammentor'
           @.req.session.username = username
           return @.res.redirect '/'
         else
+          @.analyticsService.track('SSO Login','User Account','Login Success (GIF request)')
           if (response.headers?['content-type']=='image/gif')
+            @.analyticsService.track('SSO Login GIF','User Account','Login Success')
             @.req.session.username = username
             gifImage = new Buffer('R0lGODlhAQABAPcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAP8ALAAAAAABAAEAAAgEAP8FBAA7', 'base64')
             @.res.writeHead(200, {'Content-Type': 'image/gif' });
             @.res.write(gifImage)
             return @.res.end()
+        @.analyticsService.track('SSO Login Fail','User Account','SSO Login Fail')
         @.res.send @.jade_Service.render_Jade_File @.jade_GuestPage_403
     else
+      @.analyticsService.track('SSO Login Fail','User Account','SSO Login Fail')
       @.res.send @.jade_Service.render_Jade_File  @.jade_GuestPage_403
 
 
