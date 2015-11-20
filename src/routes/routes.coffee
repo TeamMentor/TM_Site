@@ -6,7 +6,6 @@ add_Routes = (express_Service)->
     API_Controller          = require '../controllers/API-Controller'
     Article_Controller      = require '../controllers/Article-Controller'
     Browser_Controller      = require '../controllers/Browser-Controller'
-    P3P_Policy_Controller    = require '../controllers/P3P-Policy-Controller'
     Flare_Controller        = require '../controllers/Flare-Controller'
     Help_Controller         = require '../controllers/Help-Controller'
     Gateways_Controller     = require '../controllers/Gateways-Controller'
@@ -50,7 +49,6 @@ add_Routes = (express_Service)->
     app.use '/jade', new Misc_Controller(     ).routes(express_Service)
 
     app.use '/'    , new Browser_Controller(  ).routes()
-    app.use '/'    , new P3P_Policy_Controller().routes()
 
     app.get '/teamMentor'               , (req, res)->
       res.redirect "/browser-detect"

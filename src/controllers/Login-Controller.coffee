@@ -179,7 +179,7 @@ class Login_Controller
     username = @.req.query.username || @.req.query.userName
     token    = @.req.query.requestToken
     format   = @.req.query.format
-    @.res.set('P3P',"CP=\'IDC DSP COR NID DEVo CONi OTPo OUR SAM IND ONL COM NAV INT STA\'")
+    @.res.set('P3P',"CP=\'IDC DSP COR DEVo OUR\'")
     if username and token
       server = @.url_Tm_35_Server()
       path   = @.req.route.path.substring(1)
