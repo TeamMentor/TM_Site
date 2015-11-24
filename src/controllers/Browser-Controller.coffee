@@ -85,12 +85,7 @@ class Browser_Controller
 
   redirect_TeamMentor_Open: (req, res)=>
     #Adding analytics tracking, since this action was triggered from TP.
-    using new Ga_Service(req,res),->
-      actionName = 'Direct Access to TEAM Mentor'
-      category   = 'Visits from TEAM Professor'
-      eventName  = 'Direct TM access from TP'
-      @.track(actionName,category, eventName)
-
+    req.session.TPRequest = true ;
     if @.use_Flare(req)
       guid = req.params.guid
       return res.redirect '/angular/user/article/'+ guid
