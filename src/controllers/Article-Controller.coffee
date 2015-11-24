@@ -38,6 +38,7 @@ class Article_Controller
     @.virtualArticlesEnabled = global.config?.virtualArticles?.AutoRedirectIfGuidNotFound
     @.virtualArticlesTarget  = global.config?.virtualArticles?.AutoRedirectTarget
 
+
   article: =>
     send_Article = (view_Model)=>
       articleUrl = @.req.protocol + '://' + @.req.get('host') + @.req.originalUrl;
@@ -197,7 +198,18 @@ class Article_Controller
       article_Id = data.article_Id
       if article_Id
         @graphService.node_Data article_Id, (article_Data)=>
-          new Analytics_Service(@.req, @.res).track(article_Data?.title,"View Article","Title :" + article_Data?.title + " Id : " +article_Id)
+          if @.req.session.TPRequest?
+            using new Analytics_Service(@.req, @.res),->         #Tracking TP access to articles.
+              actionName = article_Data?.title
+              category   = 'TEAM Professor View Article'
+              eventName  = "Title :" + article_Data?.title + " Id : " +article_Id
+              @.track(actionName,category, eventName)
+            delete @.req.session.TPRequest                       #Undefining session variable
+          else
+            using new Analytics_Service(@.req, @.res),->
+              @.track(article_Data?.title,"View Article","Title :" + article_Data?.title + " Id : " +article_Id)
+
+          new Analytics_Service(@.req, @.res).track()
           title      = article_Data?.title
           technology = article_Data?.technology
           type       = article_Data?.type
@@ -215,6 +227,7 @@ class Article_Controller
             else
              @.res.redirect @.virtualArticlesTarget + '/article/' + article_Ref
         else
+          new Analytics_Service(@.req, @.res).track("Article Not Found: " + article_Ref,"Article Not Found","Article Not Found")
           callback null
 
   routes: (expressService) ->

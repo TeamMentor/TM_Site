@@ -25,6 +25,7 @@ class API_Controller
       textsearch = url.split('/').last().url_Decode()
       using new  Analytics_Service(req, res),->
         @.track("","","",textsearch,"Text Search")
+        @.track()
 
     if req.method is 'GET'                                  # only GET requests are supported
       if req.query['pretty'] is ''                          # if a ?pretty to the request url (show a formatted version of the data)
