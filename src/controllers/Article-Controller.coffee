@@ -209,7 +209,7 @@ class Article_Controller
             using new Analytics_Service(@.req, @.res),->
               @.track(article_Data?.title,"View Article","Title :" + article_Data?.title + " Id : " +article_Id)
 
-          using new Analytics_Service(@.req, @.res).track()
+          new Analytics_Service(@.req, @.res).track()
           title      = article_Data?.title
           technology = article_Data?.technology
           type       = article_Data?.type
@@ -227,7 +227,7 @@ class Article_Controller
             else
              @.res.redirect @.virtualArticlesTarget + '/article/' + article_Ref
         else
-          new Analytics_Service(@.req, @.res).track("Article Not Found"," Id : " + article_Ref,"Article Not Found")
+          new Analytics_Service(@.req, @.res).track("Article Not Found: " + article_Ref,"Article Not Found","Article Not Found")
           callback null
 
   routes: (expressService) ->

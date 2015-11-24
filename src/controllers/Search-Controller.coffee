@@ -167,7 +167,7 @@ class SearchController
       logger?.info {user: @.req.session?.username, action:'search', target: target, filters:filters}
 
       new Analytics_Service(@.req, @.res).track("","","",target, "Text Search")
-
+      new Analytics_Service(@.req, @.res).track()
       #jade_Page = 'user/search-two-columns.jade'
 
 

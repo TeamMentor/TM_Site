@@ -87,6 +87,7 @@ class Login_Controller
       loginResponse   = response.body.d
       success         = loginResponse?.Login_Status
       if (success == loginSuccess)
+        @.analyticsService.track()
         @.req?.session?.token = loginResponse.Token
         #If Password was expired,
         @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
