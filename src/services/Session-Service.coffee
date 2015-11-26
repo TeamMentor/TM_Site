@@ -1,5 +1,8 @@
 Nedb            = null
 Express_Session = null
+request         = null
+async           = null
+config          = null
 
 class Session_Service
 
@@ -14,6 +17,9 @@ class Session_Service
   dependencies: ()->
     Nedb            = require('nedb')
     Express_Session = require 'express-session'
+    request         = require 'request'
+    async           = require 'async'
+    config          = require '../config'
 
   constructor: (options)->
     @.dependencies()
@@ -21,11 +27,14 @@ class Session_Service
     @.filename = @.options.filename || './.tmCache/_sessionData' #"_session_Data"
     @.db = new Nedb(@.filename)
     Session_Service.prototype.__proto__ = Express_Session.Store.prototype;
+    @.url_WebServices                   = @.options.webServices ||"#{global.config?.tm_design?.tm_35_Server}#{global.config?.tm_design?.webServices}"
+    @.sessionTimeout_In_Minutes         = config.options.tm_design.session_Timeout_Minutes
 
   setup: (callback)=>
+    # 20160 * 60 * 1000 = 1.209.600.000
     @.session = Express_Session({ secret: '1234567890', key: 'tm-session'
                                 , saveUninitialized: false , resave: true
-                                , cookie: { path: '/' , httpOnly: true , maxAge: 365 * 24 * 3600 * 1000 }
+                                , cookie: { path: '/' , httpOnly: true , maxAge: 1000 * 60 *  parseInt(@.sessionTimeout_In_Minutes)} # 2 weeks
                                 , store: @ })
     @.db.loadDatabase =>
       @.db.persistence.setAutocompactionInterval(30 * 1000) # set to 30s
@@ -34,14 +43,38 @@ class Session_Service
         callback() if callback
     @
 
+  logout_User: (token, callback)=>
+    options =
+      method    : 'post',
+      body      : {},
+      json      : true,
+      headers   : {'Cookie':'Session='+token}
+      url       : @.url_WebServices + '/Logout'
+    request options, (error, response)=>
+      if error
+        logger?.info ('Could not connect with TM 3.5 server')
+        callback null
+      else
+        callback response?.body?.d
+
   clear_Empty_Sessions: (callback)=>
     logger?.info "[Session_Service] clearing empty sessions"
     cleared = 0
     @.db.find {}, (err,sessionData)=>
       for session in sessionData
-        if not session.data.recent_Articles       # remove sessions that did not see at least one article
+        expirationDate   = session.data.cookie._expires   #Expiry date from cookie
+        token            = session.data.token             #Token to invalidate TM 3.6 session
+        sessionIsExpired = Date.now() > expirationDate    #Flag to determine whether or not the session has expired.
+
+        if not session.data.recent_Articles  || sessionIsExpired     # remove sessions that did not see at least one article
           @.db.remove session
           cleared++
+          if token?   #Safe check to invalidate TM 3.6 session.
+            @.logout_User token,(response)=>
+              #TM 3.6 backend response should be an empty guid.
+              if not response? == '00000000-0000-0000-0000-000000000000'
+                console.log("Error invalidating TM 3.6 session ")
+
       if cleared
         logger?.info "[Session_Service] removed #{cleared} sessions"
       callback()
