@@ -6,6 +6,7 @@ cookieParser    = null
 path            = null
 express         = null
 config          = null
+scheduler       = null
 
 class Express_Service
 
@@ -19,20 +20,22 @@ class Express_Service
     cookieParser     = require 'cookie-parser'
     path             = require "path"
     express          = require 'express'
+    scheduler        = require 'node-schedule'
 
 
   constructor: (options)->
     @.dependencies()
-    @.options                 = options || {}
-    @.app                     = express()
-    @.app.port                = @.options.port || config.options.tm_design?.port || process.env.PORT || 1337;
-    @.session_Service         = null
-    @.logging_Service         = null
-    @.jade_Service            = new Jade_Service()
+    @.options                     = options || {}
+    @.app                         = express()
+    @.app.port                    = @.options.port || config.options.tm_design?.port || process.env.PORT || 1337;
+    @.session_Service             = null
+    @.logging_Service             = null
+    @.jade_Service                = new Jade_Service()
 
-    @.logging_Enabled         = config.options.logging_Enabled || true
-    @.path_To_Jade            = @.jade_Service.folder_Jade_Files()
-    @.path_To_Static          = @.jade_Service.folder_Static_Files()
+    @.logging_Enabled             = config.options.logging_Enabled || true
+    @.path_To_Jade                = @.jade_Service.folder_Jade_Files()
+    @.path_To_Static              = @.jade_Service.folder_Static_Files()
+    @.tm_sessionCleanup_Schedule  = config.options.tm_sessionCleanup_Schedule
 
     #@.path_To_Jade            = config?.tm_design?.folder_Jade_Files #__dirname.path_Combine '../../../TM_Jade'
     #@.path_To_Static          = @.path_To_Jade?.path_Combine '../TM_Static' #__dirname.path_Combine '../../../TM_Static'
@@ -45,6 +48,7 @@ class Express_Service
     @.remove_Unwanted_Headers()
     @.set_Static_Route()
     @.add_Session()      # for now not using the async version of add_Session
+    @.clear_Empty_Sessions()
     @.set_Views_Path()
     @.map_Route('../routes/routes')
     @
@@ -71,6 +75,16 @@ class Express_Service
 
   remove_Unwanted_Headers : () ->
     @.app.disable "x-powered-by"
+
+  clear_Empty_Sessions :()=>
+    hour          = @.tm_sessionCleanup_Schedule.hour
+    minutes       = @.tm_sessionCleanup_Schedule.minutes
+    dayOfWeek     = @.tm_sessionCleanup_Schedule.dayOfWeek
+
+    job = scheduler.scheduleJob({hour: hour, minute: minutes, dayOfWeek: dayOfWeek}, =>
+      @.session_Service.clear_Empty_Sessions =>
+        return
+    )
 
   set_Static_Route:()=>
     @app.use express['static'](@.path_To_Static)
