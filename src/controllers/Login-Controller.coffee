@@ -190,7 +190,6 @@ class Login_Controller
     if username and token
       if (@.req.session.username? && @.req.session.username == username)
         @.res.set('P3P',"CP=\'IDC DSP COR DEVo OUR\'")
-        @.analyticsService.track('SSO Login','User Account','Login Success')
         if format?
           @.res.writeHead(200, {'Content-Type': 'image/gif' });
           @.res.write(@.get_GifImage())
@@ -209,7 +208,6 @@ class Login_Controller
 
       request options,(error, response)=>
 
-        @.analyticsService.track('SSO Login','User Account','Login Success')
         #Parsing response cookie to get the authenticated token
         cookie    = response?.headers?['set-cookie']
         sessionId = cookie?.toString().split(',')[1]
@@ -218,11 +216,13 @@ class Login_Controller
         @.res.set('P3P',"CP=\'IDC DSP COR DEVo OUR\'")
 
         if response.headers?.location is '/teammentor'
+          @.analyticsService.track('SSO Login','User Account','Login Success')
           @.req.session.username = username
           @.req.session.token    = sessionId if sessionId?
           return @.res.redirect '/'
         else
           if (response.headers?['content-type']=='image/gif')
+            @.analyticsService.track('SSO Login','User Account','Login Success')
             @.req.session.username = username
             @.req.session.token    = sessionId if sessionId?
             @.res.writeHead(200, {'Content-Type': 'image/gif' });
