@@ -62,10 +62,12 @@ class Session_Service
     cleared = 0
     @.db.find {}, (err,sessionData)=>
       for session in sessionData
-        expirationDate   = session.data.cookie._expires   #Expiry date from cookie
+        expirationDate   = new Date (session.data.cookie._expires)   #Expiry date from cookie
         token            = session.data.token             #Token to invalidate TM 3.6 session
-        sessionIsExpired = Date.now() > expirationDate    #Flag to determine whether or not the session has expired.
-
+        sessionIsExpired = new Date() > expirationDate    #Flag to determine whether or not the session has expired.
+        console.log("Session Expiration date is " + expirationDate)
+        console.log("Current time is " + new Date())
+        console.log("** Session is expired " + sessionIsExpired)
         if not session.data.recent_Articles  || sessionIsExpired     # remove sessions that did not see at least one article
           @.db.remove session
           cleared++
