@@ -38,7 +38,7 @@ class API_Controller
     if req?.session?.username and req?.url?.not_Contains '/user'
       return next()
 
-    res.json API_Controller.LOGIN_FAIL_MESSAGE
+    res.status(403).send(API_Controller.LOGIN_FAIL_MESSAGE)
 
   routes: =>
     router = new Router()
