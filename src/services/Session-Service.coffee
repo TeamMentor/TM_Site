@@ -62,15 +62,15 @@ class Session_Service
     cleared = 0
     @.db.find {}, (err,sessionData)=>
       for session in sessionData
-        expirationDate   = new Date (session.data.cookie._expires)   #Expiry date from cookie
-        token            = session.data.token             #Token to invalidate TM 3.6 session
-        sessionIsExpired = new Date() > expirationDate    #Flag to determine whether or not the session has expired.
-        console.log("Session Expiration date is " + expirationDate)
-        console.log("Current time is " + new Date())
-        console.log("** Session is expired " + sessionIsExpired)
-        if not session.data.recent_Articles  || sessionIsExpired     # remove sessions that did not see at least one article
-          @.db.remove {sid: session.sid },{},(callback, deletedRecords)  ->
-            cleared++
+        expirationDate   = new Date (session.data.cookie._expires)    #Expiry date from cookie
+        token            = session.data.token                         #Token to invalidate TM 3.6 session
+        sessionIsExpired = new Date() > expirationDate                #Flag to determine whether or not the session has expired.
+        if not session.data.recent_Articles  || sessionIsExpired      #remove sessions that did not see at least one article
+
+          @.db.remove {sid: session.sid },{},(callback, deletedRecords)  =>
+            if deletedRecords? == 0
+              console.log("Unable to delete session with sid " + session.sid)
+          cleared++
           if token?   #Safe check to invalidate TM 3.6 session.
             @.logout_User token,(response)=>
               #TM 3.6 backend response should be an empty guid.
