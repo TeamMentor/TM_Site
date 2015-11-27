@@ -62,12 +62,14 @@ class Session_Service
     cleared = 0
     @.db.find {}, (err,sessionData)=>
       for session in sessionData
-        expirationDate   = session.data.cookie._expires   #Expiry date from cookie
-        token            = session.data.token             #Token to invalidate TM 3.6 session
-        sessionIsExpired = Date.now() > expirationDate    #Flag to determine whether or not the session has expired.
+        expirationDate   = new Date (session.data.cookie._expires)    #Expiry date from cookie
+        token            = session.data.token                         #Token to invalidate TM 3.6 session
+        sessionIsExpired = new Date() > expirationDate                #Flag to determine whether or not the session has expired.
+        if not session.data.recent_Articles  || sessionIsExpired      #remove sessions that did not see at least one article
 
-        if not session.data.recent_Articles  || sessionIsExpired     # remove sessions that did not see at least one article
-          @.db.remove session
+          @.db.remove {sid: session.sid },{},(callback, deletedRecords)  =>
+            if deletedRecords? == 0
+              console.log("Unable to delete session with sid " + session.sid)
           cleared++
           if token?   #Safe check to invalidate TM 3.6 session.
             @.logout_User token,(response)=>
