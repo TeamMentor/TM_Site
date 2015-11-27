@@ -69,8 +69,8 @@ class Session_Service
         console.log("Current time is " + new Date())
         console.log("** Session is expired " + sessionIsExpired)
         if not session.data.recent_Articles  || sessionIsExpired     # remove sessions that did not see at least one article
-          @.db.remove session
-          cleared++
+          @.db.remove {sid: session.sid },{},(callback, deletedRecords)  ->
+            cleared++
           if token?   #Safe check to invalidate TM 3.6 session.
             @.logout_User token,(response)=>
               #TM 3.6 backend response should be an empty guid.
