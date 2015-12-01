@@ -109,7 +109,8 @@ class Express_Service
     if req.url is '/'
       res.redirect '/jade/index.html'
     else
-      req.session.redirectUrl = req.url
+      if not req.url == '/json/gateways/library'
+        req.session.redirectUrl = req.url
       res.status(403)
          .send(@.jade_Service.render_Jade_File('guest/login-required.jade'))
 
