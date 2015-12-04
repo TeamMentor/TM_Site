@@ -36,6 +36,16 @@ class API_Controller
 
   check_Auth: (req,res,next)=>
     if req?.session?.username and req?.url?.not_Contains '/user'
+      #Expiration date logic goes here.
+      now             = Date.now()
+      expirationDate  = req.session?.sessionExpirationDate
+
+      if (expirationDate? && (now >  expirationDate))  #Session is expired.
+        req.session.destroy()
+        return res.status(403).send(API_Controller.LOGIN_FAIL_MESSAGE)
+      else
+        return next()
+
       return next()
 
     res.status(403).send(API_Controller.LOGIN_FAIL_MESSAGE)

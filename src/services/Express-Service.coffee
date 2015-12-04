@@ -104,7 +104,16 @@ class Express_Service
 
   checkAuth: (req, res, next)=>
     if req?.session?.username
-      return next()
+      # Session expiration check
+      now                    = Date.now()
+      sessionExpirationDate  = req.session?.sessionExpirationDate
+      
+      if (sessionExpirationDate? && (now  >  sessionExpirationDate)) #If session is expired.
+        req.session.destroy()                                        #This implementation removes the session from the file.
+        return res.status(403)
+                  .send(@.jade_Service.render_Jade_File('guest/login-required.jade'))
+      else
+        return next()
 
     if req.url is '/'
       res.redirect '/jade/index.html'
