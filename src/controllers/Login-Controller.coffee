@@ -174,7 +174,7 @@ class Login_Controller
     if token
       return @.res.json user_data_cache[token] if  user_data_cache[token]?
       @.webServiceResponse "Current_User",token,(userProfile)=>
-        @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6))).toGMTString()
+        @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
         user_data_cache[token] = userProfile
         @.res.json userProfile
     else

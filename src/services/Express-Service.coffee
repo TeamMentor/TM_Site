@@ -107,7 +107,7 @@ class Express_Service
       # Session expiration check
       now                    = Date.now()
       sessionExpirationDate  = req.session?.sessionExpirationDate
-      
+
       if (sessionExpirationDate? && (now  >  sessionExpirationDate)) #If session is expired.
         req.session.destroy()                                        #This implementation removes the session from the file.
         return res.status(403)
