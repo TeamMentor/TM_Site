@@ -150,6 +150,7 @@ class Login_Controller
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
       #Setting up internal user
+      @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
       @.verifyInternalUser userProfile?.Email
       if(userProfile?.PasswordExpired)
         @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
@@ -174,7 +175,6 @@ class Login_Controller
     if token
       return @.res.json user_data_cache[token] if  user_data_cache[token]?
       @.webServiceResponse "Current_User",token,(userProfile)=>
-        @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
         user_data_cache[token] = userProfile
         @.res.json userProfile
     else
