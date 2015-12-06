@@ -110,6 +110,7 @@ class Login_Controller
         @.analyticsService.track('Login','User Account','Login Failed')
         if (loginResponse?.Validation_Results?.not_Empty())
           userViewModel.errorMessage  = loginResponse.Validation_Results.first().Message
+
         else
           userViewModel.errorMessage  = loginResponse?.Simple_Error_Message
 
@@ -120,7 +121,7 @@ class Login_Controller
     token = @.req?.session?.token
     @.webServiceResponse "Logout",token,(response)=>
       @.analyticsService.track('Logout','User Account',"Logout")
-      @.req?.session?.token = undefined
+      @.req?.session?.destroy()
       @.res.redirect(@.page_MainPage_no_user)
 
   render_Page: (page, view_Model)=>
@@ -149,6 +150,7 @@ class Login_Controller
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
       #Setting up internal user
+      @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
       @.verifyInternalUser userProfile?.Email
       if(userProfile?.PasswordExpired)
         @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
@@ -219,18 +221,22 @@ class Login_Controller
           @.analyticsService.track('SSO Login','User Account','Login Success')
           @.req.session.username = username
           @.req.session.token    = sessionId if sessionId?
-          return @.res.redirect '/'
+          @.webServiceResponse "Current_User",sessionId,(userProfile)=>
+            @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+            return @.res.redirect '/'
         else
           if (response.headers?['content-type']=='image/gif')
             @.analyticsService.track('SSO Login','User Account','Login Success')
             @.req.session.username = username
             @.req.session.token    = sessionId if sessionId?
-            @.res.writeHead(200, {'Content-Type': 'image/gif' });
-            @.res.write(@.get_GifImage())
-            return @.res.end()
-
-        @.analyticsService.track('SSO Login Fail','User Account','SSO Login Fail')
-        @.res.send @.jade_Service.render_Jade_File @.jade_GuestPage_403
+            @.webServiceResponse "Current_User",sessionId,(userProfile)=>
+              @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+              @.res.writeHead(200, {'Content-Type': 'image/gif' });
+              @.res.write(@.get_GifImage())
+              return @.res.end()
+          else
+            @.analyticsService.track('SSO Login Fail','User Account','SSO Login Fail')
+            @.res.send @.jade_Service.render_Jade_File @.jade_GuestPage_403
     else
       @.analyticsService.track('SSO Login Fail','User Account','SSO Login Fail')
       @.res.send @.jade_Service.render_Jade_File  @.jade_GuestPage_403

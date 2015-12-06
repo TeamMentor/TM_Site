@@ -94,13 +94,19 @@ class Anonymous_Service
       return @redirectToLoginPage()
 
   redirectToLoginPage: () ->
-    @.req.session.redirectUrl = @.req.url
+    @.req.session.redirectUrl = @.req.url if  @.req?.session?
     @.res.status(403)
     .send(new Jade_Service().render_Jade_File('guest/login-required.jade'))
 
   checkAuth: (next) ->
     if @.req?.session?.username
-      return next()
+      now                    = Date.now()
+      sessionExpirationDate  = @.req.session?.sessionExpirationDate
+      if (sessionExpirationDate? && (now  >  sessionExpirationDate))
+        @.req.session.destroy()
+        return @redirectToLoginPage()
+      else
+        return next()
     @.graphService.article @.req?.params?.ref,(data)=>
       if data.article_Id
         console.log "data.article_Id is: " + data.article_Id

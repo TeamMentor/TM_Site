@@ -31,16 +31,19 @@ class Session_Service
     @.sessionTimeout_In_Minutes         = config.options.tm_design.session_Timeout_Minutes
 
   setup: (callback)=>
-    # 20160 * 60 * 1000 = 1.209.600.000
     @.session = Express_Session({ secret: '1234567890', key: 'tm-session'
                                 , saveUninitialized: false , resave: true
-                                , cookie: { path: '/' , httpOnly: true , maxAge: 1000 * 60 *  parseInt(@.sessionTimeout_In_Minutes)} # 2 weeks
+                                , cookie: { path: '/' , httpOnly: true , maxAge: 1000 * 60 *  parseInt(@.sessionTimeout_In_Minutes)}
                                 , store: @ })
     @.db.loadDatabase =>
       @.db.persistence.setAutocompactionInterval(30 * 1000) # set to 30s
       @.clear_Empty_Sessions ->
         logger?.info('[Session_Service] Configured')
         callback() if callback
+      #based on code from https://github.com/louischatriot/connect-nedb-session/blob/master/index.js
+      Session_Service.prototype.destroy = (sid, callback) =>
+        @db.remove { sid: sid }, { multi: true }, (err, callback) ->
+          return callback = err
     @
 
   logout_User: (token, callback)=>
@@ -62,10 +65,10 @@ class Session_Service
     cleared = 0
     @.db.find {}, (err,sessionData)=>
       for session in sessionData
-        expirationDate   = new Date (session.data.cookie._expires)    #Expiry date from cookie
-        token            = session.data.token                         #Token to invalidate TM 3.6 session
-        sessionIsExpired = new Date() > expirationDate                #Flag to determine whether or not the session has expired.
-        if not session.data.recent_Articles  || sessionIsExpired      #remove sessions that did not see at least one article
+        expirationDate   = new Date (session.data.sessionExpirationDate)    #Expiry date from cookie
+        token            = session.data.token                               #Token to invalidate TM 3.6 session
+        sessionIsExpired = new Date() > expirationDate                      #Flag to determine whether or not the session has expired.
+        if not session.data.recent_Articles  || sessionIsExpired            #remove sessions that did not see at least one article
 
           @.db.remove {sid: session.sid },{},(callback, deletedRecords)  =>
             if deletedRecords? == 0
@@ -183,10 +186,6 @@ Session_Service.prototype.get =  (sid, callback)->
 Session_Service::set = (sid, data, callback)->
   this.db.update { sid: sid }, { sid: sid, data: data }, { multi: false, upsert: true },  (err)->
     return callback(err)
-
-Session_Service.prototype.destroy = (sid, callback)->
-  this.db.remove { sid: sid }, { multi: false }, (err)->
-    return callback(err);
 
 module.exports = Session_Service
 
