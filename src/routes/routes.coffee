@@ -18,6 +18,7 @@ add_Routes = (express_Service)->
     PoC_Controller          = require '../poc/PoC-Controller'
     app                     = express_Service.app
     jade_Service            = new Jade_Service()
+    uuid                    = require 'node-uuid'
 
     # Log/track request
     app.use (req,res,next)->
@@ -25,6 +26,8 @@ add_Routes = (express_Service)->
       using new Ga_Service(req,res),->
         if (req.url.starts_With('jade') || req.url.match '/angular/guest/')
             @.track()
+        if not req.session.username? && global.config?.tm_security?.Show_ContentToAnonymousUsers
+            req.session.username = uuid.v4()
         next()
 
     #run custom code hook (if available)

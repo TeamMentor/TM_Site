@@ -43,6 +43,7 @@
     "marked": "latest",
     "nedb": "latest",
     "node-schedule": "^0.5.1",
+    "node-uuid": "^1.4.7",
     "piwik-tracker": "^0.1.1",
     "request": "latest",
     "supervisor": "latest",
