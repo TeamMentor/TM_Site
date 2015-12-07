@@ -27,7 +27,7 @@ add_Routes = (express_Service)->
         if (req.url.starts_With('jade') || req.url.match '/angular/guest/')
             @.track()
         if not req.session.username? && global.config?.tm_security?.Show_ContentToAnonymousUsers
-            req.session.username = uuid.v4()
+            req.session.username = uuid.v4()  #Setting a surrogate username, since anonymous access is enabled.
         next()
 
     #run custom code hook (if available)
