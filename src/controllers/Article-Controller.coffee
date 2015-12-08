@@ -44,6 +44,7 @@ class Article_Controller
       articleUrl = @.req.protocol + '://' + @.req.get('host') + @.req.originalUrl;
       if view_Model
         view_Model.loggedIn          = @.req.session?.username isnt undefined
+        view_Model.hideLogout        = @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
         view_Model.signUpUrl         = @.config?.options?.anonymousService?.signUpUrl
         view_Model.loginUrl          = @.config?.options?.anonymousService?.loginUrl
         #recentArticles = @.recentArticles()

@@ -101,6 +101,7 @@ class Help_Controller
 
   render_Jade_and_Send: (jade_Page, view_Model)=>
     view_Model.loggedIn          = @.user_Logged_In()
+    view_Model.hideLogout        = @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
     view_Model.library           = @.docs_Library
     view_Model.internalUser      = @.req.session?.internalUser
     view_Model.githubUrl         = @.config?.options?.tm_design.githubUrl

@@ -84,7 +84,7 @@ class SearchController
             @searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
             @searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
             @searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
-
+            @.searchData.hideLogout       = @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
             if filters
               @graph_Service.resolve_To_Ids filters, (results)=>
                 @searchData.activeFilter         = results.values()
@@ -183,6 +183,7 @@ class SearchController
           searchData.githubUrl         = @.config?.options?.tm_design.githubUrl
           searchData.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
           searchData.supportEmail      = @.config?.options?.tm_design.supportEmail
+          searchData.hideLogout        = @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
           @.req.session.user_Searches ?= []
           if searchData?.id
             user_Search = { id: searchData.id, title: searchData.title, results: searchData.results.size(), username: @.req.session.username }
@@ -218,6 +219,7 @@ class SearchController
         user_Data.githubUrl         = @.config?.options?.tm_design.githubUrl
         user_Data.githubContentUrl  = @.config?.options?.tm_design.githubContentUrl
         user_Data.supportEmail      = @.config?.options?.tm_design.supportEmail
+        user_Data.hideLogout        = @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
 
         @.render_Page @.jade_Main, user_Data
 

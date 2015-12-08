@@ -19,7 +19,6 @@ add_Routes = (express_Service)->
     app                     = express_Service.app
     jade_Service            = new Jade_Service()
     uuid                    = require 'node-uuid'
-
     # Log/track request
     app.use (req,res,next)->
       logger?.info {url: req.url , ip: req.connection.remoteAddress,  agent: req.headers.agent }
@@ -70,8 +69,8 @@ add_Routes = (express_Service)->
     new PoC_Controller(options)        .register_Routes()
 
     #errors 404 and 500
-    app.get '/jade/error', (req,res)-> res.status(500).send  jade_Service.render_Jade_File 'guest/500.jade',{ loggedIn:req.session?.username isnt undefined }
-    app.get '/*'         , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined }
+    app.get '/jade/error', (req,res)-> res.status(500).send  jade_Service.render_Jade_File 'guest/500.jade',{ loggedIn:req.session?.username isnt undefined , hideLogout: hideLogout}
+    app.get '/*'         , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined , hideLogout: hideLogout}
 
     app.use (err, req, res, next)->
       #console.error(err.stack)
