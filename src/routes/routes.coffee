@@ -68,7 +68,7 @@ add_Routes = (express_Service)->
     options = { express_Service: express_Service }
     new PoC_Controller(options)        .register_Routes()
 
-    hideLogout        = global.config?.tm_security?.Show_ContentToAnonymousUsers
+    hideLogout        = global.config?.tm_security?.Show_ContentToAnonymousUsers || @.req?.session?.ssoUser isnt undefined
     #errors 404 and 500
     app.get '/jade/error', (req,res)-> res.status(500).send  jade_Service.render_Jade_File 'guest/500.jade',{ loggedIn:req.session?.username isnt undefined , hideLogout: hideLogout}
     app.get '/*'         , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined , hideLogout: hideLogout}

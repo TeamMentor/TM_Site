@@ -42,8 +42,9 @@ class Misc_Controller
                 githubUrl           : @.config.options.tm_design.githubUrl,
                 githubContentUrl    : @.config.options.tm_design.githubContentUrl,
                 allowedEmailDomains : @.config.options.tm_design.allowedEmailDomains
-                showLogoutButton    : not @.config.options.tm_security.Show_ContentToAnonymousUsers
+                showLogoutButton    : not @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
               }
+    config.showLogoutButton = false  if @.req?.session?.ssoUser isnt undefined
     @.res.json config
 
   routes: (expressService) ->

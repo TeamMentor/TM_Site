@@ -188,7 +188,7 @@ class Login_Controller
     username = @.req.query.username || @.req.query.userName
     token    = @.req.query.requestToken
     format   = @.req.query.format
-
+    @.req.session.ssoUser = true
     if username and token
       if (@.req.session.username? && @.req.session.username == username)
         @.res.set('P3P',"CP=\'IDC DSP COR DEVo OUR\'")
