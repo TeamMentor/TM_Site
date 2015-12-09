@@ -222,7 +222,7 @@ class Login_Controller
           @.req.session.username = username
           @.req.session.token    = sessionId if sessionId?
           @.webServiceResponse "Current_User",sessionId,(userProfile)=>
-            @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+            @.req.session.sessionExpirationDate = new Date(parseInt(userProfile?.ExpirationDate?.substr(6)))
             return @.res.redirect '/'
         else
           if (response.headers?['content-type']=='image/gif')
@@ -230,7 +230,7 @@ class Login_Controller
             @.req.session.username = username
             @.req.session.token    = sessionId if sessionId?
             @.webServiceResponse "Current_User",sessionId,(userProfile)=>
-              @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+              @.req.session.sessionExpirationDate = new Date(parseInt(userProfile?.ExpirationDate?.substr(6)))
               @.res.writeHead(200, {'Content-Type': 'image/gif' });
               @.res.write(@.get_GifImage())
               return @.res.end()
