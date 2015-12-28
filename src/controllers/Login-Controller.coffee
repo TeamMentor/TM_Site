@@ -188,7 +188,7 @@ class Login_Controller
     username = @.req.query.username || @.req.query.userName
     token    = @.req.query.requestToken
     format   = @.req.query.format
-
+    @.req.session.ssoUser = true
     if username and token
       if (@.req.session.username? && @.req.session.username == username)
         @.res.set('P3P',"CP=\'IDC DSP COR DEVo OUR\'")
@@ -222,7 +222,7 @@ class Login_Controller
           @.req.session.username = username
           @.req.session.token    = sessionId if sessionId?
           @.webServiceResponse "Current_User",sessionId,(userProfile)=>
-            @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+            @.req.session.sessionExpirationDate = new Date(parseInt(userProfile?.ExpirationDate?.substr(6)))
             return @.res.redirect '/'
         else
           if (response.headers?['content-type']=='image/gif')
@@ -230,7 +230,7 @@ class Login_Controller
             @.req.session.username = username
             @.req.session.token    = sessionId if sessionId?
             @.webServiceResponse "Current_User",sessionId,(userProfile)=>
-              @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+              @.req.session.sessionExpirationDate = new Date(parseInt(userProfile?.ExpirationDate?.substr(6)))
               @.res.writeHead(200, {'Content-Type': 'image/gif' });
               @.res.write(@.get_GifImage())
               return @.res.end()
