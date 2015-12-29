@@ -18,13 +18,15 @@ add_Routes = (express_Service)->
     PoC_Controller          = require '../poc/PoC-Controller'
     app                     = express_Service.app
     jade_Service            = new Jade_Service()
-
+    uuid                    = require 'node-uuid'
     # Log/track request
     app.use (req,res,next)->
       logger?.info {url: req.url , ip: req.connection.remoteAddress,  agent: req.headers.agent }
       using new Ga_Service(req,res),->
         if (req.url.starts_With('jade') || req.url.match '/angular/guest/')
             @.track()
+        if not req.session.username? && global.config?.tm_security?.Show_ContentToAnonymousUsers
+            req.session.username = uuid.v4()  #Setting a surrogate username, since anonymous access is enabled.
         next()
 
     #run custom code hook (if available)
@@ -66,9 +68,10 @@ add_Routes = (express_Service)->
     options = { express_Service: express_Service }
     new PoC_Controller(options)        .register_Routes()
 
+    hideLogout        = global.config?.tm_security?.Show_ContentToAnonymousUsers || @.req?.session?.ssoUser isnt undefined
     #errors 404 and 500
-    app.get '/jade/error', (req,res)-> res.status(500).send  jade_Service.render_Jade_File 'guest/500.jade',{ loggedIn:req.session?.username isnt undefined }
-    app.get '/*'         , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined }
+    app.get '/jade/error', (req,res)-> res.status(500).send  jade_Service.render_Jade_File 'guest/500.jade',{ loggedIn:req.session?.username isnt undefined , hideLogout: hideLogout}
+    app.get '/*'         , (req,res)-> res.status(404).send  jade_Service.render_Jade_File 'guest/404.jade',{ loggedIn:req.session?.username isnt undefined , hideLogout: hideLogout}
 
     app.use (err, req, res, next)->
       #console.error(err.stack)
