@@ -11,8 +11,8 @@ var Side_Data = require('../TM_Shared/src/Site-Data');
 var site_Data = new Side_Data()
 
 //log('[SiteData] loading data from ' + site_Data.siteData_Folder())
-
-global.config = site_Data.load_Options() //.load_Custom_Code()
+global.config = site_Data.load_Options()
+global.custom = site_Data.custom_Code()
 
 log('------------global.config---------------')
 log(global.config);
