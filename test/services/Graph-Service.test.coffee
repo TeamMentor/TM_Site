@@ -8,14 +8,16 @@ Server         = http.Server
 
 describe '| services | Graph-Service.test |', ->
 
-  test_Port    = 45566 + Math.floor((Math.random() * 1000) + 1)
+  test_Port    = null
   test_Ip      = '127.0.0.1'
   test_Data    = 'mocked server'
-  test_Server  = "http://#{test_Ip}:#{test_Port}"
+  test_Server  = null
   server       = null
   graphService = null
 
   before (done)->
+    test_Port   = 45566 + Math.floor((Math.random() * 1000) + 1)
+    test_Server = "http://#{test_Ip}:#{test_Port}"
     test_Server.assert_Contains(test_Ip).assert_Contains(test_Port)
     server = http.createServer(null)
     server.listen_OnPort_Saying test_Port, test_Data, ()=>

@@ -17,6 +17,8 @@ describe "| services | Docs-TM-Service.test", ()->
       @.getLibraryData     .assert_Is_Function()
 
       @.disableCache = false
+      @.root_Path.assert_Folder_Exists()
+      @.libraryDirectory.assert_Folder_Exists()
 
   it 'getArticlesMetadata', ()->
 
@@ -70,7 +72,7 @@ describe "| services | Docs-TM-Service.test", ()->
 
   it 'json_Files', ->
     docs_TM_Service.json_Files (json_Files)->
-      json_Files.assert_Size_Is_Above 40              # there should be at least 40 help files
+      json_Files.assert_Size_Is_Above 10              # there should be at least 40 help files
 
   it 'article_Data', ->
     using docs_TM_Service, ->

@@ -8,6 +8,8 @@ supertest          = require 'supertest'
 
 describe '| controllers | Article-Controller.test', ->
 
+  global.config = null
+
   it 'constructor', (done)->
     using new Article_Controller(), ->
       @.jade_Article.assert_Is    'user/article.jade'
@@ -17,8 +19,12 @@ describe '| controllers | Article-Controller.test', ->
   it 'article (bad id)', (done)->
     article_Id = 123
     req =
-      params: ref: article_Id
+      params : ref: article_Id
       session: recent_Articles: []
+      get    : (name)->
+        name.assert_Is 'host'
+        return 'localhost'
+
     res =
       send : (data)->
         $ = cheerio.load(data)
@@ -45,6 +51,9 @@ describe '| controllers | Article-Controller.test', ->
     req =
       params: ref: article_Id
       session: recent_Articles: []
+      get: (name)->
+        name.assert_Is 'host'
+        'localhost'
 
     res =
       send : (data)->
@@ -84,7 +93,7 @@ describe '| controllers | Article-Controller.test', ->
         $ = cheerio.load(data)
         $('#articles').html()
         $('#articles').html().assert_Contains 'list-view-article'
-        $('#articles #list-view-article a').attr().assert_Is { href: '/article/12345/this-is-an-title', id: 'article-12345' }
+        $('#articles #list-view-article a').attr().assert_Is { href: '/jade/article/12345/this-is-an-title', id: 'article-12345' }
         $('#articles #list-view-article a h4').html().assert_Is 'this is an title'
         $('#articles #list-view-article p').html().assert_Is 'html summary is here...'
         done()
@@ -131,7 +140,10 @@ describe '| controllers | Article-Controller.test', ->
     req =
       params: id : article_Id
       session: recent_Articles: []
-
+      get: (name)->
+        name.assert_Is 'host'
+        'localhost'
+      
     res = {}
 
     graphService =
@@ -165,27 +177,47 @@ describe '| controllers | Article-Controller.test', ->
 
         done()
 
-      @article()
+      @.article()
+
+  it 'my-articles', ()->
+    req =
+      query  : {}
+      session: recent_Articles: [ { title:'title-1', id:'id-1'}, { title:'title-1', id:'id-1'},
+                                  { title:'title-2', id:'id-2'}
+                                  { title:'title-1', id:'id-3'} ]
+    res =
+      json: (data)->
+        data.assert_Is [{ href: '/article/id-1', title: 'title-1', weight: 2 },
+                        { href: '/article/id-3', title: 'title-1', weight: 1 }
+                        { href: '/article/id-2', title: 'title-2', weight: 1 }]
 
 
-  describe 'routes |',->
+    new Article_Controller(req,res).my_Articles()
 
-    it 'register_Routes',->
-      route_Inner_Code = 'new Article_Controller(req, res, next, graph_Options)[method_Name]();'
-      routes = {}
-      app    =
-        get: (url, checkAuth,target)->
-          checkAuth.assert_Is_Function()
-          routes[url] = target
+    req.params  = size : 'aaaa'
 
-      Article_Controller.register_Routes app
-      routes.keys().assert_Is [ '/a/:ref','/article/:ref/:guid', '/article/:ref/:title','/article/:ref', '/articles', '/teamMentor/open/:guid','/json/article/:ref']
-      routes['/a/:ref'               ].source_Code().assert_Contains route_Inner_Code
-      routes['/article/:ref/:guid'   ].source_Code().assert_Contains route_Inner_Code
-      routes['/article/:ref/:title'  ].source_Code().assert_Contains route_Inner_Code
-      routes['/article/:ref'         ].source_Code().assert_Contains route_Inner_Code
-      routes['/teamMentor/open/:guid'].source_Code().assert_Contains route_Inner_Code
-      routes['/articles'             ].source_Code().assert_Contains route_Inner_Code
-      routes['/json/article/:ref'    ].source_Code().assert_Contains route_Inner_Code
+    new Article_Controller(req,res).my_Articles()
 
+    req.params  = size : '1'
+    res =
+      json: (data)->
+        data.assert_Is [{ href: '/article/id-1', title: 'title-1', weight: 2 }]
 
+    new Article_Controller(req,res).my_Articles()
+
+  it 'routes', ->
+    using new Article_Controller(), ->
+      @.routes().stack.size().assert_Is 10
+      paths = for item in @.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/a/:ref',
+                        '/article/:ref/:guid',
+                        '/article/:ref/:title',
+                        '/article/:ref',
+                        '/articles',
+                        '/teamMentor/open/:guid',
+                        '/json/article/:ref',
+                        '/json/recentarticles',
+                        '/json/toparticles',
+                        '/json/my-articles/:size']

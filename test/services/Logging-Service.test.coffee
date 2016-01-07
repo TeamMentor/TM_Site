@@ -23,13 +23,11 @@ describe '| services | Logging-Service.test |', ->
 
   after ->
     using logging_Service, ->
-      console.log @.log_Folder.files()
       @.log_Folder.assert_Folder_Exists()
                   .folder_Delete_Recursive().assert_True()
 
   it 'constructor()',->
     using new Logging_Service(), ->
-      console.log @.options
       @.options         .assert_Is {}
       @.log_Folder      .assert_Is './.logs'
       @.log_File_Name   .assert_Is 'tm-design'

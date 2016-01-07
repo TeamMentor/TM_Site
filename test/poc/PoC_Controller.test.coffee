@@ -3,6 +3,7 @@ supertest        = require 'supertest'
 express          = require 'express'
 cheerio          = require 'cheerio'
 path             = require 'path'
+async            = require 'async'
 
 describe '| poc | Controller-PoC.test |' ,->
 
@@ -15,13 +16,8 @@ describe '| poc | Controller-PoC.test |' ,->
       @.folder_PoC_Pages().assert_Folder_Exists()
                           .assert_Contains '__poc'
 
-
-
   it 'check_Auth (anonymous)', (done)->
     res =
-      status: (value)->
-        value.assert_Is 403
-        @
       redirect: (value)->
         value.assert_Is '/guest/404'
         done()
@@ -65,7 +61,6 @@ describe '| poc | Controller-PoC.test |' ,->
     @.timeout 5000
     express_Service =
       session_Service:
-          users_Searches: (callback) -> callback []
           user_Data: (session, callback) -> callback []
     using new PoC_Controller({ express_Service: express_Service}), ->
 
@@ -77,6 +72,7 @@ describe '| poc | Controller-PoC.test |' ,->
         send: (html)->
           html.assert_Is_String()
           done()
+
       @.show_Page(req,res)
 
   it 'show_Page (bad link) , render_Jade', (done)->
@@ -84,9 +80,6 @@ describe '| poc | Controller-PoC.test |' ,->
 
       req = params : page : 'aaaaabbbb'
       res =
-        status: (value)->
-          log value
-          @
         redirect: (target)->
           target.assert_Is '/guest/404'
           done()
@@ -104,9 +97,36 @@ describe '| poc | Controller-PoC.test |' ,->
       routes.assert_Is
         '/poc*'                     : @.check_Auth
         '/poc'                      : @.show_Index
-        '/poc/filters:page'         : @.show_Filters
-        '/poc/filters:page/:filters': @.show_Filters
         '/poc/:page'                : @.show_Page
+
+
+  it 'view_Model_For_Page', (done)->
+    @.timeout 5000
+    express_Service =
+      session_Service:
+        top_Articles: (callback        ) -> callback []
+        top_Searches: (callback        ) -> callback []
+        user_Data   : (session,callback) -> callback []
+
+    using new PoC_Controller({ express_Service: express_Service}), ->
+
+      test_Page = (page_Name, next)=>
+
+        req = params : page : page_Name
+
+        res =
+          status: (value)->
+            value.assert_Is 200
+            @
+          send: (html)->
+            html.assert_Is_String()
+            next()
+
+        @.show_Page(req,res)
+
+      page_Names = (item.name for item  in @.map_Files_As_Pages())
+      page_Names.shift()
+      async.eachSeries page_Names, test_Page, done
 
   describe 'using Express |', ->
     it 'check Auth redirect', (done)->

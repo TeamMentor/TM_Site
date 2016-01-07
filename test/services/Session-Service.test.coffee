@@ -8,18 +8,17 @@ describe '| services | Session.test', ()->
   testDb         = './_session_TestDb'
   session_Service = null
 
-  before  ()->
-    session_Service = new Session_Service { filename: testDb}
+  beforeEach  ()->
+    session_Service = new Session_Service { filename: testDb }
     session_Service.setup()
 
-  after ()->
-    testDb.assert_File_Exists()
-    testDb.file_Delete().assert_Is_True()
+  afterEach ()->
+    if testDb.file_Exists()
+      testDb.file_Delete().assert_Is_True()
 
   it 'constructor (no params)',->
     using new Session_Service(),->
       @.filename.assert_Is './.tmCache/_sessionData'
-
 
   it 'get,set',  (done)->
     key          = 'session_key'.add_5_Random_Letters()
@@ -32,7 +31,6 @@ describe '| services | Session.test', ()->
           assert_Is_Null(err);
           data.assert_Is(session_data)
           done();
-
 
   it 'destroy', (done)->
     key          = 'session_key'.add_5_Random_Letters()
@@ -68,7 +66,7 @@ describe '| services | Session.test', ()->
                                       { id :'abc3', title: 'search c' , results:0}]}, =>
         @.users_Searches (result)=>
           result.assert_Size_Is_Bigger_Than 5
-          if result.size() < 10
+          if result.size() is 6
             result.fourth().assert_Is { id :'abc1', title: 'search a' , results:11}
           done()
 
@@ -90,33 +88,33 @@ describe '| services | Session.test', ()->
         data.assert_Is @.DEFAULT_ARTICLES
         done()
 
-  describe 'testing behaviour of express-session', ()->
+describe 'testing behaviour of express-session', ()->
 
-    app           = null
-    testValue     = 'this is a session value';
-    sessionAsJson = '{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}';
+  app           = null
+  testValue     = 'this is a session value';
+  sessionAsJson = '{"cookie":{"originalMaxAge":null,"expires":null,"httpOnly":true,"path":"/"}}';
 
 
-    before ()->                            # recrete the config used on server.js and add a couple test routes
-      app     = express()
-      options =
-        secret           : '1234567890'
-        saveUninitialized: true
-        resave           : true
+  before ()->                            # recrete the config used on server.js and add a couple test routes
+    app     = express()
+    options =
+      secret           : '1234567890'
+      saveUninitialized: true
+      resave           : true
 
-      app.use session(options)
+    app.use session(options)
 
-      middleware = (req,res,next)->
-        req.session.value = testValue;
-        next()
+    middleware = (req,res,next)->
+      req.session.value = testValue;
+      next()
 
-      app.get '/session_values'     ,              (req,res)->  res.send req.session
-      app.get '/session_get_userId' , middleware,  (req,res)->  res.send req.session.value
+    app.get '/session_values'     ,              (req,res)->  res.send req.session
+    app.get '/session_get_userId' , middleware,  (req,res)->  res.send req.session.value
 
-    it 'Check default session values', (done)->
-      supertest(app).get '/session_values'
-                    .expect 200,sessionAsJson, done
+  it 'Check default session values', (done)->
+    supertest(app).get '/session_values'
+                  .expect 200,sessionAsJson, done
 
-    it 'Check specific session value', (done)->
-      supertest(app).get '/session_get_userId'
-                    .expect 200,testValue, done
+  it 'Check specific session value', (done)->
+    supertest(app).get '/session_get_userId'
+                  .expect 200,testValue, done

@@ -37,7 +37,6 @@ class Logging_Service
       log '[Logging-Service] console hooked'
 
   restore_Console: =>
-    console.log @.original_Console
     if @.original_Console
       console.log = @.original_Console
       log 'Console restored'

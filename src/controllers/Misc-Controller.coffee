@@ -1,16 +1,30 @@
-Jade_Service = null
-
+Jade_Service  = null
+Router        = null
 content_cache = {};
 
 class Misc_Controller
 
   dependencies: ->
     Jade_Service = require('../services/Jade-Service')
+    {Router}     = require 'express'
 
   constructor: (req, res)->
     @.dependencies()
-    @.req = req || {}
-    @.res = res || {}
+    @.req       = req || {}
+    @.res       = res || {}
+    @.config    = require '../config'
+
+  json_Mode: ()=>
+    @.render_Page = (page, data)=>
+      data.page = page
+      @.res.json data
+    @.res.redirect = (page)=>
+      data =
+        page     : page
+        viewModel: {}
+        result   : 'OK'
+      @.res.json data
+    @
 
   show_Misc_Page: ()=>
     jade_Page  = 'misc/' + @.req.params.page + '.jade'
@@ -22,8 +36,29 @@ class Misc_Controller
   user_Logged_In: ()=>
     @req.session?.username isnt undefined
 
-Misc_Controller.register_Routes =  (app)=>
+  tmConfig: ()=>
+    config =  {
+                supportEmail        : @.config.options.tm_design.supportEmail,
+                githubUrl           : @.config.options.tm_design.githubUrl,
+                githubContentUrl    : @.config.options.tm_design.githubContentUrl,
+                allowedEmailDomains : @.config.options.tm_design.allowedEmailDomains
+                showLogoutButton    : not @.config?.options?.tm_security?.Show_ContentToAnonymousUsers
+              }
+    config.showLogoutButton = false  if @.req?.session?.ssoUser isnt undefined
+    @.res.json config
 
-  app.get '/misc/:page'     , (req, res)-> new Misc_Controller(req, res).show_Misc_Page()
+  routes: (expressService) ->
+    checkAuth       = (req,res,next) -> expressService.checkAuth(req, res, next)
+
+    misController = (method_Name) ->
+      return (req, res,next) ->
+        new Misc_Controller(req, res, next,expressService)[method_Name]()
+
+    using new Router(),->
+      @.get '/misc/:page'                    , misController('show_Misc_Page')
+      @.get '/json/tm/config'                , checkAuth, misController('tmConfig')
+
+
+
 
 module.exports = Misc_Controller

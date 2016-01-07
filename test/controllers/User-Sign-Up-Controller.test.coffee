@@ -2,15 +2,16 @@ express                 = require 'express'
 bodyParser              = require('body-parser')
 Login_Controller        = require('../../src/controllers/Login-Controller')
 User_Sign_Up_Controller = require('../../src/controllers/User-Sign-Up-Controller')
+config                  = require '../../src/config'
 
 describe '| controllers | User-Sign-Up-Controller', ->
 
   signUp_fail                     = "guest/sign-up-Fail.jade"
   signUpPage_Unavailable          = 'guest/sign-up-cant-connect.jade'
-  signUp_Ok                       = '/guest/sign-up-OK.html'
-  mainPage_user                   = '/user/main.html'
+  #signUp_Ok                       = '/guest/sign-up-OK.html'
+  mainPage_user                   = '/jade/show'
   text_Short_Pwd                  = 'Password must be 8 to 256 character long'
-  text_Bad_Pwd                    = 'Password must contain a non-letter and a non-number character'
+  #text_Bad_Pwd                    = 'Password must contain a non-letter and a non-number character'
   text_password_NoMatch           =  'Passwords don\'t match'
   text_username_Required          = 'Username is a required field.'
   text_password_Required          = 'Password is a required field.'
@@ -19,7 +20,9 @@ describe '| controllers | User-Sign-Up-Controller', ->
   text_firstName_Required         = 'First Name is a required field.'
   text_lastName_Required          = 'Last Name is a required field.'
   text_country_Required           = 'Country is a required field.'
-  text_An_Error                   = 'An error occurred'
+  #text_An_Error                   = 'An error occurred'
+
+  random_Port     = 10000.random().add(10000)
 
   server                          = null
   url_WebServices                 = null
@@ -57,14 +60,13 @@ describe '| controllers | User-Sign-Up-Controller', ->
         if password.match(passwordStrengthRegularExpression)
           users[username] = password
           res.send { d: { Signup_Status: 0 , Validation_Results: [], Simple_Error_Message: 'sign-up ok' } }
-          return
+     #     return
 
-        res.send { d: { Signup_Status: 1 , Validation_Results: [{Message: text_Bad_Pwd }], Simple_Error_Message: '' } }
-      else
-        res.send { d: { Signup_Status: 1, Validation_Results: [] } }
+     #   res.send { d: { Signup_Status: 1 , Validation_Results: [{Message: text_Bad_Pwd }], Simple_Error_Message: '' } }
+     # else
+     #   res.send { d: { Signup_Status: 1, Validation_Results: [] } }
 
   before (done)->
-    random_Port     = 10000.random().add(10000)
     url_WebServices = "http://localhost:#{random_Port}/Aspx_Pages/TM_WebServices.asmx"
     app             = new express().use(bodyParser.json())
     add_TM_WebServices_Routes(app)
@@ -73,6 +75,12 @@ describe '| controllers | User-Sign-Up-Controller', ->
     url_WebServices.GET (html)->
       html.assert_Is 'Cannot GET /Aspx_Pages/TM_WebServices.asmx\n'
       done()
+
+  beforeEach ()->
+    config.options.tm_design.tm_35_Server = "http://localhost:#{random_Port}"
+
+  afterEach ->
+    config.restore()
 
   after ->
     server.close()
@@ -228,10 +236,10 @@ describe '| controllers | User-Sign-Up-Controller', ->
     email     = "#{user}@teammentor.net"
     Firstname = "Foo"
     Lastname  = "Bar"
-    Company   = "Temp"
-    Title     = "Engineering"
+    #Company   = "Temp"
+    #Title     = "Engineering"
     Country   =  "US"
-    State     = "California"
+    #State     = "California"
 
     invoke_UserSignUp user,pwd,pwd,email,Firstname,Lastname,Country,mainPage_user,'', ->
       invoke_LoginUser user,pwd,mainPage_user, ->

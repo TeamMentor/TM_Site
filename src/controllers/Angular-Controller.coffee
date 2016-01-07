@@ -2,23 +2,33 @@ Router        = null
 express       = null
 Jade_Service  = null
 
-if process.cwd().contains('.dist')
-  root_Folder = process.cwd().path_Combine '../../../'
+if process.cwd().contains('wallaby')
+  root_Folder = process.cwd()
 else
   root_Folder = process.cwd().path_Combine '../../'
 
 autoComplete_Data = null
-
+config            = null
 class Angular_Controller
 
   dependencies: ->
     express       = require 'express'
     {Router}      = require 'express'
     Jade_Service  = require '../services/Jade-Service'
+    config        = require '../config'
 
   constructor: ()->
     @.dependencies()
+    @.port_TM_Graph  = config?.options?.tm_graph?.port
     @.path_To_Static = root_Folder.path_Combine 'code/TM_Angular/build'
+    @.url_TM_Graph   = "http://localhost:#{@.port_TM_Graph}"
+    @.url_Articles   = "#{@.url_TM_Graph}/search/article_titles"
+    @.url_Queries    = "#{@.url_TM_Graph}/search/query_titles"
+    @.url_Words      = "#{@.url_TM_Graph}/search/all_words"
+    @.guest_Whitelist  = ["home","about","features","docs","sign_up","login","error","logout","terms-and-conditions"]
+
+    @.redirectPage   = '/angular/guest/home'
+    @.loginPage      = '/angular/guest/login'
 
   send_Search_Auto_Complete: (term, res)->
     matches = {}
@@ -33,20 +43,21 @@ class Angular_Controller
     if autoComplete_Data
       @.send_Search_Auto_Complete term, res
     else
-      path_Articles = 'http://localhost:12346/search/article_titles'
-      path_Queries  = 'http://localhost:12346/search/query_titles'
-      path_Queries.json_GET (data_Queries)=>
-        path_Articles.json_GET (data_Articles)=>
-          autoComplete_Data = data_Queries.sort().concat data_Articles
-          #for item in autoComplete_Data
-          #  console.log item
-          #console.log "THERE ARE #{data_Queries.size()} #{data_Articles.size()} #{autoComplete_Data.size()}"
-          #console.log autoComplete_Data
-          @.send_Search_Auto_Complete term, res
+      @.url_Queries.json_GET (data_Queries)=>
+        @.url_Articles.json_GET (data_Articles)=>
+          @.url_Words.json_GET (data_Words)=>
+            if data_Queries.sort
+              autoComplete_Data = data_Queries.concat(data_Articles)
+            else
+              autoComplete_Data =[]
+            if data_Words.sort
+              for word in data_Words
+                autoComplete_Data.push { title: word, id: "word-#{word}" }
+
+            autoComplete_Data.sort()
+            @.send_Search_Auto_Complete term, res
 
   get_Static_Html: (req,res)=>
-    #path = "#{@.path_To_Static}/html/index.html";
-    #res.sendFile path
     file = req.params.file
     if file isnt 'guest'
       req.params.file = 'page-user'
@@ -63,9 +74,20 @@ class Angular_Controller
     @.get_Rendered_Jade req,res
 
   get_Static_Html_Guest: (req,res)=>
-    req.params.file = 'page-guest'
-    req.params.area = '_layouts'
-    @.get_Rendered_Jade req,res
+    #picking the route which should match with the whitelist
+    view       = req.url?.split('/')?.last()
+
+    if (view? && view in @.guest_Whitelist) || req.url.contains('guest/pwd_reset') || req.url.contains('guest/docs')
+      req.params.file = 'page-guest'
+      req.params.area = '_layouts'
+
+      @.get_Rendered_Jade req,res
+    else
+      if req?.session?.username
+        return res.redirect '/angular/user/error'
+      else
+        return res.redirect '/angular/guest/error'
+
 
   get_Static_Html_Component:  (req,res)=>
     req.params.file = 'page-component'
@@ -80,6 +102,8 @@ class Angular_Controller
     else
       root_Folder.path_Combine "/code/TM_Flare/#{file}.jade"
 
+  get_Index_Page : (req,res)=>               #Route /user/home should not exist,so we redirect to index if any user hits this pattern.
+    res.redirect '/angular/user/index'
 
   get_Compiled_Jade: (req,res)=>
     jade    = require('jade');
@@ -98,25 +122,38 @@ class Angular_Controller
     area    = req.params.area
     section = req.params.section
     path = @.resolve_Jade_file(file, area, section)
-    console.log path
     using new Jade_Service(), ->
       res.send @.render_Jade_File path, {}
 
+
+  check_Auth: (req,res,next)=>
+    return next() if req?.session?.username
+
+    if (req?.url?.starts_With('/user/'))
+      req?.session?.redirectUrl = "/angular" +req.url
+      return res?.redirect('/browser-detect-login')
+    else
+      return res?.redirect(@.redirectPage)
+
   routes: ()=>
     router = new Router()
-    router.use express['static'](@.path_To_Static);
-    router.get '/flare/:file'          , @.get_Static_Html
-    router.get '/user/:file*'          , @.get_Static_Html_User
-    router.get '/guest/:file'          , @.get_Static_Html_Guest
-    router.get '/component/:file'      , @.get_Static_Html_Component
-    router.get '/api/auto-complete'    , @.get_Search_Auto_Complete
+    router.get '/flare/:file'                         , @.get_Static_Html
+    router.get '/user/home'            ,@.check_Auth  , @.get_Index_Page
+    router.get '/user/:file*'          ,@.check_Auth  , @.get_Static_Html_User
+    router.get '/guest/:file'                         , @.get_Static_Html_Guest
+    router.get '/guest/pwd_reset/:username/:password' , @.get_Static_Html_Guest
+    router.get '/guest/docs/:guid'                    , @.get_Static_Html_Guest
+    router.get '/component/:file'                     , @.get_Static_Html_Component
+    router.get '/api/auto-complete'                   , @.get_Search_Auto_Complete
 
-    router.get '/jade/:file'                    , @.get_Compiled_Jade
-    router.get '/jade/:area/:file'              , @.get_Compiled_Jade
-    router.get '/jade/:section/:area/:file'     , @.get_Compiled_Jade
-    router.get '/jade-html/:file'               , @.get_Rendered_Jade
-    router.get '/jade-html/:area/:file'         , @.get_Rendered_Jade
-    router.get '/jade-html/:section/:area/:file', @.get_Rendered_Jade
+    router.get '/jade/:file'                          , @.get_Compiled_Jade
+    router.get '/jade/:area/:file'                    , @.get_Compiled_Jade
+    router.get '/jade/:section/:area/:file'           , @.get_Compiled_Jade
+    router.get '/jade-html/:file'                     , @.get_Rendered_Jade
+    router.get '/jade-html/:area/:file'               , @.get_Rendered_Jade
+    router.get '/jade-html/:section/:area/:file'      , @.get_Rendered_Jade
+
+    router.use express['static'](@.path_To_Static);
 
     return router
 

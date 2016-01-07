@@ -2,10 +2,11 @@ Pwd_Reset_Controller = require('../../src/controllers/Pwd-Reset-Controller')
 express    = require 'express'
 supertest  = require 'supertest'
 bodyParser = require('body-parser')
+config     = require '../../src/config'
 
 describe "| controllers | Pwd-Reset-Controller.test |", ->
 
-  url_password_sent          = '/guest/pwd-sent.html'
+  url_password_sent       = '/guest/pwd-sent.html'
   #blank_credentials_message = 'Invalid Username or Password'
   app                     = null
   server                  = null
@@ -13,11 +14,13 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
   #config                  = null
   pwd_Reset_Controller    = null
   url_Mocked_Server       = null
+  random_Port             = 10000.random().add(10000)
+
   on_SendPasswordReminder = ->
   on_PasswordReset        = ->
 
   before (done)->
-    random_Port       = 10000.random().add(10000)
+
     url_Mocked_Server = "http://localhost:#{random_Port}/"
     app               = new express().use(bodyParser.json())
     app.post          '/tmWebServices/SendPasswordReminder', (req,res)-> on_SendPasswordReminder(req,res)
@@ -31,6 +34,12 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
       html.assert_Is 'Cannot GET /\n'
       done()
 
+  beforeEach ()->
+    config.options.tm_design.tm_35_Server = "http://localhost:#{random_Port}"
+
+  afterEach ->
+    config.restore()
+
   after ->
     server.close()
 
@@ -38,15 +47,10 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
     ws_Called = false
     using pwd_Reset_Controller,->
       @.req = {}
-      @.res =
-        redirect: (target)->
-          target.assert_Is '/error'
-          ws_Called.assert_True()
-          done()
 
       @.render_Page = (target,model)->
           model.assert_Is_Not_Undefined
-          model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
+          model.viewModel.errorMessage.assert_Is('TEAM Mentor is unavailable, please contact us at ')
           target.assert_Is('guest/login-cant-connect.jade')
           done()
 
@@ -64,7 +68,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
       @.req = { body : email: email}
       @.res =
         redirect: (target)->
-          target.assert_Is '/guest/pwd-sent.html'
+          target.assert_Is '/jade/guest/pwd-sent.html'
           ws_Called.assert_True()
           done()
 
@@ -81,7 +85,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
     res = null
     render_Page = (target,model)->
         model.assert_Is_Not_Undefined
-        model.errorMessage?.assert_Is('TEAM Mentor is unavailable, please contact us at ')
+        model.viewModel.errorMessage.assert_Is('TEAM Mentor is unavailable, please contact us at ')
         target.assert_Is('guest/login-cant-connect.jade')
         done()
 
@@ -182,7 +186,7 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
   describe 'Check password_Reset_Token method validation',->
 
     password_reset_fail       = 'guest/pwd-reset-fail.jade'
-    password_reset_ok         = 'guest/login-pwd-reset.html'
+    #password_reset_ok         = 'guest/login-pwd-reset.html'
 
     invoke_PasswordReset = (username, token, password, confirmPassword,expected_Target, expected_Message,callback)->
       using pwd_Reset_Controller,->
@@ -196,12 +200,6 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
           callback()
 
         @password_Reset_Token()
-
-
-      #invoke_Method "password_Reset_Token",
-      #  { password: password,'confirm-password': confirmPassword } ,
-      #  expected_Target,
-      #  callback
 
     text_Invalid_Token   = 'Token is invalid'
     text_Password_Match  = 'Passwords don\'t match'
@@ -242,14 +240,12 @@ describe "| controllers | Pwd-Reset-Controller.test |", ->
 
   describe 'routes',->
     it 'register_Routes',->
-      routes = {}
-      app    =
-        post: (url, target)-> routes['post:'+ url] = target
-        get:  (url, target)-> routes['get:' + url] = target
 
-      Pwd_Reset_Controller.register_Routes app
-      routes.keys().assert_Is [ 'post:/user/pwd_reset', 'post:/passwordReset/:username/:token','get:/passwordReset/:username/:token'
-                                'post:/json/user/pwd_reset']
-      routes['post:/user/pwd_reset'                ].source_Code().assert_Contains 'return new Pwd_Reset_Controller(req, res).password_Reset();'
-      routes['post:/passwordReset/:username/:token'].source_Code().assert_Contains 'return new Pwd_Reset_Controller(req, res).password_Reset_Token();'
-      routes['get:/passwordReset/:username/:token' ].source_Code().assert_Contains 'return new Pwd_Reset_Controller(req, res).password_Reset_Page();'
+      paths = for item in pwd_Reset_Controller.routes().stack
+        if item.route
+          item.route.path
+      paths.assert_Is [ '/user/pwd_reset',
+                        '/passwordReset/:username/:token',
+                        '/passwordReset/:username/:token',
+                        '/json/passwordReset/:username/:token',
+                        '/json/user/pwd_reset' ]

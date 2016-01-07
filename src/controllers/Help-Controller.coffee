@@ -1,22 +1,27 @@
 fs                 = null
 request            = null
+Router             = null
 Jade_Service       = null
 Docs_TM_Service    = null
+cheerio            = null
 content_cache = {};
 
 class Help_Controller
 
   dependencies: ->
-    fs                 = require('fs')
-    request            = require('request')
-    Jade_Service       = require('../services/Jade-Service')
-    Docs_TM_Service    = require('../services/Docs-TM-Service');
+    fs                 = require 'fs'
+    cheerio            = require 'cheerio'
+    request            = require 'request'
+    {Router}           = require 'express'
+    Jade_Service       = require '../services/Jade-Service'
+    Docs_TM_Service    = require '../services/Docs-TM-Service'
 
   constructor: (req, res)->
     @.dependencies()
     @.pageParams       = {}
     @.req              = req
     @.res              = res
+    @.config           = require '../config'
     @.docs_TM_Service  = new Docs_TM_Service()
 
     @.content          = null
@@ -30,6 +35,7 @@ class Help_Controller
     @.jade_No_Image    = 'guest/404.jade'
     @.index_Page_Id    = '1eda3d77-43e0-474b-be99-9ba118408dd3'
     @.jade_Error_Page  = 'guest/404.jade'
+
     @.imagePath        = @.docs_TM_Service.libraryDirectory?.path_Combine '_Images/'
 
   content_Cache_Set: (title, content)=>
@@ -59,6 +65,26 @@ class Help_Controller
 
   json_Docs_Page: =>
     article_Data = @.docs_TM_Service.article_Data @.page_Id()
+    $            = cheerio.load(article_Data?.html)
+    links        = $('a')
+
+    $(links).each (i, link)->
+      href          = $(link).attr('href')
+      originalHtml  = $.html($(link))
+      if (href.contains("/"))
+        href = href.split('/').last()
+      if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(href))
+        #articleId = href.split('-').last()
+        articleId = href
+        $(link).attr('href', 'guides/' + articleId )
+        $(link).attr('ng-click',"load_Doc($event,'#{articleId}')")
+        article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+      else
+        if ($(link).attr('href').starts_With('http')) #Adding blank attribute to absolute URLs
+          $(link).attr("target","_blank")
+          article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+
+
     @res.json { html: article_Data?.html}
 
   map_Docs_Library: (next)=>
@@ -74,8 +100,12 @@ class Help_Controller
     @.req?.params?.page || null
 
   render_Jade_and_Send: (jade_Page, view_Model)=>
-    view_Model.loggedIn = @.user_Logged_In()
-    view_Model.library  = @.docs_Library
+    view_Model.loggedIn          = @.user_Logged_In()
+    view_Model.hideLogout        = @.config?.options?.tm_security?.Show_ContentToAnonymousUsers || @.req?.session?.ssoUser isnt undefined
+    view_Model.library           = @.docs_Library
+    view_Model.internalUser      = @.req.session?.internalUser
+    view_Model.githubUrl         = @.config?.options?.tm_design.githubUrl
+    view_Model.supportEmail      = @.config?.options?.tm_design.supportEmail
     html = new Jade_Service().render_Jade_File(jade_Page, view_Model)
     @.res.status(200)
          .send(html)
@@ -115,15 +145,15 @@ class Help_Controller
       @.fetch_Article_and_Show @.docs_Library?.Articles[@.page_Id()]?.Title || null
 
   user_Logged_In: ()=>
-    @req.session?.username isnt undefined
+    @.req.session?.username isnt undefined
 
-Help_Controller.register_Routes =  (app)=>
-
-  app.get '/help/index.html'      , (req, res)-> new Help_Controller(req, res).show_Index_Page()
-  app.get '/help/article/:page*'  , (req, res)-> new Help_Controller(req, res).show_Help_Page()
-  app.get '/help/:page*'          , (req, res)-> new Help_Controller(req, res).show_Help_Page()
-  app.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).show_Image()
-  app.get '/json/docs/library'    , (req, res)-> new Help_Controller(req, res).json_Docs_Library()
-  app.get '/json/docs/:page'      , (req, res)-> new Help_Controller(req, res).json_Docs_Page()
+  routes: ()=>
+    using new Router(), ->
+      @.get '/help/index.html'      , (req, res)-> new Help_Controller(req, res).show_Index_Page()
+      @.get '/help/article/:page*'  , (req, res)-> new Help_Controller(req, res).show_Help_Page()
+      @.get '/help/:page*'          , (req, res)-> new Help_Controller(req, res).show_Help_Page()
+      @.get '/Image/:name'          , (req, res)-> new Help_Controller(req, res).show_Image()
+      @.get '/json/docs/library'    , (req, res)-> new Help_Controller(req, res).json_Docs_Library()
+      @.get '/json/docs/:page'      , (req, res)-> new Help_Controller(req, res).json_Docs_Page()
 
 module.exports = Help_Controller
