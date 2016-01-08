@@ -32,6 +32,7 @@ class Login_Controller
     @.page_Index                 = '/jade/show'
     @.page_MainPage_no_user      = '/jade/guest/default.html'
     @.url                        = ''
+    @.sessionTimeout_In_Minutes  = @.config.options.tm_design.session_Timeout_Minutes
 
   json_Mode: ()=>
     @.render_Page = (page, data)=>
@@ -92,6 +93,7 @@ class Login_Controller
         #If Password was expired,
         @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
           if(redirectUrl)
+            @.url =redirectUrl
             @.res.redirect(redirectUrl)
           else
             @.analyticsService.track('Login','User Account','Login Success')
@@ -150,9 +152,17 @@ class Login_Controller
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
       #Setting up internal user
-      @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+
+      #If AccountNeverExpires, then expiration date becomes : Current Date + Minutes configured in config.
+      if (userProfile?.AccountNeverExpires)
+        currentTime = new Date()
+        currentTime.setMinutes(currentTime.getMinutes() + @.sessionTimeout_In_Minutes)
+        @.req.session.sessionExpirationDate = currentTime;
+      else
+        @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+
       @.verifyInternalUser userProfile?.Email
-      if(userProfile?.PasswordExpired)
+      if(userProfile?.PasswordExpired && not userProfile?.AccountNeverExpires)
         @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
           callback url
       else
