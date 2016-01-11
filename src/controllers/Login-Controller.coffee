@@ -32,6 +32,8 @@ class Login_Controller
     @.page_Index                 = '/jade/show'
     @.page_MainPage_no_user      = '/jade/guest/default.html'
     @.url                        = ''
+    @.sessionTimeout_In_Minutes  = @.config.options.tm_design.session_Timeout_Minutes
+    @.debugEnabled               = @.config?.options?.tm_debug?.debugEnabled
 
   json_Mode: ()=>
     @.render_Page = (page, data)=>
@@ -92,6 +94,7 @@ class Login_Controller
         #If Password was expired,
         @.redirectIfPasswordExpired loginResponse.Token,(redirectUrl)=>
           if(redirectUrl)
+            @.url =redirectUrl
             @.res.redirect(redirectUrl)
           else
             @.analyticsService.track('Login','User Account','Login Success')
@@ -150,9 +153,31 @@ class Login_Controller
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
       #Setting up internal user
-      @.req.session.sessionExpirationDate = new Date(parseInt(userProfile.ExpirationDate.substr(6)))
+      cookieExpirationDate = new Date(@.req.session.cookie.expires)                     #Expiration defined in config
+      userExpiration       = new Date(parseInt(userProfile?.ExpirationDate?.substr(6))) #TM backend expiration.
+
+      @.debugEnabled && console.log("TM 3.6 user expires on " + userExpiration)
+      @.debugEnabled && console.log("Cookie Expires on      " + cookieExpirationDate)
+
+      #If AccountNeverExpires, then expiration date becomes : Current Date + Minutes configured in config.
+      if (userProfile?.AccountNeverExpires)
+        currentTime = new Date()
+        currentTime.setMinutes(currentTime.getMinutes() + @.sessionTimeout_In_Minutes)
+        @.req.session.sessionExpirationDate = currentTime;
+      else
+        if (userExpiration > cookieExpirationDate)
+          @.req.session.sessionExpirationDate = cookieExpirationDate
+        else
+          @.req.session.sessionExpirationDate = userExpiration
+          @.req.session.cookie.expires        = userExpiration
+
+      @.debugEnabled && console.log("After recalculating dates :")
+      @.debugEnabled && console.log("Session expires on " + @.req.session.sessionExpirationDate)
+      @.debugEnabled && console.log("Cookie Expires on  " + @.req.session.cookie.expires)
+
       @.verifyInternalUser userProfile?.Email
-      if(userProfile?.PasswordExpired)
+      #Redirect to password reset page
+      if(userProfile?.PasswordExpired && not userProfile?.AccountNeverExpires)
         @.webServiceResponse "GetCurrentUserPasswordExpiryUrl",token,(url)->
           callback url
       else
