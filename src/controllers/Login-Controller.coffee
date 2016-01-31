@@ -152,28 +152,8 @@ class Login_Controller
 
   redirectIfPasswordExpired: (token,callback)->
     @.webServiceResponse "Current_User",token,(userProfile)=>
-      #Setting up internal user
-      cookieExpirationDate = new Date(@.req.session.cookie.expires)                     #Expiration defined in config
-      userExpiration       = new Date(parseInt(userProfile?.ExpirationDate?.substr(6))) #TM backend expiration.
 
-      @.debugEnabled && console.log("TM 3.6 user expires on " + userExpiration)
-      @.debugEnabled && console.log("Cookie Expires on      " + cookieExpirationDate)
-
-      #If AccountNeverExpires, then expiration date becomes : Current Date + Minutes configured in config.
-      if (userProfile?.AccountNeverExpires)
-        currentTime = new Date()
-        currentTime.setMinutes(currentTime.getMinutes() + @.sessionTimeout_In_Minutes)
-        @.req.session.sessionExpirationDate = currentTime;
-      else
-        if (userExpiration > cookieExpirationDate)
-          @.req.session.sessionExpirationDate = cookieExpirationDate
-        else
-          @.req.session.sessionExpirationDate = userExpiration
-          @.req.session.cookie.expires        = userExpiration
-
-      @.debugEnabled && console.log("After recalculating dates :")
-      @.debugEnabled && console.log("Session expires on " + @.req.session.sessionExpirationDate)
-      @.debugEnabled && console.log("Cookie Expires on  " + @.req.session.cookie.expires)
+      @.set_SessionExpirationDate(userProfile)
 
       @.verifyInternalUser userProfile?.Email
       #Redirect to password reset page
@@ -234,12 +214,10 @@ class Login_Controller
         followRedirect: false
 
       request options,(error, response)=>
-
         #Parsing response cookie to get the authenticated token
         cookie    = response?.headers?['set-cookie']
         sessionId = cookie?.toString().split(',')[1]
         sessionId = sessionId.split('=')[1] if sessionId?.split('=')?
-
         @.res.set('P3P',"CP=\'IDC DSP COR DEVo OUR\'")
 
         if response.headers?.location is '/teammentor'
@@ -247,7 +225,7 @@ class Login_Controller
           @.req.session.username = username
           @.req.session.token    = sessionId if sessionId?
           @.webServiceResponse "Current_User",sessionId,(userProfile)=>
-            @.req.session.sessionExpirationDate = new Date(parseInt(userProfile?.ExpirationDate?.substr(6)))
+            @.set_SessionExpirationDate(userProfile);
             return @.res.redirect '/'
         else
           if (response.headers?['content-type']=='image/gif')
@@ -255,7 +233,7 @@ class Login_Controller
             @.req.session.username = username
             @.req.session.token    = sessionId if sessionId?
             @.webServiceResponse "Current_User",sessionId,(userProfile)=>
-              @.req.session.sessionExpirationDate = new Date(parseInt(userProfile?.ExpirationDate?.substr(6)))
+              @.set_SessionExpirationDate(userProfile);
               @.res.writeHead(200, {'Content-Type': 'image/gif' });
               @.res.write(@.get_GifImage())
               return @.res.end()
@@ -270,6 +248,31 @@ class Login_Controller
   get_GifImage: () =>
     gifImage = new Buffer('R0lGODlhAQABAPcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAP8ALAAAAAABAAEAAAgEAP8FBAA7', 'base64')
     return gifImage
+
+  set_SessionExpirationDate: (userProfile)=>
+    #Setting up internal user
+    cookieExpirationDate = new Date(@.req.session.cookie.expires)                     #Expiration defined in config
+    userExpirationDate   = new Date(parseInt(userProfile?.ExpirationDate?.substr(6))) #TM backend expiration.
+
+    @.debugEnabled && console.log("User Profile => " + userProfile?.json_Str())
+    @.debugEnabled && console.log("TM 3.6 user expires on : " + userExpirationDate)
+    @.debugEnabled && console.log("Cookie Expires on      : " + cookieExpirationDate)
+
+    #If AccountNeverExpires, then expiration date becomes : Current Date + Minutes configured in config.
+    if (userProfile?.AccountNeverExpires)
+      currentTime = new Date()
+      currentTime.setMinutes(currentTime.getMinutes() + @.sessionTimeout_In_Minutes)
+      @.req.session.sessionExpirationDate = currentTime;
+    else
+      if (userExpirationDate > cookieExpirationDate)
+        @.req.session.sessionExpirationDate = cookieExpirationDate
+      else
+        @.req.session.sessionExpirationDate = userExpirationDate
+        @.req.session.cookie.expires        = userExpirationDate
+
+    @.debugEnabled && console.log("After recalculating dates :")
+    @.debugEnabled && console.log("Session expires on : " + @.req.session.sessionExpirationDate)
+    @.debugEnabled && console.log("Cookie Expires on  : " + @.req.session.cookie.expires)
 
   routes_Json: ()=>
     using new Router(), ->
