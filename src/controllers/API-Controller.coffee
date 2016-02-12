@@ -35,7 +35,13 @@ class API_Controller
         req.pipe(request(url)).pipe res                     # pipe GET and POST requests between cli
 
   check_Auth: (req,res,next)=>
-    if req?.session?.username and req?.url?.not_Contains '/user'
+    ###
+      req.originalURL returns => /api/search/query_from_text_search/user%20enumeration
+      req.url         return  => /search/query_from_text_search/user%20enumeration
+      hence below evaluation uses req.originalURL
+      This request should redirect to login page => http://localhost:12345/api/user/log_search_valid/a/b
+    ###
+    if req?.session?.username and req?.originalUrl?.not_Contains '/api/user/'
       #Expiration date logic goes here.
       now             = Date.now()
       expirationDate  = req.session?.sessionExpirationDate
