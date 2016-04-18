@@ -51,7 +51,7 @@ class Hubspot_Service
           country               :@.req.body.country,
           state__c              :@.req.body.state,
           leadsource            :@.HubspotLeadSource,
-          lead_source_detail__c :@.HubspotLeadSourceDetail
+          lead_detail           :@.HubspotLeadSourceDetail
         },
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
