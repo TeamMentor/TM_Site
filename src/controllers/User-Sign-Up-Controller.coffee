@@ -1,6 +1,7 @@
 signUp_fail             = 'guest/sign-up-Fail.jade'
 signUpPage_Unavailable  = 'guest/sign-up-cant-connect.jade'
 signUp_Ok               = 'guest/sign-up-OK.html'
+login_page              = '/browser-detect-login'
 errorMessage            = "TEAM Mentor is unavailable, please contact us at "
 request                 = null
 Config                  = null
@@ -22,6 +23,7 @@ class User_Sign_Up_Controller
 
   constructor: (req, res, options)->
     @.dependencies()
+    @.config             = require '../config'
     @.options            = options || {}
     @.req                = req || {}
     @.res                = res || {}
@@ -31,6 +33,7 @@ class User_Sign_Up_Controller
     @.analyticsService        = new Analytics_Service(@.req, @.res)
     @.hubspotService          = new Hubspot_Service(@.req,@.res)
     @.jade_Service            = new Jade_Service()
+    @.redirectToLoginPage     = @.config?.options?.tm_design?.redirectToLoginPage
 
   json_Mode: ()=>
     @.render_Page = (page, data)=>
@@ -136,7 +139,12 @@ class User_Sign_Up_Controller
       if (signUpResponse.Signup_Status is 0)
         @.analyticsService.track('Signup','User Account',"Signup Success #{@.req.body.username}")
         @.hubspotService.submitHubspotForm()
-        return @.login.loginUser()
+        # If redirectToLoginPage config setting is set to true, then redirecting to login upon successful signup
+        # otherwise redirect to index
+        if (@.redirectToLoginPage)
+          return @.res.redirect login_page
+        else
+          return @.login.loginUser()
       if (signUpResponse.Validation_Results.empty())
         message = signUpResponse.Simple_Error_Message || 'An error occurred'
       else
