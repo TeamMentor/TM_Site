@@ -18,7 +18,7 @@ add_Routes = (express_Service)->
     PoC_Controller          = require '../poc/PoC-Controller'
     app                     = express_Service.app
     jade_Service            = new Jade_Service()
-    uuid                    = require 'node-uuid'
+    uuid                    = require 'uuid'
     # Log/track request
     app.use (req,res,next)->
       logger?.info {url: req.url , ip: req.connection.remoteAddress,  agent: req.headers.agent }

@@ -34,7 +34,7 @@ class Angular_Controller
     matches = {}
     for match in autoComplete_Data when match.title.lower().contains(term.lower())
       matches[match.title] = match.id
-      if (matches.keys().size() > 15)
+      if (matches.keys_Own().size() > 15)
         break
     res.json matches
 
