@@ -65,7 +65,8 @@ class Help_Controller
 
   json_Docs_Page: =>
     article_Data = @.docs_TM_Service.article_Data @.page_Id()
-    $            = cheerio.load(article_Data?.html)
+    console.log("Hint " +  article_Data)
+    $            = cheerio.load(article_Data)
     links        = $('a')
 
     $(links).each (i, link)->
@@ -78,14 +79,14 @@ class Help_Controller
         articleId = href
         $(link).attr('href', 'guides/' + articleId )
         $(link).attr('ng-click',"load_Doc($event,'#{articleId}')")
-        article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+        article_Data.html = article_Data.replace(originalHtml,$.html($(link)))
       else
         if ($(link).attr('href').starts_With('http')) #Adding blank attribute to absolute URLs
           $(link).attr("target","_blank")
-          article_Data.html = article_Data.html.replace(originalHtml,$.html($(link)))
+          article_Data = article_Data.replace(originalHtml,$.html($(link)))
 
 
-    @res.json { html: article_Data?.html}
+    @res.json { html: article_Data}
 
   map_Docs_Library: (next)=>
     @.docs_TM_Service.getLibraryData (libraries)=>
