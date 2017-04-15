@@ -65,7 +65,6 @@ class Help_Controller
 
   json_Docs_Page: =>
     article_Data = @.docs_TM_Service.article_Data @.page_Id()
-    console.log("Hint " +  article_Data)
     $            = cheerio.load(article_Data)
     links        = $('a')
 
