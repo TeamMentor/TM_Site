@@ -87,14 +87,14 @@ class Docs_TM_Service
   json_Files: (callback)=>
     if not @._json_Files
       json_Folder   = @.libraryDirectory.append("/Articles_Html")
-      @._json_Files = json_Folder.files_Recursive(".json")
+      @._json_Files = json_Folder.files_Recursive(".html")
     callback @._json_Files
 
   article_Data: (articleId)=>
     @.json_Files (jsonFiles)=>
       article_File = jsonFile for jsonFile in jsonFiles when jsonFile.contains(articleId)
       if article_File and article_File.file_Exists()
-        return article_File.load_Json()
+        return article_File.file_Contents()
       return null
 
 module.exports = Docs_TM_Service
