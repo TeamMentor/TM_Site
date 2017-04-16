@@ -52,7 +52,7 @@ class SearchController
       @.graph_Service.resolve_To_Ids queryId, (data)=>
         navigation = []
         path = null
-        for key in data.keys()
+        for key in data.keys_Own()
           item = data[key]
           path = if path then "#{path},#{key}" else "#{key}"
           if item and path

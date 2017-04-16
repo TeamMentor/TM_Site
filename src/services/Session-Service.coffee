@@ -121,7 +121,7 @@ class Session_Service
       for item in data
           results[item.id] ?= { href: "/article/#{item.id}", title: item.title, weight: 0}
           results[item.id].weight++
-      results = (results[key] for key in results.keys())
+      results = (results[key] for key in results.keys_Own())
 
       results = results.sort (a,b)-> a.weight - b.weight
 
@@ -137,7 +137,7 @@ class Session_Service
         if item.title
           results[item.id] ?= { title: item.title, weight: 0}
           results[item.id].weight++
-      results = (results[key] for key in results.keys())
+      results = (results[key] for key in results.keys_Own())
 
       results = results.sort (a,b)-> a.weight - b.weight
 

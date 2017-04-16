@@ -14,9 +14,9 @@ var site_Data = new Side_Data()
 global.config = site_Data.load_Options()
 global.custom = site_Data.custom_Code()
 
-log('------------global.config---------------')
-log(global.config);
-log('----------------------------------------')
+console.log('------------global.config---------------')
+console.log(global.config);
+console.log('----------------------------------------')
 
 var Express_Service    = require('./src/services/Express-Service');
 var Analytics_Service  = require('./src/services/Analytics-Service');
