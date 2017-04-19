@@ -54,7 +54,7 @@ class Help_Controller
       return
     callback = @.docs_TM_Service.article_Data @.page_Id()
     if callback
-        content =callback.html
+        content =callback
         @show_Content(article_Title,content )
     else
         @show_Content('Error fetching page from docs site','')
